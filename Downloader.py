@@ -43,8 +43,6 @@ SCROLLSPEED = 30  #less=faster
 class Screen:
     tempoAtual = time.time()
     window = TK.Tk()
-    auxFilesDir = ""
-
     def __init__(self, masterFramePreviousScreen):
         masterFramePreviousScreen.destroy()
 
@@ -237,7 +235,7 @@ class InitialScreen(Screen):
             if whichOne == 0:
                 self.downloadsDir = aux
                 ent_Directory = self.ent_downloadsDirectory
-                auxFile = os.path.join(Screen.auxFilesDir, "auxFiles",
+                auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
                                         "DownloaderDirectories.xml")
                 tree = ET.parse(auxFile)
                 root = tree.getroot()
@@ -245,7 +243,7 @@ class InitialScreen(Screen):
             elif whichOne == 1:
                 self.musicOriginDir = aux
                 ent_Directory = self.ent_musicOriginDirectory
-                auxFile = os.path.join(Screen.auxFilesDir, "auxFiles",
+                auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
                                         "DownloaderDirectories.xml")
                 tree = ET.parse(auxFile)
                 root = tree.getroot()
@@ -253,7 +251,7 @@ class InitialScreen(Screen):
             else:
                 self.musicDestinyDir = aux
                 ent_Directory = self.ent_musicDestinyDirectory
-                auxFile = os.path.join(Screen.auxFilesDir, "auxFiles",
+                auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
                                         "DetailsMusic.xml")
                 tree = ET.parse(auxFile)
                 root = tree.getroot()
@@ -303,7 +301,7 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         #TODO: adjusts to input exceptions and save and load said exceptions from files
         #Tkinter Vars
         self.newArtist = TK.StringVar()
-        self.file = os.path.join(Screen.auxFilesDir, "auxFiles",
+        self.file = os.path.join(os.path.dirname(__file__), "auxFiles",
                                  "GrimeArtists.xml")
         tree=ET.parse(self.file)
         root = tree.getroot()
@@ -651,7 +649,7 @@ class MusicScreen(Screen):
 
         self.checkMusicCondition = True
         self.newFiles = []
-        auxFile= os.path.join(Screen.auxFilesDir, "auxFiles",
+        auxFile= os.path.join(os.path.dirname(__file__), "auxFiles",
                                  "GrimeArtists.xml")
         tree=ET.parse(auxFile)
         root = tree.getroot()
@@ -685,7 +683,9 @@ class MusicScreen(Screen):
         for filename in os.listdir(self.musicOriginDir):
             if filename.endswith(".mp3") and filename not in self.buffer:
                 self.buffer.append(filename)
+                self.txt_beforeFiles.config(state=TK.NORMAL)
                 self.txt_beforeFiles.insert(TK.END, filename + "\n")
+                self.txt_beforeFiles.config(state=TK.DISABLED)
                 self.txt_beforeFiles.see(TK.END)
                 self.numberOfFilesFound += 1
                 self.title.set(str(self.numberOfFilesFound) + " Files Found")
@@ -693,12 +693,19 @@ class MusicScreen(Screen):
                 for ficheiro in self.buffer:
                     os.remove(os.path.join(self.musicOriginDir, ficheiro))
                 self.buffer.clear()
+                self.txt_beforeFiles.config(state=TK.NORMAL)
                 self.txt_beforeFiles.delete("1.0", TK.END)
+                self.txt_beforeFiles.config(state=TK.DISABLED)
                 self.numberOfFilesFound = 0
                 self.title.set(str(self.numberOfFilesFound) + " Files Found")
         if self.checkMusicCondition:
             Screen.window.update_idletasks()
             Screen.window.after(1000, self.checkMusic)
+
+    def addToOutput(self,filename):
+        self.txt_afterFiles.config(state=TK.NORMAL)
+        self.txt_afterFiles.insert(TK.END, filename + "\n")
+        self.txt_afterFiles.config(state=TK.DISABLED)
 
     def moveOutOfBuffer(self):
         if self.buffer != []:
@@ -722,7 +729,7 @@ class MusicScreen(Screen):
                 os.rename(os.path.join(self.musicOriginDir, old),
                           os.path.join(self.musicDestinyDir, filename))
                 self.numberOfFilesMoved += 1
-                self.txt_afterFiles.insert(TK.END, filename + "\n")
+                self.addToOutput(filename)
                 self.newFiles.append(
                     os.path.join(self.musicDestinyDir, filename))
             except FileExistsError:
@@ -733,8 +740,7 @@ class MusicScreen(Screen):
                         'albumartist'][0] and mp3aEnviar['album'][
                             0] == mp3aVerificar['album'][0]:
                     os.remove(os.path.join(self.musicOriginDir, old))
-                    self.txt_afterFiles.insert(
-                        TK.END, filename + " already exists, deleted\n")
+                    self.addToOutput(filename+ " already exists, deleted")
                 else:
                     acrescenta = "("
                     palavras = mp3aEnviar['albumartist'][0].split()
@@ -755,22 +761,20 @@ class MusicScreen(Screen):
                                 'albumartist'][0] and mp3aEnviar['album'][
                                     0] == mp3aVerificar['album'][0]:
                             os.remove(os.path.join(self.musicOriginDir, old))
-                            self.txt_afterFiles.insert(
-                                TK.END,
-                                filename + " already exists, deleted\n")
+                            self.addToOutput(filename+ " already exists, deleted")
                         else:
                             os.rename(
                                 os.path.join(self.musicOriginDir, old),
                                 os.path.join(self.musicDestinyDir, filename))
                             self.numberOfFilesMoved += 1
-                            self.txt_afterFiles.insert(TK.END, filename + "\n")
+                            self.addToOutput(filename)
                             self.newFiles.append(
                                 os.path.join(self.musicDestinyDir, filename))
                     else:
                         os.rename(os.path.join(self.musicOriginDir, old),
                                   os.path.join(self.musicDestinyDir, filename))
                         self.numberOfFilesMoved += 1
-                        self.txt_afterFiles.insert(TK.END, filename + "\n")
+                        self.addToOutput(filename)
                         self.newFiles.append(
                             os.path.join(self.musicDestinyDir, filename))
             self.buffer.remove(old)
@@ -1021,7 +1025,7 @@ class AlbumAndLyricsScreen(Screen):
 
     def exitOpenHandler(self):
         Screen.window.quit()
-        os.system(r"C:\Users\ruben\Desktop\Handler_Music.py")
+        os.system(os.path.join(os.path.dirname(__file__),"Handler_Music.py"))
 
     def scrollTextOutput(self, *args):
         for txt in self.textBoxes:
