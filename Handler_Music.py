@@ -16,6 +16,7 @@ SCROLLSPEED = 30  #less=faster
 #TODO: create search screen, with key listeners
 #TODO: comment the code
 
+
 class MusicFile:
     def __init__(self, filename, title, albumArtist, album, trackNumber,
                  numberOfTracks, discNumber, numberOfDiscs, genre, year,
@@ -71,17 +72,18 @@ class ListsAndFiles:
         self.listMusicFile = []
         self.listAlbums = []
         self.listGenres = []
-        self.fileMusicFiles = os.path.join(os.path.dirname(__file__), "auxFiles",
-                                           "MusicFiles.xml")
+        self.baseDirectory = os.path.dirname(__file__)
+        self.fileMusicFiles = os.path.join(self.baseDirectory,
+                                           "auxFiles", "MusicFiles.xml")
         if not os.path.isfile(self.fileMusicFiles):
             aux = open(self.fileMusicFiles, "w", encoding="utf-8")
             aux.close()
-        self.fileDetails = os.path.join(os.path.dirname(__file__), "auxFiles",
+        self.fileDetails = os.path.join(self.baseDirectory, "auxFiles",
                                         "DetailsMusic.xml")
         if not os.path.isfile(self.fileDetails):
             aux = open(self.fileDetails, "w", encoding="utf-8")
             aux.close()
-        self.workoutFile = os.path.join(os.path.dirname(__file__), "auxFiles",
+        self.workoutFile = os.path.join(self.baseDirectory, "auxFiles",
                                         "WorkoutDatabase.xml")
         if not os.path.isfile(self.workoutFile):
             aux = open(self.workoutFile, "w", encoding="utf-8")
@@ -194,6 +196,7 @@ class ListsAndFiles:
             for time in workout:
                 times.append(int(time.text))
             self.workoutDatabase[workout.text] = times
+
     def saveWorkoutDatabase(self):
         tree = ET.parse(self.workoutFile)
         root = tree.getroot()
@@ -220,17 +223,17 @@ class ListsAndFiles:
             root = tree.getroot()
             for child in root:
                 self.listMusicFile.append(
-                    MusicFile(
-                        child.text,
-                        child.find('title').text,
-                        child.find('artist').text,
-                        child.find('album').text,
-                        int(child.find('tracknumber').text),
-                        int(child.find('numbertracks').text),
-                        int(child.find('discnumber').text),
-                        int(child.find('numberdiscs').text),
-                        child.find('genre').text, int(child.find('year').text),
-                        float(child.find('length').text)))
+                    MusicFile(child.text,
+                              child.find('title').text,
+                              child.find('artist').text,
+                              child.find('album').text,
+                              int(child.find('tracknumber').text),
+                              int(child.find('numbertracks').text),
+                              int(child.find('discnumber').text),
+                              int(child.find('numberdiscs').text),
+                              child.find('genre').text,
+                              int(child.find('year').text),
+                              float(child.find('length').text)))
             if screen != None:
                 self.timeOfLastModified = self.timeOfLastModifiedFile
                 self.recalibrateList(screen)
@@ -1273,8 +1276,8 @@ class ShowAlbumTracklistScreen(Screen):
 if __name__ == "__main__":
     Screen.window.title("Handler")
     Screen.window.iconbitmap(
-        os.path.join(os.path.dirname(__file__),
-                     "auxFiles", "icons8-music-32.ico"))
+        os.path.join(Screen.container.baseDirectory, "auxFiles",
+                     "icons8-music-32.ico"))
     Screen.window.configure(bg=DEFAULT_BGCOLOR)
     if Screen.container.newFilesFound:
         Screen.window.after(50, lambda x=TK.Frame(): newFilesFoundScreen(x))

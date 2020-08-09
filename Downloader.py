@@ -40,9 +40,12 @@ SCROLLSPEED = 30  #less=faster
 
 #TODO: comment the code
 
+
 class Screen:
     tempoAtual = time.time()
     window = TK.Tk()
+    baseDirectory = os.path.dirname(__file__)
+
     def __init__(self, masterFramePreviousScreen):
         masterFramePreviousScreen.destroy()
 
@@ -119,14 +122,14 @@ class InitialScreen(Screen):
     def __init__(self, masterFramePreviousScreen):
         super().__init__(masterFramePreviousScreen)
         #getting directories from file
-        auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
-                                    "DownloaderDirectories.xml")
+        auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                               "DownloaderDirectories.xml")
         tree = ET.parse(auxFile)
         root = tree.getroot()
         self.downloadsDir = root.find('downloaddir').text
         self.musicOriginDir = root.find('musicorigindir').text
-        auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
-                                    "DetailsMusic.xml")
+        auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                               "DetailsMusic.xml")
         tree = ET.parse(auxFile)
         root = tree.getroot()
         self.musicDestinyDir = root.find('directory').text
@@ -235,24 +238,24 @@ class InitialScreen(Screen):
             if whichOne == 0:
                 self.downloadsDir = aux
                 ent_Directory = self.ent_downloadsDirectory
-                auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
-                                        "DownloaderDirectories.xml")
+                auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                                       "DownloaderDirectories.xml")
                 tree = ET.parse(auxFile)
                 root = tree.getroot()
                 directory = root.find('downloaddir')
             elif whichOne == 1:
                 self.musicOriginDir = aux
                 ent_Directory = self.ent_musicOriginDirectory
-                auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
-                                        "DownloaderDirectories.xml")
+                auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                                       "DownloaderDirectories.xml")
                 tree = ET.parse(auxFile)
                 root = tree.getroot()
                 directory = root.find('musicorigindir')
             else:
                 self.musicDestinyDir = aux
                 ent_Directory = self.ent_musicDestinyDirectory
-                auxFile = os.path.join(os.path.dirname(__file__), "auxFiles",
-                                        "DetailsMusic.xml")
+                auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                                       "DetailsMusic.xml")
                 tree = ET.parse(auxFile)
                 root = tree.getroot()
                 directory = root.find('directory')
@@ -301,11 +304,11 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         #TODO: adjusts to input exceptions and save and load said exceptions from files
         #Tkinter Vars
         self.newArtist = TK.StringVar()
-        self.file = os.path.join(os.path.dirname(__file__), "auxFiles",
+        self.file = os.path.join(Screen.baseDirectory, "auxFiles",
                                  "GrimeArtists.xml")
-        tree=ET.parse(self.file)
+        tree = ET.parse(self.file)
         root = tree.getroot()
-        self.grimeArtists=[child.text for child in root]
+        self.grimeArtists = [child.text for child in root]
         self.mode = 0
         #1 - new Grime Artist
         #2 - delete Grime Artist
@@ -649,11 +652,11 @@ class MusicScreen(Screen):
 
         self.checkMusicCondition = True
         self.newFiles = []
-        auxFile= os.path.join(os.path.dirname(__file__), "auxFiles",
-                                 "GrimeArtists.xml")
-        tree=ET.parse(auxFile)
+        auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                               "GrimeArtists.xml")
+        tree = ET.parse(auxFile)
         root = tree.getroot()
-        self.grimeArtists=[child.text for child in root]
+        self.grimeArtists = [child.text for child in root]
         self.checkMusic()
 
     def nextScreen(self, event=None):
@@ -702,7 +705,7 @@ class MusicScreen(Screen):
             Screen.window.update_idletasks()
             Screen.window.after(1000, self.checkMusic)
 
-    def addToOutput(self,filename):
+    def addToOutput(self, filename):
         self.txt_afterFiles.config(state=TK.NORMAL)
         self.txt_afterFiles.insert(TK.END, filename + "\n")
         self.txt_afterFiles.config(state=TK.DISABLED)
@@ -740,7 +743,7 @@ class MusicScreen(Screen):
                         'albumartist'][0] and mp3aEnviar['album'][
                             0] == mp3aVerificar['album'][0]:
                     os.remove(os.path.join(self.musicOriginDir, old))
-                    self.addToOutput(filename+ " already exists, deleted")
+                    self.addToOutput(filename + " already exists, deleted")
                 else:
                     acrescenta = "("
                     palavras = mp3aEnviar['albumartist'][0].split()
@@ -761,7 +764,8 @@ class MusicScreen(Screen):
                                 'albumartist'][0] and mp3aEnviar['album'][
                                     0] == mp3aVerificar['album'][0]:
                             os.remove(os.path.join(self.musicOriginDir, old))
-                            self.addToOutput(filename+ " already exists, deleted")
+                            self.addToOutput(filename +
+                                             " already exists, deleted")
                         else:
                             os.rename(
                                 os.path.join(self.musicOriginDir, old),
@@ -1025,7 +1029,7 @@ class AlbumAndLyricsScreen(Screen):
 
     def exitOpenHandler(self):
         Screen.window.quit()
-        os.system(os.path.join(os.path.dirname(__file__),"Handler_Music.py"))
+        os.system(os.path.join(Screen.baseDirectory, "Handler_Music.py"))
 
     def scrollTextOutput(self, *args):
         for txt in self.textBoxes:
@@ -1156,7 +1160,7 @@ class AlbumAndLyricsScreen(Screen):
             album = AlbumAndLyricsScreen.artistAlbumReplacements[(artist,
                                                                   album)][1]
         if "Tea In China" in album:
-            artist+= " & The Alchemist"
+            artist += " & The Alchemist"
         if "God's" == album:
             album = album.replace("'", " ")
         elif "Section" in album or "good kid," in album:
@@ -1430,8 +1434,8 @@ if __name__ == '__main__':
 
     Screen.window.title("Downloader")
     Screen.window.iconbitmap(
-        os.path.join(os.path.dirname(__file__),
-                     "auxFiles", "icons8-download-32.ico"))
+        os.path.join(Screen.baseDirectory, "auxFiles",
+                     "icons8-download-32.ico"))
     Screen.window.configure(bg=DEFAULT_BGCOLOR)
     InitialScreen(TK.Frame())
     Screen.window.mainloop()
