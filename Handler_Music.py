@@ -1,5 +1,5 @@
-import sys
 import os
+import threading
 import tkinter as TK
 import tkinter.filedialog as filedialog
 import tkinter.colorchooser as colorchooser
@@ -12,9 +12,8 @@ DEFAULT_FONT2 = ("Times New Roman", 14)
 DEFAULT_FONT3 = ("Times New Roman", 12)
 DEFAULT_BGCOLOR = "#061130"
 SCROLLSPEED = 30  #less=faster
-
-#TODO: create search screen, with key listeners
 #TODO: comment the code
+#TODO: separate into class multiple textboxes one scrollbar
 
 
 class MusicFile:
@@ -73,8 +72,8 @@ class ListsAndFiles:
         self.listAlbums = []
         self.listGenres = []
         self.baseDirectory = os.path.dirname(__file__)
-        self.fileMusicFiles = os.path.join(self.baseDirectory,
-                                           "auxFiles", "MusicFiles.xml")
+        self.fileMusicFiles = os.path.join(self.baseDirectory, "auxFiles",
+                                           "MusicFiles.xml")
         if not os.path.isfile(self.fileMusicFiles):
             aux = open(self.fileMusicFiles, "w", encoding="utf-8")
             aux.close()
@@ -223,7 +222,7 @@ class ListsAndFiles:
             root = tree.getroot()
             for child in root:
                 self.listMusicFile.append(
-                    MusicFile(child.text,
+                    MusicFile(child.text.strip(),
                               child.find('title').text,
                               child.find('artist').text,
                               child.find('album').text,
@@ -250,7 +249,7 @@ class ListsAndFiles:
     def deleteFilesFromList(self):
         toDelete = []
         for obj in self.listMusicFile:
-            if os.path.join(self.musicDirectory +
+            if os.path.join(self.musicDirectory,
                             obj.filename) not in self.files:
                 toDelete.append(obj)
         for obj in toDelete:
@@ -406,8 +405,13 @@ class Screen:
 
 
 class InitialScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen,firstTime=True):
         super().__init__(masterFramePreviousScreen)
+        #Thread to check files in the background
+        self.firstTime=firstTime
+        if self.firstTime:
+            self.checkFilesThread = threading.Thread(target=Screen.container.checkFiles, daemon=True)
+            self.checkFilesThread.start()
 
         #Widget Creation
         self.lbl_title = TK.Label(
@@ -455,6 +459,7 @@ class InitialScreen(Screen):
             text="Register Workout",
             command=self.registerWorkoutScreen,
             font=DEFAULT_FONT3)
+        self.btn_searchLibrary = TK.Button(self.frm_master, text="Search Library", command=self.searchLibraryScreen, font=DEFAULT_FONT3)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=0, padx=200)
@@ -466,6 +471,7 @@ class InitialScreen(Screen):
         self.btn_recalibrateAll.grid(row=4, column=2)
         self.btn_chooseGenreColors.grid(row=5, column=2)
         self.btn_registerWorkout.grid(row=6, column=2)
+        self.btn_searchLibrary.grid(row=7,column=2)
 
     def chooseDirectory(self):
         aux = filedialog.askdirectory(initialdir=os.path.join(
@@ -480,19 +486,86 @@ class InitialScreen(Screen):
         self.ent_Directory.config(state="readonly")
 
     def nextScreen(self, event=None):
-        if not Screen.container.newFilesFound:
-            Screen.container.checkFiles()
+        if self.firstTime:
+            self.checkFilesThread.join()
+        # if not Screen.container.newFilesFound:
+        #     Screen.container.checkFiles()
         ChooseAlbumScreen(self.frm_master)
 
     def recalibrateALL(self):
+        if self.firstTime:
+            self.checkFilesThread.join()
         Screen.container.timeOfLastModified = Screen.container.timeOfLastModifiedFile = 0
         newFilesFoundScreen(self.frm_master)
 
     def chooseGenreColorsScreen(self):
+        if self.firstTime:
+            self.checkFilesThread.join()
         ChooseColorsScreen(self.frm_master)
 
     def registerWorkoutScreen(self):
+        if self.firstTime:
+            self.checkFilesThread.join()
         WorkoutRegistryScreen(self.frm_master)
+
+    def searchLibraryScreen(self):
+        if self.firstTime:
+            self.checkFilesThread.join()
+        SearchLibraryScreen(self.frm_master)
+
+
+class SearchLibraryScreen(Screen):
+    def __init__(self, masterFramePreviousScreen):
+        super().__init__(masterFramePreviousScreen)
+
+        #TODO: implement key listeners to update search results
+        # Possible attributes to search
+        self.searchableAttrs = {"Artist": [], "Album": [], "Genre": [], "Year": [], "Title": []}
+        # 0 - StringVar
+        # 1 - Entry
+
+        #Widget Creation
+        self.lbl_title = TK.Label(self.frm_master,
+                                  text="Search The Library",
+                                  font=DEFAULT_FONT1,
+                                  bg=DEFAULT_BGCOLOR,
+                                  fg="white")
+        i = 1
+        for attribute in self.searchableAttrs:
+            var = TK.StringVar()
+            lbl_field = TK.Label(self.frm_master,
+            text=attribute,
+                                 font=DEFAULT_FONT2,
+                                 bg=DEFAULT_BGCOLOR,
+                                 fg="white")
+            ent_field = TK.Entry(self.frm_master,
+                                 textvariable=var, width=60, font=DEFAULT_FONT3)
+            lbl_field.grid(row=i, column=1)
+            ent_field.grid(row=i, column=2)
+            self.searchableAttrs[attribute].append(var)
+            self.searchableAttrs[attribute].append(ent_field)
+            i += 1
+        self.txt_results=TK.Text(self.frm_master,font=DEFAULT_FONT3,bg=DEFAULT_BGCOLOR,fg="white")
+
+        #Widget Placement
+        self.lbl_title.grid(row=0, column=3)
+        self.txt_results.grid(row=1, column=3, rowspan=len(self.searchableAttrs) * 15)
+        self.btn_backScreen.grid(row=i,column=0)
+
+        #Widget Configuration
+        for attr in self.searchableAttrs:
+            self.searchableAttrs[attr][1].bind("<Key>", self.updateResults)
+        #Screen.window.bind("<Key>", self.keyPressed)
+
+    def backScreen(self, event=None):
+        InitialScreen(self.frm_master,False)
+
+    def updateResults(self,event):
+        print("CHEGOU")
+
+    # def oneEntryHasFocus(self):
+    #     for attr in self.searchableAttrs:
+    #         if self.searchableAttrs[attr][1]
 
 
 class ChooseColorsScreen(Screen):
@@ -542,7 +615,7 @@ class ChooseColorsScreen(Screen):
 
     def backScreen(self, event=None):
         Screen.container.saveGenreColors()
-        InitialScreen(self.frm_master)
+        InitialScreen(self.frm_master,False)
 
 
 class WorkoutRegistryScreen(Screen):
@@ -620,7 +693,7 @@ class WorkoutRegistryScreen(Screen):
 
     def backScreen(self, event=None):
         Screen.container.saveWorkoutDatabase()
-        InitialScreen(self.frm_master)
+        InitialScreen(self.frm_master,False)
         pass
 
 
@@ -884,6 +957,8 @@ class ChooseAlbumScreen(Screen):
         self.ent_chooseLeeway.configure(
             validatecommand=(self.ent_chooseLeeway.register(self.testVal),
                              '%P', '%d'))
+        self.ent_chooseTime.delete(0,TK.END)
+        self.ent_chooseLeeway.delete(0,TK.END)
 
     # restricts entry to only accept digits
     def testVal(self, inStr, acttyp):
@@ -922,8 +997,8 @@ class ChooseAlbumScreen(Screen):
         self.lbl_chooseWorkout.grid_forget()
         self.ent_workoutName.grid_forget()
         self.btn_confirmWorkout.grid_forget()
-        self.btn_forCar.grid(row=2, column=2)
-        self.btn_forWorkout.grid(row=1, column=2)
+        self.btn_forWorkout.grid(row=1, column=3)
+        self.btn_forCar.grid(row=2, column=3)
 
     def forCar(self):
         self.time.set(25)
@@ -960,7 +1035,7 @@ class ChooseAlbumScreen(Screen):
                             self.overUnderLeeway.get(), self)
 
     def backScreen(self, event=None):
-        InitialScreen(self.frm_master)
+        InitialScreen(self.frm_master,False)
 
 
 class ListAlbumScreen(Screen):
