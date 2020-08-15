@@ -14,6 +14,7 @@ from mutagen.id3 import ID3, USLT, TDRC
 import tkinter as TK
 import tkinter.filedialog as filedialog
 import xml.etree.ElementTree as ET
+import subprocess
 
 OneDrive = os.path.join('C:', os.path.sep, 'Users', 'ruben',
                         'Onedrive - Universidade da Madeira', 'Ano_2',
@@ -40,6 +41,7 @@ SCROLLSPEED = 30  #less=faster
 
 #TODO: comment the code
 #TODO: separate into class multiple textboxes one scrollbar
+#TODO: implement file exceptions
 
 
 class Screen:
@@ -1034,7 +1036,8 @@ class AlbumAndLyricsScreen(Screen):
 
     def exitOpenHandler(self):
         Screen.window.quit()
-        os.system(os.path.join(Screen.baseDirectory, "Handler_Music.py"))
+        subprocess.run(
+            ['python',os.path.join(Screen.baseDirectory, "Handler_Music.py")])
 
     def scrollTextOutput(self, *args):
         for txt in self.textBoxes:
@@ -1132,44 +1135,44 @@ class AlbumAndLyricsScreen(Screen):
         Determines the artist and title to be used in the search for lyrics and handles the most common changes
     """
 
-    #TODO: divide function into settings to get year and to get lyrics and save exceptions user has to define
-    def ArtistAlbumAndTitle(self, filename):
+    def ArtistAlbumAndTitle(self, filename,forYear):
         artist = EasyID3(filename)['albumartist'][0]
         title = EasyID3(filename)['title'][0]
         album = EasyID3(filename)['album'][0]
-        album = Screen.removeWordsFromWord(
-            ["Remaster", "Anniversary", "Deluxe", "Expanded"], album)
-        # if "OKNOTOK" in album:
-        #     album = "OK Computer"
-        # elif "Piñata" == album or "Bandana" == album:
-        #     artist += " & Madlib"
-        # elif "What A Time To Be Alive" == album:
-        #     artist += " & Future"
-        # elif "Alfredo" == album:
-        #     artist += " & The Alchemist"
-        # elif "sign of the times" in album.lower():
-        #     album = artist
-        # elif "UNLOCKED" == album:
-        #     artist += " & Kenny Beats"
-        # elif "Watch The Throne" == album:
-        #     artist += " & Kanye West"
-        # elif "Tonight" == album:
-        #     album += ": Franz Ferdinand"
-        # elif "Bluesbreakers" == album:
-        #     album = "Blues Breakers with Eric Clapton"
-        # elif "The Beatles" == album:
-        #     album = "The Beatles The White Album"
-        if (artist, album) in AlbumAndLyricsScreen.artistAlbumReplacements:
-            artist = AlbumAndLyricsScreen.artistAlbumReplacements[(artist,
-                                                                   album)][0]
-            album = AlbumAndLyricsScreen.artistAlbumReplacements[(artist,
-                                                                  album)][1]
-        if "Tea In China" in album:
-            artist += " & The Alchemist"
-        if "God's" == album:
-            album = album.replace("'", " ")
-        elif "Section" in album or "good kid," in album:
-            album.replace(".", " ")
+        if forYear:
+            album = Screen.removeWordsFromWord(
+                ["Remaster", "Anniversary", "Deluxe", "Expanded"], album)
+            # if "OKNOTOK" in album:
+            #     album = "OK Computer"
+            # elif "Piñata" == album or "Bandana" == album:
+            #     artist += " & Madlib"
+            # elif "What A Time To Be Alive" == album:
+            #     artist += " & Future"
+            # elif "Alfredo" == album:
+            #     artist += " & The Alchemist"
+            # elif "sign of the times" in album.lower():
+            #     album = artist
+            # elif "UNLOCKED" == album:
+            #     artist += " & Kenny Beats"
+            # elif "Watch The Throne" == album:
+            #     artist += " & Kanye West"
+            # elif "Tonight" == album:
+            #     album += ": Franz Ferdinand"
+            # elif "Bluesbreakers" == album:
+            #     album = "Blues Breakers with Eric Clapton"
+            # elif "The Beatles" == album:
+            #     album = "The Beatles The White Album"
+            if (artist, album) in AlbumAndLyricsScreen.artistAlbumReplacements:
+                artist = AlbumAndLyricsScreen.artistAlbumReplacements[(artist,
+                                                                    album)][0]
+                album = AlbumAndLyricsScreen.artistAlbumReplacements[(artist,
+                                                                    album)][1]
+            if "Tea In China" in album:
+                artist += " & The Alchemist"
+            if "God's" == album:
+                album = album.replace("'", " ")
+            elif "Section" in album or "good kid," in album:
+                album.replace(".", " ")
         title = Screen.removeWordsFromWord([
             "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track",
             "Vocal Mix", "Explicit", "explicit", "Extended"
@@ -1246,11 +1249,24 @@ class AlbumAndLyricsScreen(Screen):
                 return index
         return -1
 
-    def checkIfWebpageExists(self):
-        name = self.namingConventions(
-            self.currentArtist.get() + " " + self.currentTitle.get(), True)
-        url = "https://genius.com/" + name + "-lyrics"
+    def checkIfWebpageExists(self, forAlbum):
+        skip=False
+        if forAlbum:
+            name = self.namingConventions(self.currentArtist.get(),
+                                                True) + "/" + self.namingConventions(
+                                                    self.currentAlbum.get(), False)
+            url = "https://www.genius.com/albums/" + name
+            if url in AlbumAndLyricsScreen.pagesVisited_year:
+                self.currentYear.set(AlbumAndLyricsScreen.pagesVisited_year[url])
+                skip=True
+        else:
+            name = self.namingConventions(
+                self.currentArtist.get() + " " + self.currentTitle.get(), True)
+            url = "https://genius.com/" + name + "-lyrics"
         self.currentUrl.set(url)
+        Screen.window.update_idletasks()
+        if skip:
+            return "Skip"
         req = Request(self.currentUrl.get(),
                       headers={'User-Agent': 'Mozilla/5.0'})
         try:
@@ -1261,8 +1277,61 @@ class AlbumAndLyricsScreen(Screen):
         except:
             return None
 
+    """
+        Gets the year of release of the file passed as parameter, writing it in the metaTag of the file, given it has the metaTags defined correctly
+        In case of not finding the page, it asks the user. If the user writes two empty lines, it skips, leaving the original year
+    """
+
+    def getYearCycle(self):
+        soup = self.checkIfWebpageExists(True)
+        if soup == "Skip":
+            return
+        if soup!=None:
+            yearTemp = ""
+            #Extract the year of the album
+            for div in soup.findAll('div', attrs={'class': 'metadata_unit'}):
+                yearTemp += div.text.strip()
+                break
+            year = yearTemp.split()
+            AlbumAndLyricsScreen.pagesVisited_year[self.currentUrl.get()] = year[len(year) - 1]
+            self.currentYear.set(year[len(year) - 1])
+            return
+        else:
+            soup = self.checkIfWebpageExists(False)
+            if soup!=None:
+                aux = soup.get_text(separator="\n").split(sep="\n")
+                aux = [item for item in aux if item.strip() != ""]
+                year = [
+                    aux[index + 1] for index in range(len(aux))
+                    if "release date" in aux[index].lower()
+                ][0]
+                try:
+                    int(year[len(year) - 4:])
+                    self.currentYear.set(year[len(year) - 4 :])
+                    return
+                except Exception as error:
+                    print(error)
+            else:
+                self.errorSound.start()
+                key = (self.currentArtist.get(), self.currentAlbum.get())
+                self.errorHandled.set(False)
+                self.enableEntries(0)
+                self.btn_tryAgain.wait_variable(self.errorHandled)
+                value = [self.currentArtist.get(), self.currentAlbum.get()]
+                AlbumAndLyricsScreen.artistAlbumReplacements[key] = value
+                self.disableEntries()
+        self.getYearCycle()
+        return
+
+    def getYear(self, filename):
+        self.getYearCycle()
+        audio = ID3(filename)
+        audio.delall("TDRC")
+        audio.add(TDRC(encoding=3, text=self.currentYear.get()))
+        audio.save()
+
     def setLyricsCycle(self):
-        soup = self.checkIfWebpageExists()
+        soup = self.checkIfWebpageExists(False)
         if soup != None:
             for div in soup.findAll('div', attrs={'class': 'lyrics'}):
                 self.currentLyrics += div.text.strip()
@@ -1322,91 +1391,18 @@ class AlbumAndLyricsScreen(Screen):
             audio.add(USLT(encoding=3, text=self.currentLyrics))
             audio.save()
 
-    """
-        Gets the year of release of the file passed as parameter, writing it in the metaTag of the file, given it has the metaTags defined correctly
-        In case of not finding the page, it asks the user. If the user writes two empty lines, it skips, leaving the original year
-    """
-
-    def getYearCycle(self):
-        name = self.namingConventions(self.currentArtist.get(),
-                                      True) + "/" + self.namingConventions(
-                                          self.currentAlbum.get(), False)
-        url = "https://www.genius.com/albums/" + name
-        self.currentUrl.set(url)
-        if url in AlbumAndLyricsScreen.pagesVisited_year:
-            self.currentYear.set(AlbumAndLyricsScreen.pagesVisited_year[url])
-            return
-        req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        try:
-            webpage = urlopen(req).read()
-            # Creating a BeautifulSoup object of the html page for easy extraction of data.
-            soup = BeautifulSoup(webpage, 'html.parser')
-            yearTemp = ""
-            #Extract the year of the album
-            for div in soup.findAll('div', attrs={'class': 'metadata_unit'}):
-                yearTemp += div.text.strip()
-                break
-            year = yearTemp.split()
-            AlbumAndLyricsScreen.pagesVisited_year[url] = year[len(year) - 1]
-            self.currentYear.set(year[len(year) - 1])
-            return
-        except:
-            try:
-                name = self.namingConventions(
-                    self.currentArtist.get() + " " + self.currentTitle.get(),
-                    True)
-                url = "https://genius.com/" + name + "-lyrics"
-                self.currentUrl.set(url)
-                req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-                webpage = urlopen(req).read()
-                soup = BeautifulSoup(webpage, 'html.parser')
-                aux = soup.get_text(separator="\n").split(sep="\n")
-                aux = [item for item in aux if item.strip() != ""]
-                year = [
-                    aux[index + 1] for index in range(len(aux))
-                    if "release date" in aux[index].lower()
-                ][0]
-                nonInt = False
-                try:
-                    int(year[len(year) - 4:])
-                except:
-                    nonInt = True
-                if not nonInt:
-                    AlbumAndLyricsScreen.pagesVisited_year[url] = year[len(year
-                                                                           ) -
-                                                                       4:]
-                    self.currentYear.set(year[len(year) - 4:])
-                    return
-            except:
-                self.errorSound.start()
-                key = (self.currentArtist.get(), self.currentAlbum.get())
-                self.errorHandled.set(False)
-                self.enableEntries(0)
-                self.btn_tryAgain.wait_variable(self.errorHandled)
-                value = [self.currentArtist.get(), self.currentAlbum.get()]
-                AlbumAndLyricsScreen.artistAlbumReplacements[key] = value
-                self.disableEntries()
-        self.getYearCycle()
-        return
-
-    def getYear(self, filename):
-        self.getYearCycle()
-        year = self.currentYear.get()
-        audio = ID3(filename)
-        audio.delall("TDRC")
-        audio.add(TDRC(encoding=3, text=year))
-        audio.save()
-
+    #TODO: save exceptions user has to define
     def lyricsAndYear(self):
         if self.newFiles != []:
             self.removePtOrPart = False
             filename = self.newFiles[0]
             self.gettingYear = True
-            skipLyrics = self.ArtistAlbumAndTitle(filename)
+            self.ArtistAlbumAndTitle(filename,True)
             self.addToOutput()
             self.getYear(filename)
             self.gettingYear = False
             self.changeTag("lyrics")
+            skipLyrics = self.ArtistAlbumAndTitle(filename,False)
             self.setLyrics(filename, skipLyrics)
             self.changeTag("success")
             for txt in self.textBoxes:
@@ -1432,13 +1428,14 @@ class AlbumAndLyricsScreen(Screen):
 
 
 if __name__ == "__main__":
-# def main():
+    # def main():
     # For ignoring SSL certificate errors
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
 
     Screen.window.title("Downloader")
+    Screen.window.iconbitmap(os.path.join(Screen.baseDirectory,"auxFiles","icons8-download-32.ico"))
     Screen.window.configure(bg=DEFAULT_BGCOLOR)
     InitialScreen(TK.Frame())
     Screen.window.mainloop()
