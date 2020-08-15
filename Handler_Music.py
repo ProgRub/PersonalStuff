@@ -14,6 +14,7 @@ DEFAULT_BGCOLOR = "#061130"
 SCROLLSPEED = 30  #less=faster
 #TODO: comment the code
 #TODO: separate into class multiple textboxes one scrollbar
+#TODO: implement iTunes support
 
 
 class MusicFile:
@@ -31,6 +32,22 @@ class MusicFile:
         self.genre = genre
         self.year = year
         self.length = length
+
+    def getAttribute(self, whichOne):
+        if whichOne == "Artist":
+            return self.albumArtist
+        elif whichOne == "Album":
+            return self.album
+        elif whichOne == "Genre":
+            return self.genre
+        elif whichOne == "Year":
+            return self.year
+        elif whichOne == "Title":
+            return self.title
+        elif whichOne == "Track Number":
+            return self.trackNumber
+        elif whichOne == "Disc Number":
+            return self.discNumber
 
 
 class Album:
@@ -405,12 +422,13 @@ class Screen:
 
 
 class InitialScreen(Screen):
-    def __init__(self, masterFramePreviousScreen,firstTime=True):
+    def __init__(self, masterFramePreviousScreen, firstTime=True):
         super().__init__(masterFramePreviousScreen)
         #Thread to check files in the background
-        self.firstTime=firstTime
+        self.firstTime = firstTime
         if self.firstTime:
-            self.checkFilesThread = threading.Thread(target=Screen.container.checkFiles, daemon=True)
+            self.checkFilesThread = threading.Thread(
+                target=Screen.container.checkFiles, daemon=True)
             self.checkFilesThread.start()
 
         #Widget Creation
@@ -459,7 +477,10 @@ class InitialScreen(Screen):
             text="Register Workout",
             command=self.registerWorkoutScreen,
             font=DEFAULT_FONT3)
-        self.btn_searchLibrary = TK.Button(self.frm_master, text="Search Library", command=self.searchLibraryScreen, font=DEFAULT_FONT3)
+        self.btn_searchLibrary = TK.Button(self.frm_master,
+                                           text="Search Library",
+                                           command=self.searchLibraryScreen,
+                                           font=DEFAULT_FONT3)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=0, padx=200)
@@ -471,7 +492,7 @@ class InitialScreen(Screen):
         self.btn_recalibrateAll.grid(row=4, column=2)
         self.btn_chooseGenreColors.grid(row=5, column=2)
         self.btn_registerWorkout.grid(row=6, column=2)
-        self.btn_searchLibrary.grid(row=7,column=2)
+        self.btn_searchLibrary.grid(row=7, column=2)
 
     def chooseDirectory(self):
         aux = filedialog.askdirectory(initialdir=os.path.join(
@@ -509,6 +530,9 @@ class InitialScreen(Screen):
         WorkoutRegistryScreen(self.frm_master)
 
     def searchLibraryScreen(self):
+        # auxThread = threading.Thread(
+        #         target=Screen.container.files.sort(), daemon=True)
+        # auxThread.start()
         if self.firstTime:
             self.checkFilesThread.join()
         SearchLibraryScreen(self.frm_master)
@@ -517,55 +541,145 @@ class InitialScreen(Screen):
 class SearchLibraryScreen(Screen):
     def __init__(self, masterFramePreviousScreen):
         super().__init__(masterFramePreviousScreen)
-
-        #TODO: implement key listeners to update search results
         # Possible attributes to search
-        self.searchableAttrs = {"Artist": [], "Album": [], "Genre": [], "Year": [], "Title": []}
-        # 0 - StringVar
-        # 1 - Entry
+        self.searchableAttrs = {
+            "Artist": None,
+            "Album": None,
+            "Genre": None,
+            "Year": None,
+            "Title": None
+        }
+        self.listOfResults = []
 
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
-                                  text="Search The Library",
+                                  text="Search the Library",
                                   font=DEFAULT_FONT1,
                                   bg=DEFAULT_BGCOLOR,
                                   fg="white")
         i = 1
         for attribute in self.searchableAttrs:
-            var = TK.StringVar()
+            stringVar = TK.StringVar()
+            stringVar.trace("w", self.updateResults)
             lbl_field = TK.Label(self.frm_master,
-            text=attribute,
+                                 text=attribute,
                                  font=DEFAULT_FONT2,
                                  bg=DEFAULT_BGCOLOR,
                                  fg="white")
             ent_field = TK.Entry(self.frm_master,
-                                 textvariable=var, width=60, font=DEFAULT_FONT3)
+                                 textvariable=stringVar,
+                                 width=60,
+                                 font=DEFAULT_FONT3)
             lbl_field.grid(row=i, column=1)
             ent_field.grid(row=i, column=2)
-            self.searchableAttrs[attribute].append(var)
-            self.searchableAttrs[attribute].append(ent_field)
+            self.searchableAttrs[attribute] = stringVar
             i += 1
-        self.txt_results=TK.Text(self.frm_master,font=DEFAULT_FONT3,bg=DEFAULT_BGCOLOR,fg="white")
+        self.lbx_results = TK.Listbox(self.frm_master,
+                                      font=DEFAULT_FONT3,
+                                      bg=DEFAULT_BGCOLOR,
+                                      fg="white",
+                                      state=TK.DISABLED,
+                                      width=100,
+                                      height=25,
+                                      selectmode=TK.EXTENDED)
+        self.btn_trackDetails = TK.Button(self.frm_master,
+                                          text="Show Track Details",
+                                          font=DEFAULT_FONT3,
+                                          command=self.nextScreen)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=3)
-        self.txt_results.grid(row=1, column=3, rowspan=len(self.searchableAttrs) * 15)
-        self.btn_backScreen.grid(row=i,column=0)
+        self.lbx_results.grid(row=1,
+                              column=3,
+                              rowspan=len(self.searchableAttrs) * 15)
+        self.btn_backScreen.grid(row=i, column=0)
+        self.btn_trackDetails.grid(row=i, column=4)
 
         #Widget Configuration
-        for attr in self.searchableAttrs:
-            self.searchableAttrs[attr][1].bind("<Key>", self.updateResults)
-        #Screen.window.bind("<Key>", self.keyPressed)
+        self.lbx_results.bind("<Delete>", self.deleteTracks)
 
     def backScreen(self, event=None):
-        InitialScreen(self.frm_master,False)
+        InitialScreen(self.frm_master, False)
 
-    def updateResults(self,event):
-        print("CHEGOU")
+    def nextScreen(self, event=None):
+        TrackDetailsScreen(self.frm_master, self.listOfResults)
 
-    # def oneEntryHasFocus(self):
-    #     for attr in self.searchableAttrs:
-    #         if self.searchableAttrs[attr][1]
+    def updateResults(self, *args):
+        self.listOfResults = Screen.container.listMusicFile.copy()
+        lenPossHits = len(self.listOfResults)
+        for attr in self.searchableAttrs:
+            index = 0
+            if self.searchableAttrs[attr].get().strip() != "":
+                while index < lenPossHits:
+                    musicFile = self.listOfResults[index]
+                    if self.searchableAttrs[attr].get().lower(
+                    ) not in musicFile.getAttribute(attr).lower():
+                        self.listOfResults.remove(musicFile)
+                        index -= 1
+                        lenPossHits -= 1
+                    index += 1
+        self.writeResults()
+
+    def writeResults(self):
+        self.lbx_results.config(state=TK.NORMAL)
+        self.lbx_results.delete(0, TK.END)
+        self.listOfResults.sort(key=lambda x: x.filename)
+        for obj in self.listOfResults:
+            self.lbx_results.insert(TK.END, obj.filename)
+
+    def deleteTracks(self, event=None):
+        for index in self.lbx_results.curselection():
+            print(self.lbx_results.get(index))
+
+
+class TrackDetailsScreen(Screen):
+    def __init__(self, masterFramePreviousScreen, listOfFiles):
+        super().__init__(masterFramePreviousScreen)
+        #Attributes
+        self.attributes = {
+            "Title": None,
+            "Artist": None,
+            "Album": None,
+            "Track Number": None,
+            "Disc Number": None,
+            "Genre": None,
+            "Year": None
+        }
+        self.listOfFiles = listOfFiles
+
+        #Widget Creation
+        self.lbl_title = TK.Label(self.frm_master,
+                                  text="Track Details",
+                                  font=DEFAULT_FONT1,
+                                  bg=DEFAULT_BGCOLOR,
+                                  fg="white")
+        i = 1
+        for attr in self.attributes:
+            label = TK.Label(self.frm_master,
+                             text=attr,
+                             font=DEFAULT_FONT2,
+                             bg=DEFAULT_BGCOLOR,
+                             fg="white")
+            entry = TK.Entry(self.frm_master, font=DEFAULT_FONT3, width=30)
+            attribute = self.listOfFiles[0].getAttribute(attr)
+            entry.insert(TK.END, str(attribute))
+            for musicFile in self.listOfFiles:
+                if musicFile.getAttribute(attr) != attribute:
+                    entry.delete(0, TK.END)
+                    break
+            self.attributes[attr] = entry.get()
+            label.grid(row=i, column=1)
+            entry.grid(row=i, column=2)
+            i += 1
+        print(self.attributes)
+
+        #Widget Placement
+        self.lbl_title.grid(row=0, column=2)
+        self.btn_backScreen.grid(row=i, column=0)
+
+    def backScreen(self, event=None):
+        #TODO: check if any attributes have changed and change those in the file(s)
+        SearchLibraryScreen(self.frm_master)
 
 
 class ChooseColorsScreen(Screen):
@@ -615,7 +729,7 @@ class ChooseColorsScreen(Screen):
 
     def backScreen(self, event=None):
         Screen.container.saveGenreColors()
-        InitialScreen(self.frm_master,False)
+        InitialScreen(self.frm_master, False)
 
 
 class WorkoutRegistryScreen(Screen):
@@ -693,7 +807,7 @@ class WorkoutRegistryScreen(Screen):
 
     def backScreen(self, event=None):
         Screen.container.saveWorkoutDatabase()
-        InitialScreen(self.frm_master,False)
+        InitialScreen(self.frm_master, False)
         pass
 
 
@@ -957,8 +1071,8 @@ class ChooseAlbumScreen(Screen):
         self.ent_chooseLeeway.configure(
             validatecommand=(self.ent_chooseLeeway.register(self.testVal),
                              '%P', '%d'))
-        self.ent_chooseTime.delete(0,TK.END)
-        self.ent_chooseLeeway.delete(0,TK.END)
+        self.ent_chooseTime.delete(0, TK.END)
+        self.ent_chooseLeeway.delete(0, TK.END)
 
     # restricts entry to only accept digits
     def testVal(self, inStr, acttyp):
@@ -974,7 +1088,7 @@ class ChooseAlbumScreen(Screen):
         self.leeway.set(240)
 
     def forWorkout(self):
-        self.lbl_chooseWorkout.grid(row=1, column=2)
+        self.lbl_chooseWorkout.grid(row=0, column=3)
         self.ent_workoutName.grid(row=1, column=3)
         self.btn_confirmWorkout.grid(row=2, column=3)
         self.btn_forCar.grid_forget()
@@ -987,11 +1101,15 @@ class ChooseAlbumScreen(Screen):
             timesSum = sum(Screen.container.workoutDatabase[workoutName])
             average = (timesSum // len(
                 Screen.container.workoutDatabase[workoutName])) // 60
-            leewayMin = average - Screen.container.workoutDatabase[
-                workoutName][0] // 60
-            leewayMax = average - Screen.container.workoutDatabase[workoutName][
-                len(Screen.container.workoutDatabase[workoutName]) - 1] // 60
-            self.leeway.set(max(leewayMin, leewayMax))
+            if len(Screen.container.workoutDatabase[workoutName]) == 1:
+                self.leeway.set(5)
+            else:
+                leewayMin = average - Screen.container.workoutDatabase[
+                    workoutName][0] // 60
+                leewayMax = average - Screen.container.workoutDatabase[
+                    workoutName][len(Screen.container.
+                                     workoutDatabase[workoutName]) - 1] // 60
+                self.leeway.set(max(leewayMin, leewayMax))
             self.time.set(average)
         self.workoutName.set("")
         self.lbl_chooseWorkout.grid_forget()
@@ -1035,7 +1153,7 @@ class ChooseAlbumScreen(Screen):
                             self.overUnderLeeway.get(), self)
 
     def backScreen(self, event=None):
-        InitialScreen(self.frm_master,False)
+        InitialScreen(self.frm_master, False)
 
 
 class ListAlbumScreen(Screen):
@@ -1182,13 +1300,12 @@ class ListAlbumScreen(Screen):
         Screen.generateGenreTags(self.txt_PossibleHalfAlbumsLengths)
         for index in range(len(self.lists[0])):
             album = self.lists[0][index]
-            self.lbx_possibleAlbums.insert(
-                TK.END, album.artist + " - " + album.title + "\n")
+            self.lbx_possibleAlbums.insert(TK.END,
+                                           album.artist + " - " + album.title)
             self.txt_possibleAlbumsLengths.insert(
                 TK.END,
-                Screen.standardFormatTime(album.length) +
-                ("\n" if self.lists[0].index(album) != len(self.lists[0]) - 1
-                 else ""), Screen.correctRapGenre(album.genre))
+                Screen.standardFormatTime(album.length) + "\n",
+                Screen.correctRapGenre(album.genre))
             self.lbx_possibleAlbums.itemconfig(
                 index,
                 fg=Screen.container.genresColors[Screen.correctRapGenre(
@@ -1198,7 +1315,7 @@ class ListAlbumScreen(Screen):
         for index in range(len(self.lists[1])):
             album = self.lists[1][index]
             self.lbx_PossibleHalfAlbums.insert(
-                TK.END, album.artist + " - " + album.title + "\n")
+                TK.END, album.artist + " - " + album.title)
             self.txt_PossibleHalfAlbumsLengths.insert(
                 TK.END,
                 Screen.standardFormatTime(album.length) + "\n",
@@ -1298,6 +1415,9 @@ class ShowAlbumTracklistScreen(Screen):
             if album.artist == self.albumArtist and album.title == self.albumTitle:
                 self.albumSelected = album
                 break
+        lenAlbum = 0
+        for disc in self.albumSelected.tracksByDiscs:
+            lenAlbum += len(disc)
 
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
@@ -1306,14 +1426,11 @@ class ShowAlbumTracklistScreen(Screen):
                                   bg=DEFAULT_BGCOLOR,
                                   fg="white",
                                   font=DEFAULT_FONT1)
-        self.frm_showTracklist = TK.Frame(self.frm_master,
-                                          width=500,
-                                          height=300,
-                                          bg=DEFAULT_BGCOLOR)
-        self.txt_tracklist = TK.Text(self.frm_showTracklist,
+        self.txt_tracklist = TK.Text(self.frm_master,
                                      fg="white",
                                      bg=DEFAULT_BGCOLOR,
-                                     font=DEFAULT_FONT3)
+                                     font=DEFAULT_FONT3,
+                                     height=lenAlbum)
         self.lbl_length = TK.Label(
             self.frm_master,
             text=("Length: " + Screen.standardFormatTime(album.length) +
@@ -1325,10 +1442,7 @@ class ShowAlbumTracklistScreen(Screen):
         #Widget Placement
         self.lbl_title.grid(row=0, column=1)
         self.btn_backScreen.grid(row=2, column=0)
-        self.frm_showTracklist.grid(row=1, column=1)
-        self.txt_tracklist.grid(row=0, column=0, sticky=TK.NSEW)
-        self.txt_tracklist.rowconfigure(0, weight=1)
-        self.txt_tracklist.columnconfigure(0, weight=1)
+        self.txt_tracklist.grid(row=1, column=1)
         self.lbl_length.grid(row=2, column=1)
 
         #Display Album's Tracklist
@@ -1339,7 +1453,10 @@ class ShowAlbumTracklistScreen(Screen):
                     TK.END,
                     str(track.trackNumber + maxPreviousDisc) + ". " +
                     track.title + "\n")
-            maxPreviousDisc += disc[len(disc) - 1].trackNumber
+            if len(disc) > 0:
+                maxPreviousDisc += disc[len(disc) - 1].trackNumber
+        self.txt_tracklist.delete("end-1c linestart", TK.END)
+        self.txt_tracklist.config(state=TK.DISABLED)
 
     def backScreen(self, event=None):
         ListAlbumScreen(self.frm_master, self.previousScreen.time,
@@ -1349,10 +1466,8 @@ class ShowAlbumTracklistScreen(Screen):
 
 
 if __name__ == "__main__":
+    # def main():
     Screen.window.title("Handler")
-    Screen.window.iconbitmap(
-        os.path.join(Screen.container.baseDirectory, "auxFiles",
-                     "icons8-music-32.ico"))
     Screen.window.configure(bg=DEFAULT_BGCOLOR)
     if Screen.container.newFilesFound:
         Screen.window.after(50, lambda x=TK.Frame(): newFilesFoundScreen(x))
