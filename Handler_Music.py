@@ -49,6 +49,22 @@ class MusicFile:
         elif whichOne == "Disc Number":
             return self.discNumber
 
+    def attributeToMutagenTag(self, whichOne):
+        if whichOne == "Artist":
+            return "album" + whichOne.lower()
+        elif whichOne == "Album":
+            return whichOne.lower()
+        elif whichOne == "Genre":
+            return whichOne.lower()
+        elif whichOne == "Year":
+            return "date"
+        elif whichOne == "Title":
+            return whichOne.lower()
+        elif whichOne == "Track Number":
+            return "tracknumber"
+        elif whichOne == "Disc Number":
+            return "discnumber"
+
 
 class Album:
     def __init__(self, albumTitle, albumArtist, numberOfTracks, numberOfDiscs,
@@ -602,7 +618,8 @@ class SearchLibraryScreen(Screen):
         InitialScreen(self.frm_master, False)
 
     def nextScreen(self, event=None):
-        TrackDetailsScreen(self.frm_master, self.listOfResults)
+        aux= [self.lbx_results.get(index) for index in self.lbx_results.curselection()]
+        TrackDetailsScreen(self.frm_master, [musicFile for musicFile in self.listOfResults if musicFile.filename in aux])
 
     def updateResults(self, *args):
         self.listOfResults = Screen.container.listMusicFile.copy()
@@ -628,6 +645,7 @@ class SearchLibraryScreen(Screen):
             self.lbx_results.insert(TK.END, obj.filename)
 
     def deleteTracks(self, event=None):
+        #TODO: Recycle the tracks
         for index in self.lbx_results.curselection():
             print(self.lbx_results.get(index))
 
@@ -637,13 +655,13 @@ class TrackDetailsScreen(Screen):
         super().__init__(masterFramePreviousScreen)
         #Attributes
         self.attributes = {
-            "Title": None,
-            "Artist": None,
-            "Album": None,
-            "Track Number": None,
-            "Disc Number": None,
-            "Genre": None,
-            "Year": None
+            "Title": [],
+            "Artist": [],
+            "Album": [],
+            "Track Number": [],
+            "Disc Number": [],
+            "Genre": [],
+            "Year": []
         }
         self.listOfFiles = listOfFiles
 
@@ -667,18 +685,28 @@ class TrackDetailsScreen(Screen):
                 if musicFile.getAttribute(attr) != attribute:
                     entry.delete(0, TK.END)
                     break
-            self.attributes[attr] = entry.get()
+            self.attributes[attr].append(entry.get())
+            self.attributes[attr].append(entry)
             label.grid(row=i, column=1)
             entry.grid(row=i, column=2)
             i += 1
-        print(self.attributes)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=2)
         self.btn_backScreen.grid(row=i, column=0)
 
     def backScreen(self, event=None):
-        #TODO: check if any attributes have changed and change those in the file(s)
+        for musicFile in self.listOfFiles:
+            audio = EasyID3(
+                os.path.join(Screen.container.musicDirectory,
+                             musicFile.filename))
+            for attr in self.attributes:
+                newAttribute = self.attributes[attr][1].get()
+                if self.attributes[attr][0] != newAttribute:
+                    print(newAttribute)
+                    audio[musicFile.attributeToMutagenTag(
+                        attr)] = newAttribute
+            audio.save()
         SearchLibraryScreen(self.frm_master)
 
 
