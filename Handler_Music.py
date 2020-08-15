@@ -6,6 +6,7 @@ import tkinter.colorchooser as colorchooser
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 import xml.etree.ElementTree as ET
+import subprocess
 
 DEFAULT_FONT1 = ("Times New Roman", 16)
 DEFAULT_FONT2 = ("Times New Roman", 14)
@@ -546,9 +547,6 @@ class InitialScreen(Screen):
         WorkoutRegistryScreen(self.frm_master)
 
     def searchLibraryScreen(self):
-        # auxThread = threading.Thread(
-        #         target=Screen.container.files.sort(), daemon=True)
-        # auxThread.start()
         if self.firstTime:
             self.checkFilesThread.join()
         SearchLibraryScreen(self.frm_master)
@@ -618,8 +616,15 @@ class SearchLibraryScreen(Screen):
         InitialScreen(self.frm_master, False)
 
     def nextScreen(self, event=None):
-        aux= [self.lbx_results.get(index) for index in self.lbx_results.curselection()]
-        TrackDetailsScreen(self.frm_master, [musicFile for musicFile in self.listOfResults if musicFile.filename in aux])
+        aux = [
+            self.lbx_results.get(index)
+            for index in self.lbx_results.curselection()
+        ]
+        if len(aux)!=0:
+            TrackDetailsScreen(self.frm_master, [
+                musicFile
+                for musicFile in self.listOfResults if musicFile.filename in aux
+            ])
 
     def updateResults(self, *args):
         self.listOfResults = Screen.container.listMusicFile.copy()
@@ -645,9 +650,16 @@ class SearchLibraryScreen(Screen):
             self.lbx_results.insert(TK.END, obj.filename)
 
     def deleteTracks(self, event=None):
-        #TODO: Recycle the tracks
+        numFilesDeleted = 0
         for index in self.lbx_results.curselection():
-            print(self.lbx_results.get(index))
+            subprocess.run([
+                os.path.join('C:', os.sep, 'Users', 'ruben', 'Desktop',
+                             'Recycle.exe'),
+                os.path.join(Screen.container.musicDirectory,
+                             self.lbx_results.get(index - numFilesDeleted))
+            ])
+            self.lbx_results.delete(index - numFilesDeleted)
+            numFilesDeleted += 1
 
 
 class TrackDetailsScreen(Screen):
@@ -696,17 +708,16 @@ class TrackDetailsScreen(Screen):
         self.btn_backScreen.grid(row=i, column=0)
 
     def backScreen(self, event=None):
-        for musicFile in self.listOfFiles:
-            audio = EasyID3(
-                os.path.join(Screen.container.musicDirectory,
-                             musicFile.filename))
-            for attr in self.attributes:
-                newAttribute = self.attributes[attr][1].get()
-                if self.attributes[attr][0] != newAttribute:
-                    print(newAttribute)
-                    audio[musicFile.attributeToMutagenTag(
-                        attr)] = newAttribute
-            audio.save()
+        if not all([self.attributes[attr][0] == self.attributes[attr][1].get() for attr in self.attributes]):
+            for musicFile in self.listOfFiles:
+                audio = EasyID3(
+                    os.path.join(Screen.container.musicDirectory,
+                                musicFile.filename))
+                for attr in self.attributes:
+                    newAttribute = self.attributes[attr][1].get()
+                    if self.attributes[attr][0] != newAttribute:
+                        audio[musicFile.attributeToMutagenTag(attr)] = newAttribute
+                audio.save()
         SearchLibraryScreen(self.frm_master)
 
 
