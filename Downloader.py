@@ -16,22 +16,22 @@ import tkinter.filedialog as filedialog
 import xml.etree.ElementTree as ET
 import subprocess
 
-OneDrive = os.path.join('C:', os.path.sep, 'Users', 'ruben',
-                        'Onedrive - Universidade da Madeira', 'Ano_2',
-                        'Semestre_2')
-ACaulas = os.path.join(OneDrive, 'AC', 'Aulas')
-ACpl = os.path.join(OneDrive, 'AC', 'PL')
-ACtp = os.path.join(OneDrive, 'AC', 'TP')
-ACfreq = os.path.join(OneDrive, 'AC', 'Frequências')
-ACgeral = os.path.join(OneDrive, 'AC')
-MNIOtp = os.path.join(OneDrive, 'MNIO', 'TP')
-MNIOformularios_geral = os.path.join(OneDrive, 'MNIO')
-POOaulas = os.path.join(OneDrive, 'POO', 'Aulas')
-POOpl = os.path.join(OneDrive, 'POO', 'PL')
-POOgeral = os.path.join(OneDrive, 'POO')
-TFCaulas = os.path.join(OneDrive, 'TFC', 'Aulas')
-TFCtp = os.path.join(OneDrive, 'TFC', 'TP')
-TFCgeral = os.path.join(OneDrive, 'TFC')
+# OneDrive = os.path.join('C:', os.path.sep, 'Users', 'ruben',
+#                         'Onedrive - Universidade da Madeira', 'Ano_2',
+#                         'Semestre_2')
+# ACaulas = os.path.join(OneDrive, 'AC', 'Aulas')
+# ACpl = os.path.join(OneDrive, 'AC', 'PL')
+# ACtp = os.path.join(OneDrive, 'AC', 'TP')
+# ACfreq = os.path.join(OneDrive, 'AC', 'Frequências')
+# ACgeral = os.path.join(OneDrive, 'AC')
+# MNIOtp = os.path.join(OneDrive, 'MNIO', 'TP')
+# MNIOformularios_geral = os.path.join(OneDrive, 'MNIO')
+# POOaulas = os.path.join(OneDrive, 'POO', 'Aulas')
+# POOpl = os.path.join(OneDrive, 'POO', 'PL')
+# POOgeral = os.path.join(OneDrive, 'POO')
+# TFCaulas = os.path.join(OneDrive, 'TFC', 'Aulas')
+# TFCtp = os.path.join(OneDrive, 'TFC', 'TP')
+# TFCgeral = os.path.join(OneDrive, 'TFC')
 
 DEFAULT_FONT1 = ("Times New Roman", 16)
 DEFAULT_FONT2 = ("Times New Roman", 14)
@@ -145,10 +145,10 @@ class InitialScreen(Screen):
             bg=DEFAULT_BGCOLOR,
             font=DEFAULT_FONT1,
             fg="white")
-        self.btn_schoolVersion = TK.Button(self.frm_master,
-                                           font=DEFAULT_FONT3,
-                                           text="School",
-                                           command=self.schoolScreen)
+        # self.btn_schoolVersion = TK.Button(self.frm_master,
+        #                                    font=DEFAULT_FONT3,
+        #                                    text="School",
+        #                                    command=self.schoolScreen)
         self.btn_musicVersion = TK.Button(self.frm_master,
                                           font=DEFAULT_FONT3,
                                           text="Music (Downloaded)",
@@ -211,7 +211,7 @@ class InitialScreen(Screen):
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=0, padx=200)
-        self.btn_schoolVersion.grid(row=2, column=1)
+        # self.btn_schoolVersion.grid(row=2, column=1)
         self.btn_musicVersion.grid(row=3, column=1)
         self.btn_musicModifiedVersion.grid(row=4, column=1)
         self.btn_grimeArtistsExceptions.grid(row=5, column=1)
@@ -278,8 +278,8 @@ class InitialScreen(Screen):
             # ])
             # auxFile.close()
 
-    def schoolScreen(self):
-        SchoolScreen(self.frm_master, self.downloadsDir)
+    # def schoolScreen(self):
+    #     SchoolScreen(self.frm_master, self.downloadsDir)
 
     def musicScreen(self):
         MusicScreen(self.frm_master, self.musicOriginDir, self.musicDestinyDir,
@@ -413,174 +413,174 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         self.btn_previousScreen.grid_forget()
 
 
-class SchoolScreen(Screen):
-    def __init__(self, masterFramePreviousScreen, downloadsDir):
-        super().__init__(masterFramePreviousScreen)
-        #Tkinter Vars
-        self.downloadsDir = downloadsDir
-        self.title = TK.StringVar()
-        self.numberOfFiles = 0
-        self.title.set(str(self.numberOfFiles) + " Files Found")
+# class SchoolScreen(Screen):
+#     def __init__(self, masterFramePreviousScreen, downloadsDir):
+#         super().__init__(masterFramePreviousScreen)
+#         #Tkinter Vars
+#         self.downloadsDir = downloadsDir
+#         self.title = TK.StringVar()
+#         self.numberOfFiles = 0
+#         self.title.set(str(self.numberOfFiles) + " Files Found")
 
-        #Widget Creation
-        self.lbl_title = TK.Label(self.frm_master,
-                                  textvariable=self.title,
-                                  font=DEFAULT_FONT1,
-                                  bg=DEFAULT_BGCOLOR,
-                                  fg="white")
-        self.txt_filesFound = TK.Text(self.frm_master,
-                                      bg=DEFAULT_BGCOLOR,
-                                      fg="white",
-                                      font=DEFAULT_FONT3)
-        self.txt_filesMoved = TK.Text(self.frm_master,
-                                      bg=DEFAULT_BGCOLOR,
-                                      fg="white",
-                                      font=DEFAULT_FONT3)
-        self.btn_stopCycle = TK.Button(self.frm_master,
-                                       text="Stop",
-                                       font=DEFAULT_FONT3,
-                                       command=self.stopCheckDownloads)
+#         #Widget Creation
+#         self.lbl_title = TK.Label(self.frm_master,
+#                                   textvariable=self.title,
+#                                   font=DEFAULT_FONT1,
+#                                   bg=DEFAULT_BGCOLOR,
+#                                   fg="white")
+#         self.txt_filesFound = TK.Text(self.frm_master,
+#                                       bg=DEFAULT_BGCOLOR,
+#                                       fg="white",
+#                                       font=DEFAULT_FONT3)
+#         self.txt_filesMoved = TK.Text(self.frm_master,
+#                                       bg=DEFAULT_BGCOLOR,
+#                                       fg="white",
+#                                       font=DEFAULT_FONT3)
+#         self.btn_stopCycle = TK.Button(self.frm_master,
+#                                        text="Stop",
+#                                        font=DEFAULT_FONT3,
+#                                        command=self.stopCheckDownloads)
 
-        #Widget Placement
-        self.lbl_title.grid(row=0, column=0, padx=200)
-        self.txt_filesFound.grid(row=1, column=0)
-        self.txt_filesMoved.grid(row=1, column=1)
-        self.btn_stopCycle.grid(row=2, column=0)
+#         #Widget Placement
+#         self.lbl_title.grid(row=0, column=0, padx=200)
+#         self.txt_filesFound.grid(row=1, column=0)
+#         self.txt_filesMoved.grid(row=1, column=1)
+#         self.btn_stopCycle.grid(row=2, column=0)
 
-        Screen.window.update_idletasks()
+#         Screen.window.update_idletasks()
 
-        self.cycleCondition = True
-        webbrowser.open("https://moodle.cee.uma.pt/login/index.php", new=2)
-        webbrowser.open("https://infoalunos.uma.pt", new=2)
-        self.txt_filesMoved.tag_config("existed", fg="yellow")
-        self.txt_filesMoved.tag_config("notExisted", fg="green")
-        self.txt_filesMoved.tag_config("deleted/Skipped", fg="red")
-        self.checkDownloads()
+#         self.cycleCondition = True
+#         webbrowser.open("https://moodle.cee.uma.pt/login/index.php", new=2)
+#         webbrowser.open("https://infoalunos.uma.pt", new=2)
+#         self.txt_filesMoved.tag_config("existed", fg="yellow")
+#         self.txt_filesMoved.tag_config("notExisted", fg="green")
+#         self.txt_filesMoved.tag_config("deleted/Skipped", fg="red")
+#         self.checkDownloads()
 
-    def stopCheckDownloads(self):
-        self.cycleCondition = False
-        self.btn_stopCycle.destroy()
+#     def stopCheckDownloads(self):
+#         self.cycleCondition = False
+#         self.btn_stopCycle.destroy()
 
-    def addToOutput(self, fileFound, fileMoved, tag):
-        self.numberOfFiles += 1
-        self.title.set(str(self.numberOfFiles) + " Files Found")
-        self.txt_filesFound.config(state=TK.NORMAL)
-        self.txt_filesMoved.config(state=TK.NORMAL)
-        self.txt_filesFound.insert(TK.END, fileFound + "\n")
-        self.txt_filesMoved.insert(TK.END, fileMoved + "\n", tag)
-        self.txt_filesFound.config(state=TK.DISABLED)
-        self.txt_filesMoved.config(state=TK.DISABLED)
-        Screen.window.update_idletasks()
-        self.txt_filesFound.see(TK.END)
-        self.txt_filesMoved.see(TK.END)
+#     def addToOutput(self, fileFound, fileMoved, tag):
+#         self.numberOfFiles += 1
+#         self.title.set(str(self.numberOfFiles) + " Files Found")
+#         self.txt_filesFound.config(state=TK.NORMAL)
+#         self.txt_filesMoved.config(state=TK.NORMAL)
+#         self.txt_filesFound.insert(TK.END, fileFound + "\n")
+#         self.txt_filesMoved.insert(TK.END, fileMoved + "\n", tag)
+#         self.txt_filesFound.config(state=TK.DISABLED)
+#         self.txt_filesMoved.config(state=TK.DISABLED)
+#         Screen.window.update_idletasks()
+#         self.txt_filesFound.see(TK.END)
+#         self.txt_filesMoved.see(TK.END)
 
-    def checkDownloads(self):
-        #FIXME: need to adapt this to the GUI and the new disciplines when the time comes
-        if self.cycleCondition:
-            Screen.window.after(1000, self.checkDownloads)
-            for filename in os.listdir(self.downloadsDir):
-                #try:
-                if os.path.getctime(os.path.join(
-                        self.downloadsDir,
-                        filename)) > Screen.tempoAtual and os.path.getsize(
-                            os.path.join(
-                                self.downloadsDir,
-                                filename)) > 0 and filename.endswith(".pdf"):
-                    destino = self.whichFolder(filename)
-                    if "False" != destino:
-                        count += 1
-                        try:
-                            os.rename(
-                                os.path.join(self.downloadsDir, filename),
-                                destino)
-                            self.addToOutput(filename, destino, "notExisted")
-                            # print("File downloaded succesfully")
-                        except FileExistsError:
-                            os.remove(destino)
-                            os.rename(
-                                os.path.join(self.downloadsDir, filename),
-                                destino)
-                            self.addToOutput(filename, destino, "existed")
-                            #print("File replaced succesfully")
-                    else:
-                        self.addToOutput(filename, "REMOVED/SKIPPED",
-                                         "deleted/Skipped")
-                        #print("File skipped/deleted")
-                # except FileNotFoundError:
-                #     if not filename.endswith(".part"):
-                #         print(filename + "\nERRO")
-                #         break
+#     def checkDownloads(self):
+#         #FIXME: need to adapt this to the GUI and the new disciplines when the time comes
+#         if self.cycleCondition:
+#             Screen.window.after(1000, self.checkDownloads)
+#             for filename in os.listdir(self.downloadsDir):
+#                 #try:
+#                 if os.path.getctime(os.path.join(
+#                         self.downloadsDir,
+#                         filename)) > Screen.tempoAtual and os.path.getsize(
+#                             os.path.join(
+#                                 self.downloadsDir,
+#                                 filename)) > 0 and filename.endswith(".pdf"):
+#                     destino = self.whichFolder(filename)
+#                     if "False" != destino:
+#                         count += 1
+#                         try:
+#                             os.rename(
+#                                 os.path.join(self.downloadsDir, filename),
+#                                 destino)
+#                             self.addToOutput(filename, destino, "notExisted")
+#                             # print("File downloaded succesfully")
+#                         except FileExistsError:
+#                             os.remove(destino)
+#                             os.rename(
+#                                 os.path.join(self.downloadsDir, filename),
+#                                 destino)
+#                             self.addToOutput(filename, destino, "existed")
+#                             #print("File replaced succesfully")
+#                     else:
+#                         self.addToOutput(filename, "REMOVED/SKIPPED",
+#                                          "deleted/Skipped")
+#                         #print("File skipped/deleted")
+#                 # except FileNotFoundError:
+#                 #     if not filename.endswith(".part"):
+#                 #         print(filename + "\nERRO")
+#                 #         break
 
-    def whichFolder(self, filename):
-        if filename.startswith("PT_AC_"):
-            return os.path.join(ACaulas,
-                                filename[len("PT_AC_"):].replace("T_", ""))
-        elif filename.startswith("Apresentação") or filename.startswith(
-                "Guia"):
-            return os.path.join(ACpl, filename)
-        elif filename.startswith("Aula_"):
-            return os.path.join(ACtp, filename)
-        elif filename.startswith("T1") or filename.startswith("T2"):
-            if "Frequencia" in filename:
-                return os.path.join(
-                    ACfreq, 'Normal',
-                    filename[len("T1_"):].replace("_AC",
-                                                  "").replace("_PT", ""))
-            elif "Recurso" in filename:
-                return os.path.join(
-                    ACfreq, 'Recurso', filename[len("T1_T2_"):].replace(
-                        "_AC", "").replace("_PT", "").replace("_20", ""))
-            elif "Especial" in filename:
-                return os.path.join(
-                    ACfreq, 'EpocaEspecial', filename[len("T1_T2_"):].replace(
-                        "_AC", "").replace("_PT", "").replace("_20", ""))
-        elif filename.startswith("AC_P"):
-            return os.path.join(ACgeral,
-                                "Enunciado Projeto " + filename[4] + ".pdf")
-        elif filename[2] == ".":
-            return os.path.join(POOaulas, filename)
-        elif filename.startswith("Ficha"):
-            diretoria = os.path.join(
-                POOpl, filename[:filename.find(".")].replace(" ", ""))
-            try:
-                os.makedirs(diretoria)
-            except FileExistsError:
-                print("Directory already existed")
-            return os.path.join(diretoria, filename)
-        elif filename.startswith("MNIO_FichaExerc"):
-            return os.path.join(MNIOtp, filename[len("MNIO_"):])
-        elif filename.startswith("MNIO_Formulario"):
-            return os.path.join(MNIOformularios_geral, filename[len("MNIO_"):])
-        elif filename.startswith("Folha"):
-            return os.path.join(TFCtp, filename.replace("TFC1920", ""))
-        elif filename.startswith("TFC1920"):
-            numero = filename[filename.rfind("Semana") +
-                              6:filename.rfind("Handout") - 1]
-            return os.path.join(
-                TFCaulas,
-                filename.replace("TFC1920", "").replace("-", "")[0:12] +
-                numero + ".pdf")
-        else:
-            rename = input(
-                "This is the file " + filename +
-                "\nDo you want to rename it? (y/n, d to delete, s to skip)\n")
-            if rename == "y":
-                filename = input("Rename the file: ") + ".pdf"
-            elif rename == "d":
-                os.remove(os.path.join(self.downloadsDir, filename))
-                return "False"
-            elif rename == "s":
-                return "False"
-            op = input(
-                "Choose the discipline:\n1.AC\n2.POO\n3.TFC\n4.MNIO\nOption: ")
-            if op == "1":
-                return os.path.join(ACgeral, filename)
-            elif op == "2":
-                return os.path.join(POOgeral, filename)
-            elif op == "3":
-                return os.path.join(TFCgeral, filename)
-            elif op == "4":
-                return os.path.join(MNIOformularios_geral, filename)
+#     def whichFolder(self, filename):
+#         if filename.startswith("PT_AC_"):
+#             return os.path.join(ACaulas,
+#                                 filename[len("PT_AC_"):].replace("T_", ""))
+#         elif filename.startswith("Apresentação") or filename.startswith(
+#                 "Guia"):
+#             return os.path.join(ACpl, filename)
+#         elif filename.startswith("Aula_"):
+#             return os.path.join(ACtp, filename)
+#         elif filename.startswith("T1") or filename.startswith("T2"):
+#             if "Frequencia" in filename:
+#                 return os.path.join(
+#                     ACfreq, 'Normal',
+#                     filename[len("T1_"):].replace("_AC",
+#                                                   "").replace("_PT", ""))
+#             elif "Recurso" in filename:
+#                 return os.path.join(
+#                     ACfreq, 'Recurso', filename[len("T1_T2_"):].replace(
+#                         "_AC", "").replace("_PT", "").replace("_20", ""))
+#             elif "Especial" in filename:
+#                 return os.path.join(
+#                     ACfreq, 'EpocaEspecial', filename[len("T1_T2_"):].replace(
+#                         "_AC", "").replace("_PT", "").replace("_20", ""))
+#         elif filename.startswith("AC_P"):
+#             return os.path.join(ACgeral,
+#                                 "Enunciado Projeto " + filename[4] + ".pdf")
+#         elif filename[2] == ".":
+#             return os.path.join(POOaulas, filename)
+#         elif filename.startswith("Ficha"):
+#             diretoria = os.path.join(
+#                 POOpl, filename[:filename.find(".")].replace(" ", ""))
+#             try:
+#                 os.makedirs(diretoria)
+#             except FileExistsError:
+#                 print("Directory already existed")
+#             return os.path.join(diretoria, filename)
+#         elif filename.startswith("MNIO_FichaExerc"):
+#             return os.path.join(MNIOtp, filename[len("MNIO_"):])
+#         elif filename.startswith("MNIO_Formulario"):
+#             return os.path.join(MNIOformularios_geral, filename[len("MNIO_"):])
+#         elif filename.startswith("Folha"):
+#             return os.path.join(TFCtp, filename.replace("TFC1920", ""))
+#         elif filename.startswith("TFC1920"):
+#             numero = filename[filename.rfind("Semana") +
+#                               6:filename.rfind("Handout") - 1]
+#             return os.path.join(
+#                 TFCaulas,
+#                 filename.replace("TFC1920", "").replace("-", "")[0:12] +
+#                 numero + ".pdf")
+#         else:
+#             rename = input(
+#                 "This is the file " + filename +
+#                 "\nDo you want to rename it? (y/n, d to delete, s to skip)\n")
+#             if rename == "y":
+#                 filename = input("Rename the file: ") + ".pdf"
+#             elif rename == "d":
+#                 os.remove(os.path.join(self.downloadsDir, filename))
+#                 return "False"
+#             elif rename == "s":
+#                 return "False"
+#             op = input(
+#                 "Choose the discipline:\n1.AC\n2.POO\n3.TFC\n4.MNIO\nOption: ")
+#             if op == "1":
+#                 return os.path.join(ACgeral, filename)
+#             elif op == "2":
+#                 return os.path.join(POOgeral, filename)
+#             elif op == "3":
+#                 return os.path.join(TFCgeral, filename)
+#             elif op == "4":
+#                 return os.path.join(MNIOformularios_geral, filename)
 
 
 class MusicScreen(Screen):
