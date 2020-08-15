@@ -39,6 +39,7 @@ DEFAULT_BGCOLOR = "#061130"
 SCROLLSPEED = 30  #less=faster
 
 #TODO: comment the code
+#TODO: separate into class multiple textboxes one scrollbar
 
 
 class Screen:
@@ -302,6 +303,7 @@ class GrimeArtistsAndExceptionsScreen(Screen):
     def __init__(self, masterFramePreviousScreen):
         super().__init__(masterFramePreviousScreen)
         #TODO: adjusts to input exceptions and save and load said exceptions from files
+        #xml element: pair type = 0-2 base = "..." new = "..."
         #Tkinter Vars
         self.newArtist = TK.StringVar()
         self.file = os.path.join(Screen.baseDirectory, "auxFiles",
@@ -620,12 +622,14 @@ class MusicScreen(Screen):
                                        bg=DEFAULT_BGCOLOR,
                                        fg="white",
                                        font=DEFAULT_FONT3,
-                                       yscrollcommand=self.scb_textOutput.set)
+                                       yscrollcommand=self.scb_textOutput.set,
+                                       state=TK.DISABLED)
         self.txt_afterFiles = TK.Text(self.frm_textOutput,
                                       bg=DEFAULT_BGCOLOR,
                                       fg="white",
                                       font=DEFAULT_FONT3,
-                                      yscrollcommand=self.scb_textOutput.set)
+                                      yscrollcommand=self.scb_textOutput.set,
+                                      state=TK.DISABLED)
         self.btn_moveOutOfBuffer = TK.Button(self.frm_master,
                                              text="Move Files",
                                              command=self.nextScreen,
@@ -645,6 +649,7 @@ class MusicScreen(Screen):
         self.txt_afterFiles.grid(row=1, column=1)
         self.btn_moveOutOfBuffer.grid(row=2, column=0)
 
+        #Widget Configuration
         self.txt_afterFiles.bind("<MouseWheel>",
                                  self.scrollTextOutputMouseWheel)
         self.txt_beforeFiles.bind("<MouseWheel>",
@@ -1127,7 +1132,7 @@ class AlbumAndLyricsScreen(Screen):
         Determines the artist and title to be used in the search for lyrics and handles the most common changes
     """
 
-    #TODO: divide function into settings to get year and to get lyrics
+    #TODO: divide function into settings to get year and to get lyrics and save exceptions user has to define
     def ArtistAlbumAndTitle(self, filename):
         artist = EasyID3(filename)['albumartist'][0]
         title = EasyID3(filename)['title'][0]
@@ -1426,16 +1431,14 @@ class AlbumAndLyricsScreen(Screen):
                 self.btn_exit.grid(row=3, column=0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+# def main():
     # For ignoring SSL certificate errors
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
 
     Screen.window.title("Downloader")
-    Screen.window.iconbitmap(
-        os.path.join(Screen.baseDirectory, "auxFiles",
-                     "icons8-download-32.ico"))
     Screen.window.configure(bg=DEFAULT_BGCOLOR)
     InitialScreen(TK.Frame())
     Screen.window.mainloop()
