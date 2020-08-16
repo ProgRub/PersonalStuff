@@ -8,11 +8,6 @@ from mutagen.mp3 import MP3
 import xml.etree.ElementTree as ET
 import subprocess
 
-DEFAULT_FONT1 = ("Times New Roman", 16)
-DEFAULT_FONT2 = ("Times New Roman", 14)
-DEFAULT_FONT3 = ("Times New Roman", 12)
-DEFAULT_BGCOLOR = "#061130"
-SCROLLSPEED = 30  #less=faster
 #TODO: comment the code
 #TODO: separate into class multiple textboxes one scrollbar
 #TODO: implement iTunes support
@@ -102,31 +97,10 @@ class Album:
 
 class ListsAndFiles:
     def __init__(self):
+        # Variables
         self.listMusicFile = []
         self.listAlbums = []
         self.listGenres = []
-        self.baseDirectory = os.path.dirname(__file__)
-        self.fileMusicFiles = os.path.join(self.baseDirectory, "auxFiles",
-                                           "MusicFiles.xml")
-        if not os.path.isfile(self.fileMusicFiles):
-            aux = open(self.fileMusicFiles, "w", encoding="utf-8")
-            aux.close()
-        self.fileDetails = os.path.join(self.baseDirectory, "auxFiles",
-                                        "DetailsMusic.xml")
-        if not os.path.isfile(self.fileDetails):
-            aux = open(self.fileDetails, "w", encoding="utf-8")
-            aux.close()
-        self.workoutFile = os.path.join(self.baseDirectory, "auxFiles",
-                                        "WorkoutDatabase.xml")
-        if not os.path.isfile(self.workoutFile):
-            aux = open(self.workoutFile, "w", encoding="utf-8")
-            aux.close()
-        self.musicDirectory = self.getMusicDirectory()
-        self.files = os.listdir(self.musicDirectory)
-        self.files = [
-            os.path.join(self.musicDirectory, f) for f in self.files
-            if f.endswith(".mp3")
-        ]
         self.genresColors = {}
         # self.genresColors = {
         #     "Grime": "red",
@@ -138,15 +112,49 @@ class ListsAndFiles:
         #     "Metal": "black",
         #     "R&B": "purple"
         # }
-        self.generateGenreColorsFromFile()
+        self.workoutDatabase = {}
         self.alreadyReadFile = False
-        self.numberOfFiles = self.getNumFiles()
-        self.timeOfLastModified = self.getLastModified()
+        self.baseDirectory = os.path.dirname(__file__)
         self.numberOfFilesFile = -1
         self.timeOfLastModifiedFile = -1
-        self.getNumFilesLastModifiedFromFile()
+
+        # Create files, if necessary
+        self.fileDetails = os.path.join(self.baseDirectory, "auxFiles",
+                                        "OtherDetails.xml")
+        if not os.path.isfile(self.fileDetails):
+            root = ET.Element("root")
+            tree = ET.ElementTree(root)
+            tree.write(self.fileDetails)
+            self.musicDirectory = "SET THE DIRECTORY WHERE YOU STORE THE MUSIC FILES"
+            self.files=[]
+            self.numberOfFiles = 0
+            self.timeOfLastModified = 0
+        else:
+            self.musicDirectory = self.getMusicDirectory()
+            self.files = os.listdir(self.musicDirectory)
+            self.files = [
+                os.path.join(self.musicDirectory, f) for f in self.files
+                if f.endswith(".mp3")
+            ]
+            self.numberOfFiles = self.getNumFiles()
+            self.timeOfLastModified = self.getLastModified()
+            self.getNumFilesLastModifiedFromFile()
+            self.generateGenreColorsFromFile()
         self.newFilesFound = self.numberOfFiles > self.numberOfFilesFile or self.timeOfLastModified > self.timeOfLastModifiedFile
-        self.workoutDatabase = {}
+        self.fileMusicFiles = os.path.join(self.baseDirectory, "auxFiles",
+                                           "MusicFiles.xml")
+        if not os.path.isfile(self.fileMusicFiles):
+            root = ET.Element("root")
+            tree = ET.ElementTree(root)
+            tree.write(self.fileMusicFiles)
+            self.numberOfFilesFile = -1
+            self.timeOfLastModifiedFile = -1
+        # self.workoutFile = os.path.join(self.baseDirectory, "auxFiles",
+        #                                 "WorkoutDatabase.xml")
+        # if not os.path.isfile(self.workoutFile):
+        #     root = ET.Element("root")
+        #     tree = ET.ElementTree(root)
+        #     tree.write(self.workoutFile)
         self.loadWorkoutDatabase()
 
     def getNumFiles(self):
@@ -160,8 +168,12 @@ class ListsAndFiles:
     def getNumFilesLastModifiedFromFile(self):
         tree = ET.parse(self.fileDetails)
         root = tree.getroot()
-        self.numberOfFilesFile = int(root.find('numberfiles').text)
-        self.timeOfLastModifiedFile = float(root.find('lastmodified').text)
+        try:
+            self.numberOfFilesFile = int(root.find('numberfiles').text)
+            self.timeOfLastModifiedFile = float(root.find('lastmodified').text)
+        except:
+            self.numberOfFilesFile = 0
+            self.timeOfLastModifiedFile = 0
 
     def saveNumFilesLastModified(self):
         tree = ET.parse(self.fileDetails)
@@ -181,15 +193,15 @@ class ListsAndFiles:
     def getMusicDirectory(self):
         tree = ET.parse(self.fileDetails)
         root = tree.getroot()
-        return root.find('directory').text
+        return root.find('musicdestinydir').text
 
     def saveMusicDirectory(self, newDirectory):
         tree = ET.parse(self.fileDetails)
         root = tree.getroot()
         try:
-            root.find('directory').text = newDirectory
+            root.find('musicdestinydir').text = newDirectory
         except:
-            child = ET.Element('directory')
+            child = ET.Element('musicdestinydir')
             child.text = newDirectory
             root.append(child)
         tree.write(self.fileDetails)
@@ -198,11 +210,11 @@ class ListsAndFiles:
         tree = ET.parse(self.fileDetails)
         root = tree.getroot()
         genreColors = tree.find('genreColors')
-        for pair in genreColors:
-            genre = pair.get('genre')
-            colour = pair.get('colour')
-            self.genresColors[genre] = colour
-        tree.write(self.fileDetails)
+        if genreColors!=None:
+            for pair in genreColors:
+                genre = pair.get('genre')
+                colour = pair.get('colour')
+                self.genresColors[genre] = colour
 
     def saveGenreColors(self):
         tree = ET.parse(self.fileDetails)
@@ -221,7 +233,7 @@ class ListsAndFiles:
         tree.write(self.fileDetails)
 
     def loadWorkoutDatabase(self):
-        tree = ET.parse(self.workoutFile)
+        tree = ET.parse(self.fileDetails)
         root = tree.getroot()
         workouts = root.findall('workout')
         for workout in workouts:
@@ -231,9 +243,10 @@ class ListsAndFiles:
             self.workoutDatabase[workout.text] = times
 
     def saveWorkoutDatabase(self):
-        tree = ET.parse(self.workoutFile)
+        tree = ET.parse(self.fileDetails)
         root = tree.getroot()
-        root.clear()
+        for child in root.findall("workout"):
+            root.remove(child)
         for workout in self.workoutDatabase:
             child = ET.Element('workout')
             child.text = workout
@@ -393,16 +406,21 @@ class ListsAndFiles:
 class Screen:
     container = ListsAndFiles()
     window = TK.Tk()
+    DEFAULT_FONT1 = ("Times New Roman", 16)
+    DEFAULT_FONT2 = ("Times New Roman", 14)
+    DEFAULT_FONT3 = ("Times New Roman", 12)
+    DEFAULT_BGCOLOR = "#061130"
+    SCROLLSPEED = 30  #less=faster
 
     def __init__(self, masterFramePreviousScreen):
         masterFramePreviousScreen.destroy()
 
         #Widget Creation
-        self.frm_master = TK.Frame(Screen.window, bg=DEFAULT_BGCOLOR)
+        self.frm_master = TK.Frame(Screen.window, bg=Screen.DEFAULT_BGCOLOR)
         self.btn_backScreen = TK.Button(self.frm_master,
                                         text="Go Back",
                                         command=self.backScreen,
-                                        font=DEFAULT_FONT3)
+                                        font=Screen.DEFAULT_FONT3)
 
         #Widget Placement
         self.frm_master.grid(row=0, column=0)
@@ -443,9 +461,9 @@ class InitialScreen(Screen):
         super().__init__(masterFramePreviousScreen)
         #Thread to check files in the background
         self.firstTime = firstTime
-        if self.firstTime:
-            self.checkFilesThread = threading.Thread(
-                target=Screen.container.checkFiles, daemon=True)
+        self.checkFilesThread = threading.Thread(
+            target=Screen.container.checkFiles, daemon=True)
+        if self.firstTime and os.sep in Screen.container.musicDirectory:
             self.checkFilesThread.start()
 
         #Widget Creation
@@ -453,51 +471,51 @@ class InitialScreen(Screen):
             self.frm_master,
             text=
             "Welcome to the Music Handler Program!\nYou can search your library for a certain file\nOr choose an album to listen to!",
-            font=DEFAULT_FONT1,
-            bg=DEFAULT_BGCOLOR,
+            font=Screen.DEFAULT_FONT1,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white")
         self.frm_whichDirectory = TK.Frame(self.frm_master,
                                            width=750,
                                            height=250,
-                                           bg=DEFAULT_BGCOLOR)
+                                           bg=Screen.DEFAULT_BGCOLOR)
         self.lbl_whichDirectory = TK.Label(
             self.frm_whichDirectory,
             text="In which directory do you have your music files?",
-            font=DEFAULT_FONT1,
-            bg=DEFAULT_BGCOLOR,
+            font=Screen.DEFAULT_FONT1,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white")
         self.ent_Directory = TK.Entry(self.frm_whichDirectory,
                                       width=60,
                                       state=TK.NORMAL,
-                                      font=DEFAULT_FONT3)
+                                      font=Screen.DEFAULT_FONT3)
         self.ent_Directory.insert(TK.END, str(Screen.container.musicDirectory))
         self.ent_Directory.config(state="readonly")
         self.btn_chooseDirectory = TK.Button(self.frm_whichDirectory,
                                              text="Open",
                                              command=self.chooseDirectory,
-                                             font=DEFAULT_FONT3)
+                                             font=Screen.DEFAULT_FONT3)
         self.btn_advanceScreen = TK.Button(self.frm_master,
                                            text="Choose Album",
                                            command=self.nextScreen,
-                                           font=DEFAULT_FONT3)
+                                           font=Screen.DEFAULT_FONT3)
         self.btn_recalibrateAll = TK.Button(self.frm_master,
                                             text="Recalibrate All Files",
                                             command=self.recalibrateALL,
-                                            font=DEFAULT_FONT3)
+                                            font=Screen.DEFAULT_FONT3)
         self.btn_chooseGenreColors = TK.Button(
             self.frm_master,
             text="Genre Colors",
             command=self.chooseGenreColorsScreen,
-            font=DEFAULT_FONT3)
+            font=Screen.DEFAULT_FONT3)
         self.btn_registerWorkout = TK.Button(
             self.frm_master,
             text="Register Workout",
             command=self.registerWorkoutScreen,
-            font=DEFAULT_FONT3)
+            font=Screen.DEFAULT_FONT3)
         self.btn_searchLibrary = TK.Button(self.frm_master,
                                            text="Search Library",
                                            command=self.searchLibraryScreen,
-                                           font=DEFAULT_FONT3)
+                                           font=Screen.DEFAULT_FONT3)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=0, padx=200)
@@ -518,6 +536,7 @@ class InitialScreen(Screen):
             Screen.container.musicDirectory = aux
             Screen.container.saveMusicDirectory(
                 Screen.container.musicDirectory)
+            self.checkFilesThread.start()
         self.ent_Directory.config(state=TK.NORMAL)
         self.ent_Directory.delete(0, 'end')
         self.ent_Directory.insert(TK.END, str(Screen.container.musicDirectory))
@@ -568,8 +587,8 @@ class SearchLibraryScreen(Screen):
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
                                   text="Search the Library",
-                                  font=DEFAULT_FONT1,
-                                  bg=DEFAULT_BGCOLOR,
+                                  font=Screen.DEFAULT_FONT1,
+                                  bg=Screen.DEFAULT_BGCOLOR,
                                   fg="white")
         i = 1
         for attribute in self.searchableAttrs:
@@ -577,20 +596,20 @@ class SearchLibraryScreen(Screen):
             stringVar.trace("w", self.updateResults)
             lbl_field = TK.Label(self.frm_master,
                                  text=attribute,
-                                 font=DEFAULT_FONT2,
-                                 bg=DEFAULT_BGCOLOR,
+                                 font=Screen.DEFAULT_FONT2,
+                                 bg=Screen.DEFAULT_BGCOLOR,
                                  fg="white")
             ent_field = TK.Entry(self.frm_master,
                                  textvariable=stringVar,
                                  width=60,
-                                 font=DEFAULT_FONT3)
+                                 font=Screen.DEFAULT_FONT3)
             lbl_field.grid(row=i, column=1)
             ent_field.grid(row=i, column=2)
             self.searchableAttrs[attribute] = stringVar
             i += 1
         self.lbx_results = TK.Listbox(self.frm_master,
-                                      font=DEFAULT_FONT3,
-                                      bg=DEFAULT_BGCOLOR,
+                                      font=Screen.DEFAULT_FONT3,
+                                      bg=Screen.DEFAULT_BGCOLOR,
                                       fg="white",
                                       state=TK.DISABLED,
                                       width=100,
@@ -598,7 +617,7 @@ class SearchLibraryScreen(Screen):
                                       selectmode=TK.EXTENDED)
         self.btn_trackDetails = TK.Button(self.frm_master,
                                           text="Show Track Details",
-                                          font=DEFAULT_FONT3,
+                                          font=Screen.DEFAULT_FONT3,
                                           command=self.nextScreen)
 
         #Widget Placement
@@ -620,10 +639,10 @@ class SearchLibraryScreen(Screen):
             self.lbx_results.get(index)
             for index in self.lbx_results.curselection()
         ]
-        if len(aux)!=0:
+        if len(aux) != 0:
             TrackDetailsScreen(self.frm_master, [
-                musicFile
-                for musicFile in self.listOfResults if musicFile.filename in aux
+                musicFile for musicFile in self.listOfResults
+                if musicFile.filename in aux
             ])
 
     def updateResults(self, *args):
@@ -680,17 +699,19 @@ class TrackDetailsScreen(Screen):
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
                                   text="Track Details",
-                                  font=DEFAULT_FONT1,
-                                  bg=DEFAULT_BGCOLOR,
+                                  font=Screen.DEFAULT_FONT1,
+                                  bg=Screen.DEFAULT_BGCOLOR,
                                   fg="white")
         i = 1
         for attr in self.attributes:
             label = TK.Label(self.frm_master,
                              text=attr,
-                             font=DEFAULT_FONT2,
-                             bg=DEFAULT_BGCOLOR,
+                             font=Screen.DEFAULT_FONT2,
+                             bg=Screen.DEFAULT_BGCOLOR,
                              fg="white")
-            entry = TK.Entry(self.frm_master, font=DEFAULT_FONT3, width=30)
+            entry = TK.Entry(self.frm_master,
+                             font=Screen.DEFAULT_FONT3,
+                             width=30)
             attribute = self.listOfFiles[0].getAttribute(attr)
             entry.insert(TK.END, str(attribute))
             for musicFile in self.listOfFiles:
@@ -708,15 +729,20 @@ class TrackDetailsScreen(Screen):
         self.btn_backScreen.grid(row=i, column=0)
 
     def backScreen(self, event=None):
-        if not all([self.attributes[attr][0] == self.attributes[attr][1].get() for attr in self.attributes]):
+        #TODO: re-update the database if files are changed
+        if not all([
+                self.attributes[attr][0] == self.attributes[attr][1].get()
+                for attr in self.attributes
+        ]):
             for musicFile in self.listOfFiles:
                 audio = EasyID3(
                     os.path.join(Screen.container.musicDirectory,
-                                musicFile.filename))
+                                 musicFile.filename))
                 for attr in self.attributes:
                     newAttribute = self.attributes[attr][1].get()
                     if self.attributes[attr][0] != newAttribute:
-                        audio[musicFile.attributeToMutagenTag(attr)] = newAttribute
+                        audio[musicFile.attributeToMutagenTag(
+                            attr)] = newAttribute
                 audio.save()
         SearchLibraryScreen(self.frm_master)
 
@@ -729,8 +755,8 @@ class ChooseColorsScreen(Screen):
         self.lbl_title = TK.Label(
             self.frm_master,
             text="Click the button of the Genre which color you want to change",
-            font=DEFAULT_FONT1,
-            bg=DEFAULT_BGCOLOR,
+            font=Screen.DEFAULT_FONT1,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white")
         i = 1
         Screen.container.generateGenreColorsFromFile()
@@ -740,14 +766,14 @@ class ChooseColorsScreen(Screen):
             btn_genre = TK.Button(
                 self.frm_master,
                 text=Screen.inverseCorrectRapGenre(genre),
-                font=DEFAULT_FONT3,
+                font=Screen.DEFAULT_FONT3,
                 command=lambda genre=genre: self.changeColor(genre),
                 fg=Screen.container.genresColors[genre])
             lbl_example = TK.Label(self.frm_master,
                                    text="This is an example.",
-                                   font=DEFAULT_FONT3,
+                                   font=Screen.DEFAULT_FONT3,
                                    fg=Screen.container.genresColors[genre],
-                                   bg=DEFAULT_BGCOLOR)
+                                   bg=Screen.DEFAULT_BGCOLOR)
             self.genreButtons[genre] = btn_genre
             self.exampleLabels[genre] = lbl_example
             btn_genre.grid(row=i, column=0)
@@ -784,30 +810,30 @@ class WorkoutRegistryScreen(Screen):
             self.frm_master,
             text=
             "Input the name of the workout and how long it took (format MM:SS)",
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
-            font=DEFAULT_FONT1)
+            font=Screen.DEFAULT_FONT1)
         self.lbl_workoutName = TK.Label(self.frm_master,
                                         text="Name of the Workout",
-                                        bg=DEFAULT_BGCOLOR,
+                                        bg=Screen.DEFAULT_BGCOLOR,
                                         fg="white",
-                                        font=DEFAULT_FONT2)
+                                        font=Screen.DEFAULT_FONT2)
         self.lbl_time = TK.Label(self.frm_master,
                                  text="Time to Complete",
-                                 bg=DEFAULT_BGCOLOR,
+                                 bg=Screen.DEFAULT_BGCOLOR,
                                  fg="white",
-                                 font=DEFAULT_FONT2)
+                                 font=Screen.DEFAULT_FONT2)
         self.ent_workoutName = TK.Entry(self.frm_master,
                                         textvariable=self.workoutName,
-                                        font=DEFAULT_FONT3,
+                                        font=Screen.DEFAULT_FONT3,
                                         width=30)
         self.ent_time = TK.Entry(self.frm_master,
                                  textvariable=self.time,
-                                 font=DEFAULT_FONT3,
+                                 font=Screen.DEFAULT_FONT3,
                                  width=6)
         self.btn_confirm = TK.Button(self.frm_master,
                                      text="Confirm",
-                                     font=DEFAULT_FONT3,
+                                     font=Screen.DEFAULT_FONT3,
                                      command=self.nextScreen)
 
         #Widget Placement
@@ -867,10 +893,11 @@ class newFilesFoundScreen(Screen):
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
                                   textvariable=self.auxVar,
-                                  font=DEFAULT_FONT1,
-                                  bg=DEFAULT_BGCOLOR,
+                                  font=Screen.DEFAULT_FONT1,
+                                  bg=Screen.DEFAULT_BGCOLOR,
                                   fg="white")
-        self.frm_textOutput = TK.Frame(self.frm_master, bg=DEFAULT_BGCOLOR)
+        self.frm_textOutput = TK.Frame(self.frm_master,
+                                       bg=Screen.DEFAULT_BGCOLOR)
         self.scb_textOutput = TK.Scrollbar(self.frm_textOutput,
                                            command=self.scrollTextOutput,
                                            orient=TK.VERTICAL)
@@ -889,14 +916,14 @@ class newFilesFoundScreen(Screen):
         for category in categories_width:
             lbl_category = TK.Label(self.frm_textOutput,
                                     text=category,
-                                    font=DEFAULT_FONT2,
-                                    bg=DEFAULT_BGCOLOR,
+                                    font=Screen.DEFAULT_FONT2,
+                                    bg=Screen.DEFAULT_BGCOLOR,
                                     fg="white")
             txt_category = TK.Text(self.frm_textOutput,
-                                   font=DEFAULT_FONT3,
+                                   font=Screen.DEFAULT_FONT3,
                                    width=categories_width[category],
                                    height=HEIGHT,
-                                   bg=DEFAULT_BGCOLOR,
+                                   bg=Screen.DEFAULT_BGCOLOR,
                                    yscrollcommand=self.scb_textOutput.set)
             self.textBoxes.append(txt_category)
             lbl_category.grid(row=0, column=i)
@@ -906,7 +933,7 @@ class newFilesFoundScreen(Screen):
             self.frm_master,
             text=("Choose Album"
                   if not Screen.container.newFilesFound else "Exit"),
-            font=DEFAULT_FONT3,
+            font=Screen.DEFAULT_FONT3,
             command=self.nextScreen,
             state=TK.DISABLED)
 
@@ -945,7 +972,8 @@ class newFilesFoundScreen(Screen):
 
     def scrollTextOutputMouseWheel(self, event):
         for txt in self.textBoxes:
-            txt.yview("scroll", -1 * (event.delta // SCROLLSPEED), "units")
+            txt.yview("scroll", -1 * (event.delta // Screen.SCROLLSPEED),
+                      "units")
         return "break"
 
     def addToOutput(self, artist, album, title, genre, year, trackNumber,
@@ -982,91 +1010,93 @@ class ChooseAlbumScreen(Screen):
         self.lbl_infoChooseAlbum = TK.Label(
             self.frm_master,
             text="Choose the time and leeway of the album",
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
-            font=DEFAULT_FONT1)
+            font=Screen.DEFAULT_FONT1)
         self.lbl_chooseTime = TK.Label(self.frm_master,
                                        text="Time",
-                                       bg=DEFAULT_BGCOLOR,
+                                       bg=Screen.DEFAULT_BGCOLOR,
                                        fg="white",
-                                       font=DEFAULT_FONT3)
+                                       font=Screen.DEFAULT_FONT3)
         self.lbl_chooseLeeway = TK.Label(self.frm_master,
                                          text="Leeway",
-                                         bg=DEFAULT_BGCOLOR,
+                                         bg=Screen.DEFAULT_BGCOLOR,
                                          fg="white",
-                                         font=DEFAULT_FONT3)
+                                         font=Screen.DEFAULT_FONT3)
         self.ent_chooseTime = TK.Entry(self.frm_master,
                                        textvariable=self.time,
                                        width=30,
-                                       font=DEFAULT_FONT3,
+                                       font=Screen.DEFAULT_FONT3,
                                        validate="key")
         self.ent_chooseLeeway = TK.Entry(self.frm_master,
                                          textvariable=self.leeway,
                                          width=30,
-                                         font=DEFAULT_FONT3,
+                                         font=Screen.DEFAULT_FONT3,
                                          validate="key")
         self.lbl_missingTime = TK.Label(self.frm_master,
                                         text="Insert the time!",
-                                        bg=DEFAULT_BGCOLOR,
+                                        bg=Screen.DEFAULT_BGCOLOR,
                                         fg="red",
-                                        font=DEFAULT_FONT3)
+                                        font=Screen.DEFAULT_FONT3)
         self.lbl_missingLeeway = TK.Label(self.frm_master,
                                           text="Insert the leeway!",
-                                          bg=DEFAULT_BGCOLOR,
+                                          bg=Screen.DEFAULT_BGCOLOR,
                                           fg="red",
-                                          font=DEFAULT_FONT3)
+                                          font=Screen.DEFAULT_FONT3)
         aux = ["Both", "Over", "Under"]
         for i in range(len(aux)):
-            radioButton = TK.Radiobutton(self.frm_master,
-                                         text=aux[i],
-                                         padx=20,
-                                         variable=self.overUnderLeeway,
-                                         value=i,
-                                         bg=DEFAULT_BGCOLOR,
-                                         fg="white",
-                                         activebackground=DEFAULT_BGCOLOR,
-                                         activeforeground="white",
-                                         selectcolor=DEFAULT_BGCOLOR,
-                                         font=DEFAULT_FONT3)
+            radioButton = TK.Radiobutton(
+                self.frm_master,
+                text=aux[i],
+                padx=20,
+                variable=self.overUnderLeeway,
+                value=i,
+                bg=Screen.DEFAULT_BGCOLOR,
+                fg="white",
+                activebackground=Screen.DEFAULT_BGCOLOR,
+                activeforeground="white",
+                selectcolor=Screen.DEFAULT_BGCOLOR,
+                font=Screen.DEFAULT_FONT3)
             radioButton.grid(row=i + 3, column=1)
         self.btn_selectAllAlbums = TK.Button(self.frm_master,
                                              text="All Albums",
-                                             font=DEFAULT_FONT3,
+                                             font=Screen.DEFAULT_FONT3,
                                              command=self.selectAllAlbums)
         self.btn_forWorkout = TK.Button(self.frm_master,
                                         text="Album For Workout",
-                                        font=DEFAULT_FONT3,
+                                        font=Screen.DEFAULT_FONT3,
                                         command=self.forWorkout)
         self.lbl_chooseWorkout = TK.Label(self.frm_master,
                                           text="Workout Name",
-                                          font=DEFAULT_FONT2,
-                                          bg=DEFAULT_BGCOLOR,
+                                          font=Screen.DEFAULT_FONT2,
+                                          bg=Screen.DEFAULT_BGCOLOR,
                                           fg="white")
         self.ent_workoutName = TK.Entry(self.frm_master,
                                         textvariable=self.workoutName,
-                                        font=DEFAULT_FONT3,
+                                        font=Screen.DEFAULT_FONT3,
                                         width=30)
         self.btn_confirmWorkout = TK.Button(self.frm_master,
                                             text="Confirm Workout",
                                             command=self.workoutChosen,
-                                            font=DEFAULT_FONT3)
+                                            font=Screen.DEFAULT_FONT3)
         self.btn_forCar = TK.Button(self.frm_master,
                                     text="Album For Car",
-                                    font=DEFAULT_FONT3,
+                                    font=Screen.DEFAULT_FONT3,
                                     command=self.forCar)
-        self.btn_allGenres = TK.Checkbutton(self.frm_master,
-                                            text="All genres",
-                                            font=DEFAULT_FONT3,
-                                            fg="white",
-                                            bg=DEFAULT_BGCOLOR,
-                                            activebackground=DEFAULT_BGCOLOR,
-                                            activeforeground="white",
-                                            selectcolor=DEFAULT_BGCOLOR,
-                                            command=self.tickAllCheckButtons,
-                                            variable=self.selectAllGenres)
+        self.btn_allGenres = TK.Checkbutton(
+            self.frm_master,
+            text="All genres",
+            font=Screen.DEFAULT_FONT3,
+            fg="white",
+            bg=Screen.DEFAULT_BGCOLOR,
+            activebackground=Screen.DEFAULT_BGCOLOR,
+            activeforeground="white",
+            selectcolor=Screen.DEFAULT_BGCOLOR,
+            command=self.tickAllCheckButtons,
+            variable=self.selectAllGenres)
         self.btn_listAlbums = TK.Button(self.frm_master,
                                         text="Advance",
-                                        font=DEFAULT_FONT3,
+                                        font=Screen.DEFAULT_FONT3,
                                         command=self.nextScreen)
         i = 8
         self.booleanValsGenres = []
@@ -1078,11 +1108,11 @@ class ChooseAlbumScreen(Screen):
                 text=Screen.inverseCorrectRapGenre(genre),
                 variable=var,
                 fg=Screen.container.genresColors[genre],
-                bg=DEFAULT_BGCOLOR,
-                activebackground=DEFAULT_BGCOLOR,
+                bg=Screen.DEFAULT_BGCOLOR,
+                activebackground=Screen.DEFAULT_BGCOLOR,
                 activeforeground=Screen.container.genresColors[genre],
-                selectcolor=DEFAULT_BGCOLOR,
-                font=DEFAULT_FONT3)
+                selectcolor=Screen.DEFAULT_BGCOLOR,
+                font=Screen.DEFAULT_FONT3)
             btn_checkGenre.grid(row=i, column=1, sticky=TK.W)
             self.checkButtons.append(btn_checkGenre)
             self.booleanValsGenres.append(var)
@@ -1220,9 +1250,9 @@ class ListAlbumScreen(Screen):
                           (self.leeway * int(self.under)))) + " and " +
                   str(int(self.time +
                           (self.leeway * int(self.over)))) + " minutes."),
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
-            font=DEFAULT_FONT1)
+            font=Screen.DEFAULT_FONT1)
         self.scb_possibleAlbums = TK.Scrollbar(
             self.frm_master,
             command=self.bothScrollPossibleAlbums,
@@ -1233,18 +1263,18 @@ class ListAlbumScreen(Screen):
                                            bd=0)
         self.lbx_possibleAlbums = TK.Listbox(
             self.frm_possibleAlbums,
-            font=DEFAULT_FONT3,
+            font=Screen.DEFAULT_FONT3,
             bd=0,
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             highlightthickness=0,
             selectborderwidth=0,
             yscrollcommand=self.scb_possibleAlbums.set)
         self.txt_possibleAlbumsLengths = TK.Text(
             self.frm_possibleAlbums,
-            font=DEFAULT_FONT3,
+            font=Screen.DEFAULT_FONT3,
             width=10,
             spacing3=1,
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             borderwidth=0,
             yscrollcommand=self.scb_possibleAlbums.set)
         self.lbl_titleHalfAlbumsScreen = TK.Label(
@@ -1254,9 +1284,9 @@ class ListAlbumScreen(Screen):
              + str(int(self.time - (self.leeway * int(self.under)))) +
              " and " + str(int(self.time +
                                (self.leeway * int(self.over)))) + " minutes."),
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
-            font=DEFAULT_FONT1)
+            font=Screen.DEFAULT_FONT1)
         self.frm_PossibleHalfAlbums = TK.Frame(self.frm_master,
                                                width=600,
                                                height=305,
@@ -1265,32 +1295,32 @@ class ListAlbumScreen(Screen):
             self.frm_master, command=self.bothScrollPossibleHalfAlbums)
         self.lbx_PossibleHalfAlbums = TK.Listbox(
             self.frm_PossibleHalfAlbums,
-            font=DEFAULT_FONT3,
+            font=Screen.DEFAULT_FONT3,
             bd=0,
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             highlightthickness=0,
             selectborderwidth=0,
             yscrollcommand=self.scb_PossibleHalfAlbums.set)
         self.txt_PossibleHalfAlbumsLengths = TK.Text(
             self.frm_PossibleHalfAlbums,
             width=10,
-            font=DEFAULT_FONT3,
+            font=Screen.DEFAULT_FONT3,
             spacing3=1,
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             borderwidth=0,
             yscrollcommand=self.scb_PossibleHalfAlbums.set)
         self.btn_showTracklist = TK.Button(self.frm_master,
                                            text="Show Tracklist",
-                                           font=DEFAULT_FONT3,
+                                           font=Screen.DEFAULT_FONT3,
                                            command=self.nextScreen)
         self.lbl_colorsLabel = TK.Label(self.frm_master,
-                                        bg=DEFAULT_BGCOLOR,
+                                        bg=Screen.DEFAULT_BGCOLOR,
                                         fg="white",
                                         text="Colors Label",
-                                        font=DEFAULT_FONT1)
+                                        font=Screen.DEFAULT_FONT1)
         self.cnv_colorsLabel = TK.Canvas(
             self.frm_master,
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             highlightthickness=0,
             bd=0,
             height=len(Screen.container.genresColors) * 1.5 * 25)
@@ -1308,7 +1338,7 @@ class ListAlbumScreen(Screen):
                 13 + i * 25,
                 text=" - " + Screen.inverseCorrectRapGenre(genre),
                 fill="white",
-                font=DEFAULT_FONT3,
+                font=Screen.DEFAULT_FONT3,
                 anchor=TK.W)
             i += 1.5
 
@@ -1384,11 +1414,10 @@ class ListAlbumScreen(Screen):
 
     def bothScrollPossibleAlbumsMouseWheel(self, event):
         self.lbx_possibleAlbums.yview("scroll",
-                                      -1 * (event.delta // SCROLLSPEED),
+                                      -1 * (event.delta // Screen.SCROLLSPEED),
                                       "units")
-        self.txt_possibleAlbumsLengths.yview("scroll",
-                                             -1 * (event.delta // SCROLLSPEED),
-                                             "units")
+        self.txt_possibleAlbumsLengths.yview(
+            "scroll", -1 * (event.delta // Screen.SCROLLSPEED), "units")
         return "break"
 
     def bothScrollPossibleHalfAlbums(self, *args):
@@ -1396,11 +1425,10 @@ class ListAlbumScreen(Screen):
         self.txt_PossibleHalfAlbumsLengths.yview(*args)
 
     def bothScrollPossibleHalfAlbumsMouseWheel(self, event):
-        self.lbx_PossibleHalfAlbums.yview("scroll",
-                                          -1 * (event.delta // SCROLLSPEED),
-                                          "units")
+        self.lbx_PossibleHalfAlbums.yview(
+            "scroll", -1 * (event.delta // Screen.SCROLLSPEED), "units")
         self.txt_PossibleHalfAlbumsLengths.yview(
-            "scroll", -1 * (event.delta // SCROLLSPEED), "units")
+            "scroll", -1 * (event.delta // Screen.SCROLLSPEED), "units")
         return "break"
 
     def getAlbum(self, time, maxLeeway, over, under):
@@ -1462,21 +1490,21 @@ class ShowAlbumTracklistScreen(Screen):
         self.lbl_title = TK.Label(self.frm_master,
                                   text=("This is the tracklist of " +
                                         self.albumTitle),
-                                  bg=DEFAULT_BGCOLOR,
+                                  bg=Screen.DEFAULT_BGCOLOR,
                                   fg="white",
-                                  font=DEFAULT_FONT1)
+                                  font=Screen.DEFAULT_FONT1)
         self.txt_tracklist = TK.Text(self.frm_master,
                                      fg="white",
-                                     bg=DEFAULT_BGCOLOR,
-                                     font=DEFAULT_FONT3,
+                                     bg=Screen.DEFAULT_BGCOLOR,
+                                     font=Screen.DEFAULT_FONT3,
                                      height=lenAlbum)
         self.lbl_length = TK.Label(
             self.frm_master,
             text=("Length: " + Screen.standardFormatTime(album.length) +
                   " minutes"),
-            bg=DEFAULT_BGCOLOR,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
-            font=DEFAULT_FONT1)
+            font=Screen.DEFAULT_FONT1)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=1)
@@ -1507,7 +1535,10 @@ class ShowAlbumTracklistScreen(Screen):
 if __name__ == "__main__":
     # def main():
     Screen.window.title("Handler")
-    Screen.window.configure(bg=DEFAULT_BGCOLOR)
+    Screen.window.iconbitmap(
+        os.path.join(Screen.container.baseDirectory, "auxFiles",
+                     "icons8-music-32.ico"))
+    Screen.window.configure(bg=Screen.DEFAULT_BGCOLOR)
     if Screen.container.newFilesFound:
         Screen.window.after(50, lambda x=TK.Frame(): newFilesFoundScreen(x))
     else:
