@@ -33,21 +33,19 @@ import subprocess
 # TFCtp = os.path.join(OneDrive, 'TFC', 'TP')
 # TFCgeral = os.path.join(OneDrive, 'TFC')
 
-DEFAULT_FONT1 = ("Times New Roman", 16)
-DEFAULT_FONT2 = ("Times New Roman", 14)
-DEFAULT_FONT3 = ("Times New Roman", 12)
-DEFAULT_BGCOLOR = "#061130"
-SCROLLSPEED = 30  #less=faster
-
 #TODO: comment the code
 #TODO: separate into class multiple textboxes one scrollbar
-#TODO: implement file exceptions
 
 
 class Screen:
     tempoAtual = time.time()
     window = TK.Tk()
     baseDirectory = os.path.dirname(__file__)
+    DEFAULT_FONT1 = ("Times New Roman", 16)
+    DEFAULT_FONT2 = ("Times New Roman", 14)
+    DEFAULT_FONT3 = ("Times New Roman", 12)
+    DEFAULT_BGCOLOR = "#061130"
+    SCROLLSPEED = 30  #less=faster
 
     def __init__(self, masterFramePreviousScreen):
         masterFramePreviousScreen.destroy()
@@ -56,7 +54,7 @@ class Screen:
         self.frm_master = TK.Frame(Screen.window,
                                    height=700,
                                    width=1200,
-                                   bg=DEFAULT_BGCOLOR)
+                                   bg=Screen.DEFAULT_BGCOLOR)
 
         #Widget Placement
         self.frm_master.grid(row=0, column=0)
@@ -126,86 +124,95 @@ class InitialScreen(Screen):
         super().__init__(masterFramePreviousScreen)
         #getting directories from file
         auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
-                               "DownloaderDirectories.xml")
+                               "OtherDetails.xml")
+        if not os.path.isfile(auxFile):
+            root = ET.Element("root")
+            tree = ET.ElementTree(root)
+            tree.write(auxFile)
         tree = ET.parse(auxFile)
         root = tree.getroot()
-        self.downloadsDir = root.find('downloaddir').text
-        self.musicOriginDir = root.find('musicorigindir').text
-        auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
-                               "DetailsMusic.xml")
-        tree = ET.parse(auxFile)
-        root = tree.getroot()
-        self.musicDestinyDir = root.find('directory').text
+        try:
+            self.downloadsDir = root.find('downloaddir').text
+        except:
+            self.downloadsDir = "SET DOWNLOADS DIRECTORY"
+        try:
+            self.musicOriginDir = root.find('musicorigindir').text
+        except:
+            self.musicOriginDir = "SET THE DIRECTORY WHERE MUSIC FILES GO AFTER DOWNLOAD"
+        try:
+            self.musicDestinyDir = root.find('musicdestinydir').text
+        except:
+            self.musicDestinyDir = "SET THE DIRECTORY WHERE YOU STORE THE MUSIC FILES"
 
         #Widget Creation
         self.lbl_title = TK.Label(
             self.frm_master,
             text=
             "Welcome to the Download Helper!\nYou want help moving files related to school or music?",
-            bg=DEFAULT_BGCOLOR,
-            font=DEFAULT_FONT1,
+            bg=Screen.DEFAULT_BGCOLOR,
+            font=Screen.DEFAULT_FONT1,
             fg="white")
         # self.btn_schoolVersion = TK.Button(self.frm_master,
-        #                                    font=DEFAULT_FONT3,
+        #                                    font=Screen.DEFAULT_FONT3,
         #                                    text="School",
         #                                    command=self.schoolScreen)
         self.btn_musicVersion = TK.Button(self.frm_master,
-                                          font=DEFAULT_FONT3,
+                                          font=Screen.DEFAULT_FONT3,
                                           text="Music (Downloaded)",
                                           command=self.musicScreen)
         self.btn_musicModifiedVersion = TK.Button(
             self.frm_master,
-            font=DEFAULT_FONT3,
+            font=Screen.DEFAULT_FONT3,
             text="Music (Files Modified)",
             command=self.albumLyricsScreen)
         self.btn_grimeArtistsExceptions = TK.Button(
             self.frm_master,
             text="Grime Artists And Exceptions",
-            font=DEFAULT_FONT3,
+            font=Screen.DEFAULT_FONT3,
             command=self.grimeArtistsExceptionsScreen)
         self.frm_whichDirectories = TK.Frame(self.frm_master,
                                              width=750,
-                                             bg=DEFAULT_BGCOLOR)
+                                             bg=Screen.DEFAULT_BGCOLOR)
         self.lbl_whichDirectories = TK.Label(
             self.frm_whichDirectories,
             text="Choose the respective directories",
-            font=DEFAULT_FONT1,
-            bg=DEFAULT_BGCOLOR,
+            font=Screen.DEFAULT_FONT1,
+            bg=Screen.DEFAULT_BGCOLOR,
             fg="white")
         self.lbl_downloadsDirectory = TK.Label(self.frm_whichDirectories,
                                                text="Downloads",
-                                               font=DEFAULT_FONT2,
-                                               bg=DEFAULT_BGCOLOR,
+                                               font=Screen.DEFAULT_FONT2,
+                                               bg=Screen.DEFAULT_BGCOLOR,
                                                fg="white")
         self.ent_downloadsDirectory = TK.Entry(self.frm_whichDirectories,
                                                width=60,
                                                state=TK.NORMAL,
-                                               font=DEFAULT_FONT3)
+                                               font=Screen.DEFAULT_FONT3)
         self.lbl_musicOriginDirectory = TK.Label(self.frm_whichDirectories,
                                                  text="Origin Music",
-                                                 font=DEFAULT_FONT2,
-                                                 bg=DEFAULT_BGCOLOR,
+                                                 font=Screen.DEFAULT_FONT2,
+                                                 bg=Screen.DEFAULT_BGCOLOR,
                                                  fg="white")
         self.ent_musicOriginDirectory = TK.Entry(self.frm_whichDirectories,
                                                  width=60,
                                                  state=TK.NORMAL,
-                                                 font=DEFAULT_FONT3)
+                                                 font=Screen.DEFAULT_FONT3)
         self.lbl_musicDestinyDirectory = TK.Label(self.frm_whichDirectories,
                                                   text="Destiny Music",
-                                                  font=DEFAULT_FONT2,
-                                                  bg=DEFAULT_BGCOLOR,
+                                                  font=Screen.DEFAULT_FONT2,
+                                                  bg=Screen.DEFAULT_BGCOLOR,
                                                   fg="white")
         self.ent_musicDestinyDirectory = TK.Entry(self.frm_whichDirectories,
                                                   width=60,
                                                   state=TK.NORMAL,
-                                                  font=DEFAULT_FONT3)
+                                                  font=Screen.DEFAULT_FONT3)
         i = 0
         while i < 3:
             self.btn_chooseDirectory = TK.Button(
                 self.frm_whichDirectories,
                 text="Open",
                 command=lambda i=i: self.chooseDirectory(i),
-                font=DEFAULT_FONT3)
+                font=Screen.DEFAULT_FONT3)
             self.btn_chooseDirectory.grid(row=i + 1, column=2)
             i += 1
 
@@ -232,51 +239,44 @@ class InitialScreen(Screen):
         self.ent_musicDestinyDirectory.insert(TK.END,
                                               str(self.musicDestinyDir))
         self.ent_musicDestinyDirectory.config(state="readonly")
+        AlbumAndLyricsScreen.loadExceptionsFromFile()
 
     def chooseDirectory(self, whichOne):
         aux = filedialog.askdirectory(initialdir=os.path.join(
             "C:", os.path.sep, "Users", "ruben", "Desktop")).replace(
                 "/", "\\")
         if aux != "":
+            auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                                   "OtherDetails.xml")
+            tree = ET.parse(auxFile)
+            root = tree.getroot()
             if whichOne == 0:
                 self.downloadsDir = aux
                 ent_Directory = self.ent_downloadsDirectory
-                auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
-                                       "DownloaderDirectories.xml")
-                tree = ET.parse(auxFile)
-                root = tree.getroot()
                 directory = root.find('downloaddir')
+                if directory == None:
+                    directory = ET.Element('downloaddir')
+                    root.append(directory)
             elif whichOne == 1:
                 self.musicOriginDir = aux
                 ent_Directory = self.ent_musicOriginDirectory
-                auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
-                                       "DownloaderDirectories.xml")
-                tree = ET.parse(auxFile)
-                root = tree.getroot()
                 directory = root.find('musicorigindir')
+                if directory == None:
+                    directory = ET.Element('musicorigindir')
+                    root.append(directory)
             else:
                 self.musicDestinyDir = aux
                 ent_Directory = self.ent_musicDestinyDirectory
-                auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
-                                       "DetailsMusic.xml")
-                tree = ET.parse(auxFile)
-                root = tree.getroot()
-                directory = root.find('directory')
+                directory = root.find('musicdestinydir')
+                if directory == None:
+                    directory = ET.Element('musicdestinydir')
+                    root.append(directory)
             directory.text = aux
             tree.write(auxFile)
             ent_Directory.config(state=TK.NORMAL)
             ent_Directory.delete(0, 'end')
             ent_Directory.insert(TK.END, aux)
             ent_Directory.config(state="readonly")
-            # auxFile = open(os.path.join(Screen.auxFilesDir, "auxFiles",
-            #                             "DownloaderDirectories.txt"),
-            #                "w",
-            #                encoding="utf-8")
-            # auxFile.writelines([
-            #     self.downloadsDir + "\n", self.musicOriginDir + "\n",
-            #     self.musicDestinyDir + "\n"
-            # ])
-            # auxFile.close()
 
     # def schoolScreen(self):
     #     SchoolScreen(self.frm_master, self.downloadsDir)
@@ -304,99 +304,148 @@ class InitialScreen(Screen):
 class GrimeArtistsAndExceptionsScreen(Screen):
     def __init__(self, masterFramePreviousScreen):
         super().__init__(masterFramePreviousScreen)
-        #TODO: adjusts to input exceptions and save and load said exceptions from files
-        #xml element: pair type = 0-2 base = "..." new = "..."
+        #TODO: adjust to input exceptions
+        #Ctrl G 1007
         #Tkinter Vars
-        self.newArtist = TK.StringVar()
-        self.file = os.path.join(Screen.baseDirectory, "auxFiles",
-                                 "GrimeArtists.xml")
-        tree = ET.parse(self.file)
+        self.newArtistOrOldPair = TK.StringVar()
+        self.newPair = TK.StringVar()
+        #Load Grime Artists from file
+        self.grimeArtistsFile = os.path.join(Screen.baseDirectory, "auxFiles",
+                                 "OtherDetails.xml")
+        if not os.path.isfile(self.grimeArtistsFile):
+            root = ET.Element("root")
+            tree = ET.ElementTree(root)
+            tree.write(self.grimeArtistsFile)
+        tree = ET.parse(self.grimeArtistsFile)
         root = tree.getroot()
-        self.grimeArtists = [child.text for child in root]
+        self.grimeArtists = [child.text for child in root.findall("artist")]
         self.mode = 0
         #1 - new Grime Artist
         #2 - delete Grime Artist
+        #3 - new url replacement pair
 
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
-                                  text="Insert New Grime Artist or Remove",
-                                  font=DEFAULT_FONT1,
+                                  text="Insert New Grime Artist or Remove or create Url Replacement Pair",
+                                  font=Screen.DEFAULT_FONT1,
                                   fg="white",
-                                  bg=DEFAULT_BGCOLOR)
+                                  bg=Screen.DEFAULT_BGCOLOR)
         self.lbl_auxEntry = TK.Label(self.frm_master,
-                                     text="Artist",
-                                     font=DEFAULT_FONT2,
+                                     font=Screen.DEFAULT_FONT2,
                                      fg="white",
-                                     bg=DEFAULT_BGCOLOR)
-        self.ent_artist = TK.Entry(self.frm_master,
-                                   textvariable=self.newArtist,
-                                   font=DEFAULT_FONT3,
-                                   width=30)
+                                     bg=Screen.DEFAULT_BGCOLOR)
+        self.lbl_newPair = TK.Label(self.frm_master, text="New Replacement",
+                                     font=Screen.DEFAULT_FONT2,
+                                     fg="white",
+                                     bg=Screen.DEFAULT_BGCOLOR)
+        self.ent_artistOrOldPair = TK.Entry(self.frm_master,
+                                            textvariable=self.newArtistOrOldPair,
+                                            font=Screen.DEFAULT_FONT3,
+                                            width=30)
+        self.ent_newPair = TK.Entry(self.frm_master,
+                                    textvariable=self.newPair,
+                                    font=Screen.DEFAULT_FONT3,
+                                    width=30)
         self.btn_addArtist = TK.Button(self.frm_master,
                                        text="Add New Artist",
-                                       font=DEFAULT_FONT3,
+                                       font=Screen.DEFAULT_FONT3,
                                        command=self.addArtist)
         self.btn_removeArtist = TK.Button(self.frm_master,
                                           text="Remove Artist",
-                                          font=DEFAULT_FONT3,
+                                          font=Screen.DEFAULT_FONT3,
                                           command=self.removeArtist)
+        self.btn_addUrlReplacementPair = TK.Button(
+            self.frm_master,
+            text="Add Url Replacement Pair",
+            font=Screen.DEFAULT_FONT3,
+            command=self.newReplacementPair)
         self.btn_confirm = TK.Button(self.frm_master,
                                      text="Confirm",
-                                     font=DEFAULT_FONT3,
+                                     font=Screen.DEFAULT_FONT3,
                                      command=self.nextScreen)
         self.btn_previousScreen = TK.Button(self.frm_master,
                                             text="Go Back",
-                                            font=DEFAULT_FONT3,
+                                            font=Screen.DEFAULT_FONT3,
                                             command=self.backScreen)
         self.txt_artists = TK.Text(self.frm_master,
-                                   font=DEFAULT_FONT3,
+                                   font=Screen.DEFAULT_FONT3,
                                    fg="white",
-                                   bg=DEFAULT_BGCOLOR)
+                                   bg=Screen.DEFAULT_BGCOLOR)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=2)
         self.btn_addArtist.grid(row=2, column=1)
         self.btn_removeArtist.grid(row=3, column=1)
+        self.btn_addUrlReplacementPair.grid(row=4,column=1)
         self.btn_previousScreen.grid(row=4, column=0)
 
         #Widget Configuration
 
     def backScreen(self, event=None):
-        tree = ET.parse(self.file)
-        root = tree.getroot()
-        root.clear()
-        for artist in self.grimeArtists:
-            child = ET.Element('artist')
-            child.text = artist
-            root.append(child)
-        tree.write(self.file)
         InitialScreen(self.frm_master)
 
     def nextScreen(self, event=None):
-        artist = self.newArtist.get()
+        artist = self.newArtistOrOldPair.get()
         if self.mode == 1:
-            self.grimeArtists.append(artist)
+            if artist != "":
+                tree = ET.parse(self.file)
+                root = tree.getroot()
+                child = ET.Element('artist')
+                child.text = artist
+                root.append(child)
+                tree.write(self.file)
+                self.grimeArtists.append(artist)
         elif self.mode == 2:
-            try:
-                self.grimeArtists.remove(artist)
-            except ValueError:
-                pass
-        self.newArtist.set("")
+            if artist!="":
+                try:
+                    self.grimeArtists.remove(artist)
+                    tree = ET.parse(self.file)
+                    root = tree.getroot()
+                    for child in root.findall("artist"):
+                        if child.text == artist:
+                            root.remove(child)
+                            break
+                except ValueError:
+                    pass
+        else:
+            #TODO: add to replacementsDict and load exceptions in initial screen (Put ListsAndFiles in different file)
+            newPair = self.newPair.get()
+            # AlbumAndLyricsScreen.replacementsDict[artist]=newPair
+        self.newArtistOrOldPair.set("")
+        self.newPair.set("")
         self.btn_addArtist.grid(row=2, column=1)
         self.btn_removeArtist.grid(row=3, column=1)
+        self.btn_addUrlReplacementPair.grid(row=4,column=1)
         self.btn_previousScreen.grid(row=4, column=0)
         self.lbl_auxEntry.grid_forget()
-        self.ent_artist.grid_forget()
+        self.ent_artistOrOldPair.grid_forget()
+        self.lbl_newPair.grid_forget()
+        self.ent_newPair.grid_forget()
         self.btn_confirm.grid_forget()
         self.txt_artists.grid_forget()
 
     def addArtist(self):
         self.mode = 1
+        self.lbl_auxEntry.config(text="Artist")
         self.lbl_auxEntry.grid(row=1, column=1)
-        self.ent_artist.grid(row=1, column=2)
+        self.ent_artistOrOldPair.grid(row=1, column=2)
         self.btn_confirm.grid(row=2, column=2)
         self.btn_addArtist.grid_forget()
         self.btn_removeArtist.grid_forget()
+        self.btn_addUrlReplacementPair.grid_forget()
+        self.btn_previousScreen.grid_forget()
+
+    def newReplacementPair(self):
+        self.mode = 3
+        self.lbl_auxEntry.config(text="Old Replacement")
+        self.lbl_auxEntry.grid(row=1, column=1)
+        self.lbl_newPair.grid(row=2,column=1)
+        self.ent_artistOrOldPair.grid(row=1, column=2)
+        self.ent_newPair.grid(row=2,column=2)
+        self.btn_confirm.grid(row=3, column=2)
+        self.btn_addArtist.grid_forget()
+        self.btn_removeArtist.grid_forget()
+        self.btn_addUrlReplacementPair.grid_forget()
         self.btn_previousScreen.grid_forget()
 
     def removeArtist(self):
@@ -404,12 +453,14 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         self.txt_artists.config(height=len(self.grimeArtists))
         self.txt_artists.delete("1.0", TK.END)
         self.txt_artists.insert("1.0", "\n".join(self.grimeArtists))
+        self.lbl_auxEntry.config(text="Artist")
         self.lbl_auxEntry.grid(row=1, column=1)
-        self.ent_artist.grid(row=1, column=2)
+        self.ent_artistOrOldPair.grid(row=1, column=2)
         self.btn_confirm.grid(row=2, column=2)
         self.txt_artists.grid(row=1, column=3, rowspan=1500)
         self.btn_addArtist.grid_forget()
         self.btn_removeArtist.grid_forget()
+        self.btn_addUrlReplacementPair.grid_forget()
         self.btn_previousScreen.grid_forget()
 
 
@@ -425,20 +476,20 @@ class GrimeArtistsAndExceptionsScreen(Screen):
 #         #Widget Creation
 #         self.lbl_title = TK.Label(self.frm_master,
 #                                   textvariable=self.title,
-#                                   font=DEFAULT_FONT1,
-#                                   bg=DEFAULT_BGCOLOR,
+#                                   font=Screen.DEFAULT_FONT1,
+#                                   bg=Screen.DEFAULT_BGCOLOR,
 #                                   fg="white")
 #         self.txt_filesFound = TK.Text(self.frm_master,
-#                                       bg=DEFAULT_BGCOLOR,
+#                                       bg=Screen.DEFAULT_BGCOLOR,
 #                                       fg="white",
-#                                       font=DEFAULT_FONT3)
+#                                       font=Screen.DEFAULT_FONT3)
 #         self.txt_filesMoved = TK.Text(self.frm_master,
-#                                       bg=DEFAULT_BGCOLOR,
+#                                       bg=Screen.DEFAULT_BGCOLOR,
 #                                       fg="white",
-#                                       font=DEFAULT_FONT3)
+#                                       font=Screen.DEFAULT_FONT3)
 #         self.btn_stopCycle = TK.Button(self.frm_master,
 #                                        text="Stop",
-#                                        font=DEFAULT_FONT3,
+#                                        font=Screen.DEFAULT_FONT3,
 #                                        command=self.stopCheckDownloads)
 
 #         #Widget Placement
@@ -587,9 +638,9 @@ class MusicScreen(Screen):
     def __init__(self, masterFramePreviousScreen, musicOriginDir,
                  musicDestinyDir, firstTime):
         super().__init__(masterFramePreviousScreen)
-        if firstTime:
-            os.startfile(
-                r"C:\Users\ruben\Desktop\deemix\deemix-tools\start.bat")
+        # if firstTime:
+        #     os.startfile(
+        #         r"C:\Users\ruben\Desktop\deemix\deemix-tools\start.bat")
 
         #Tkinter Vars
         self.musicOriginDir = musicOriginDir
@@ -603,42 +654,43 @@ class MusicScreen(Screen):
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
                                   textvariable=self.title,
-                                  font=DEFAULT_FONT1,
-                                  bg=DEFAULT_BGCOLOR,
+                                  font=Screen.DEFAULT_FONT1,
+                                  bg=Screen.DEFAULT_BGCOLOR,
                                   fg="white")
-        self.frm_textOutput = TK.Frame(self.frm_master, bg=DEFAULT_BGCOLOR)
+        self.frm_textOutput = TK.Frame(self.frm_master,
+                                       bg=Screen.DEFAULT_BGCOLOR)
         self.lbl_beforeFiles = TK.Label(self.frm_textOutput,
-                                        bg=DEFAULT_BGCOLOR,
+                                        bg=Screen.DEFAULT_BGCOLOR,
                                         fg="white",
                                         text="Before",
-                                        font=DEFAULT_FONT2)
+                                        font=Screen.DEFAULT_FONT2)
         self.lbl_afterFiles = TK.Label(self.frm_textOutput,
-                                       bg=DEFAULT_BGCOLOR,
+                                       bg=Screen.DEFAULT_BGCOLOR,
                                        fg="white",
                                        text="After",
-                                       font=DEFAULT_FONT2)
+                                       font=Screen.DEFAULT_FONT2)
         self.scb_textOutput = TK.Scrollbar(self.frm_textOutput,
                                            command=self.scrollTextOutput,
                                            orient=TK.VERTICAL)
         self.txt_beforeFiles = TK.Text(self.frm_textOutput,
-                                       bg=DEFAULT_BGCOLOR,
+                                       bg=Screen.DEFAULT_BGCOLOR,
                                        fg="white",
-                                       font=DEFAULT_FONT3,
+                                       font=Screen.DEFAULT_FONT3,
                                        yscrollcommand=self.scb_textOutput.set,
                                        state=TK.DISABLED)
         self.txt_afterFiles = TK.Text(self.frm_textOutput,
-                                      bg=DEFAULT_BGCOLOR,
+                                      bg=Screen.DEFAULT_BGCOLOR,
                                       fg="white",
-                                      font=DEFAULT_FONT3,
+                                      font=Screen.DEFAULT_FONT3,
                                       yscrollcommand=self.scb_textOutput.set,
                                       state=TK.DISABLED)
         self.btn_moveOutOfBuffer = TK.Button(self.frm_master,
                                              text="Move Files",
                                              command=self.nextScreen,
-                                             font=DEFAULT_FONT3)
+                                             font=Screen.DEFAULT_FONT3)
         self.btn_nextScreen = TK.Button(self.frm_master,
                                         text="Get Album Year and Lyrics",
-                                        font=DEFAULT_FONT3,
+                                        font=Screen.DEFAULT_FONT3,
                                         command=self.nextScreen)
 
         #Widget Placement
@@ -660,7 +712,11 @@ class MusicScreen(Screen):
         self.checkMusicCondition = True
         self.newFiles = []
         auxFile = os.path.join(Screen.baseDirectory, "auxFiles",
-                               "GrimeArtists.xml")
+                               "OtherDetails.xml")
+        if not os.path.isfile(auxFile):
+            root = ET.Element("root")
+            tree = ET.ElementTree(root)
+            tree.write(auxFile)
         tree = ET.parse(auxFile)
         root = tree.getroot()
         self.grimeArtists = [child.text for child in root]
@@ -683,9 +739,11 @@ class MusicScreen(Screen):
         self.txt_afterFiles.yview(*args)
 
     def scrollTextOutputMouseWheel(self, event):
-        self.txt_beforeFiles.yview("scroll", -1 * (event.delta // SCROLLSPEED),
+        self.txt_beforeFiles.yview("scroll",
+                                   -1 * (event.delta // Screen.SCROLLSPEED),
                                    "units")
-        self.txt_afterFiles.yview("scroll", -1 * (event.delta // SCROLLSPEED),
+        self.txt_afterFiles.yview("scroll",
+                                  -1 * (event.delta // Screen.SCROLLSPEED),
                                   "units")
         return "break"
 
@@ -843,7 +901,10 @@ class MusicScreen(Screen):
 
 class AlbumAndLyricsScreen(Screen):
     pagesVisited_year = {}
+    replacementsDict = {}
     artistAlbumReplacements = {}
+    artistTitleReplacements = {}
+    songsToSkip = []
 
     def __init__(self,
                  masterFramePreviousScreen,
@@ -890,10 +951,11 @@ class AlbumAndLyricsScreen(Screen):
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
                                   textvariable=self.title,
-                                  bg=DEFAULT_BGCOLOR,
+                                  bg=Screen.DEFAULT_BGCOLOR,
                                   fg="white",
-                                  font=DEFAULT_FONT1)
-        self.frm_textOutput = TK.Frame(self.frm_master, bg=DEFAULT_BGCOLOR)
+                                  font=Screen.DEFAULT_FONT1)
+        self.frm_textOutput = TK.Frame(self.frm_master,
+                                       bg=Screen.DEFAULT_BGCOLOR)
         self.scb_textOutput = TK.Scrollbar(self.frm_textOutput,
                                            command=self.scrollTextOutput,
                                            orient=TK.VERTICAL)
@@ -910,13 +972,13 @@ class AlbumAndLyricsScreen(Screen):
                 break
             lbl_category = TK.Label(self.frm_textOutput,
                                     text=category,
-                                    font=DEFAULT_FONT2,
-                                    bg=DEFAULT_BGCOLOR,
+                                    font=Screen.DEFAULT_FONT2,
+                                    bg=Screen.DEFAULT_BGCOLOR,
                                     fg="white")
             txt_category = TK.Text(self.frm_textOutput,
-                                   font=DEFAULT_FONT3,
+                                   font=Screen.DEFAULT_FONT3,
                                    width=self.categories_width[category],
-                                   bg=DEFAULT_BGCOLOR,
+                                   bg=Screen.DEFAULT_BGCOLOR,
                                    yscrollcommand=self.scb_textOutput.set)
             txt_category.tag_config("album", foreground="yellow")
             txt_category.tag_config("lyrics", foreground="dark green")
@@ -926,18 +988,18 @@ class AlbumAndLyricsScreen(Screen):
             lbl_category.grid(row=0, column=i)
             txt_category.grid(row=1, column=i)
             i += 1
-        self.frm_newAAT = TK.Frame(self.frm_master, bg=DEFAULT_BGCOLOR)
+        self.frm_newAAT = TK.Frame(self.frm_master, bg=Screen.DEFAULT_BGCOLOR)
         i = 0
         self.entriesTrack = []
         for category in self.trackBeingReviewedDetails:
             label = TK.Label(self.frm_newAAT,
-                             font=DEFAULT_FONT2,
-                             bg=DEFAULT_BGCOLOR,
+                             font=Screen.DEFAULT_FONT2,
+                             bg=Screen.DEFAULT_BGCOLOR,
                              fg="white",
                              text=category)
             entry = TK.Entry(
                 self.frm_newAAT,
-                font=DEFAULT_FONT3,
+                font=Screen.DEFAULT_FONT3,
                 textvariable=self.trackBeingReviewedDetails[category],
                 width=50)
             self.entriesTrack.append(entry)
@@ -949,13 +1011,13 @@ class AlbumAndLyricsScreen(Screen):
             i += 1
         self.lbl_url = TK.Label(self.frm_master,
                                 textvariable=self.currentUrl,
-                                font=DEFAULT_FONT2,
-                                bg=DEFAULT_BGCOLOR,
+                                font=Screen.DEFAULT_FONT2,
+                                bg=Screen.DEFAULT_BGCOLOR,
                                 fg="white")
         colors = ["yellow", "dark green", "green2"]
         text = ["Getting Album Year", "Getting Track Lyrics", "File Done"]
         self.cnv_tagsLabel = TK.Canvas(self.frm_master,
-                                       bg=DEFAULT_BGCOLOR,
+                                       bg=Screen.DEFAULT_BGCOLOR,
                                        highlightthickness=0,
                                        bd=0,
                                        width=200,
@@ -971,26 +1033,26 @@ class AlbumAndLyricsScreen(Screen):
                                            13 + i * 25,
                                            text=" - " + text[index],
                                            fill="white",
-                                           font=DEFAULT_FONT3,
+                                           font=Screen.DEFAULT_FONT3,
                                            anchor=TK.W)
             i += 1.5
         self.btn_tryAgain = TK.Button(self.frm_newAAT,
                                       text="Try Again",
-                                      font=DEFAULT_FONT3,
+                                      font=Screen.DEFAULT_FONT3,
                                       command=self.nextScreen,
                                       state=TK.DISABLED)
         self.btn_skipLyrics = TK.Button(self.frm_newAAT,
                                         text="Skip Song",
-                                        font=DEFAULT_FONT3,
+                                        font=Screen.DEFAULT_FONT3,
                                         command=self.skipLyrics,
                                         state=TK.DISABLED)
         self.btn_downloadMore = TK.Button(self.frm_master,
                                           text="Download More",
-                                          font=DEFAULT_FONT3,
+                                          font=Screen.DEFAULT_FONT3,
                                           command=self.goBackDownloadMore)
         self.btn_exit = TK.Button(self.frm_master,
                                   text="Exit",
-                                  font=DEFAULT_FONT3,
+                                  font=Screen.DEFAULT_FONT3,
                                   command=self.exitOpenHandler)
 
         #Widget Placement
@@ -1009,8 +1071,129 @@ class AlbumAndLyricsScreen(Screen):
         self.lyricsAndYear()
         Screen.window.update_idletasks()
 
+    @staticmethod
+    def loadExceptionsFromFile():
+        filename = os.path.join(Screen.baseDirectory, "auxFiles",
+                                "YearLyricsExceptions.xml")
+        if not os.path.isfile(filename):
+            root = ET.Element("root")
+            tree = ET.ElementTree(root)
+            tree.write(filename)
+            return
+        tree = ET.parse(filename)
+        root = tree.getroot()
+        allExceptions = root.findall("exception")
+        for exc in allExceptions:
+            excType = int(exc.find("type").text)
+            if excType == 0:
+                oldArtist = exc.find("oldartist").text
+                newArtist = exc.find("newartist").text
+                oldAlbum = exc.find("oldalbum").text
+                newAlbum = exc.find("newalbum").text
+                AlbumAndLyricsScreen.artistAlbumReplacements[(oldArtist,
+                                                              oldAlbum)] = [
+                                                                  newArtist,
+                                                                  newAlbum
+                                                              ]
+            elif excType == 1:
+                oldArtist = exc.find("oldartist").text
+                newArtist = exc.find("newartist").text
+                oldTitle = exc.find("oldtitle").text
+                newTitle = exc.find("newtitle").text
+                AlbumAndLyricsScreen.artistTitleReplacements[(oldArtist,
+                                                              oldTitle)] = [
+                                                                  newArtist,
+                                                                  newTitle
+                                                              ]
+            else:
+                artist = exc.find("artist").text
+                album = exc.find("album").text
+                title = exc.find("title").text
+                AlbumAndLyricsScreen.songsToSkip.append("\n".join(
+                    [artist, album, title]))
+        for replacementPair in root.findall("pair"):
+            old = replacementPair.find("old").text
+            new = replacementPair.find("new").text
+            if new == None:
+                new = ""
+            AlbumAndLyricsScreen.replacementsDict[old] = new
+
+    def saveExceptions(self):
+        filename = os.path.join(Screen.baseDirectory, "auxFiles",
+                                "YearLyricsExceptions.xml")
+        tree = ET.parse(filename)
+        root = tree.getroot()
+        root.clear()
+        for exc in AlbumAndLyricsScreen.artistAlbumReplacements:
+            child = ET.Element("exception")
+            mode = ET.Element("type")
+            mode.text = str(0)
+            oldArtist = ET.Element("oldartist")
+            newArtist = ET.Element("newartist")
+            oldAlbum = ET.Element("oldalbum")
+            newAlbum = ET.Element("newalbum")
+            oldArtist.text = exc[0]
+            oldAlbum.text = exc[1]
+            newArtist.text = AlbumAndLyricsScreen.artistAlbumReplacements[exc][
+                0]
+            newAlbum.text = AlbumAndLyricsScreen.artistAlbumReplacements[exc][
+                1]
+            child.append(mode)
+            child.append(oldArtist)
+            child.append(oldAlbum)
+            child.append(newArtist)
+            child.append(newAlbum)
+            root.append(child)
+        for exc in AlbumAndLyricsScreen.artistTitleReplacements:
+            child = ET.Element("exception")
+            mode = ET.Element("type")
+            mode.text = str(1)
+            oldArtist = ET.Element("oldartist")
+            newArtist = ET.Element("newartist")
+            oldTitle = ET.Element("oldtitle")
+            newTitle = ET.Element("newtitle")
+            oldArtist.text = exc[0]
+            oldTitle.text = exc[1]
+            newArtist.text = AlbumAndLyricsScreen.artistTitleReplacements[exc][
+                0]
+            newTitle.text = AlbumAndLyricsScreen.artistTitleReplacements[exc][
+                1]
+            child.append(mode)
+            child.append(oldArtist)
+            child.append(oldTitle)
+            child.append(newArtist)
+            child.append(newTitle)
+            root.append(child)
+        for exc in AlbumAndLyricsScreen.songsToSkip:
+            child = ET.Element("exception")
+            mode = ET.Element("type")
+            mode.text = str(2)
+            artist = ET.Element("artist")
+            album = ET.Element("album")
+            title = ET.Element("title")
+            auxArray = exc.split("\n")
+            artist.text = auxArray[0]
+            album.text = auxArray[1]
+            title.text = auxArray[2]
+            child.append(mode)
+            child.append(artist)
+            child.append(album)
+            child.append(title)
+            root.append(child)
+        for replacementPair in AlbumAndLyricsScreen.replacementsDict:
+            child = ET.Element("pair")
+            old = ET.Element("old")
+            new = ET.Element("new")
+            old.text = replacementPair
+            new.text = AlbumAndLyricsScreen.replacementsDict[replacementPair]
+            child.append(old)
+            child.append(new)
+            root.append(child)
+        tree.write(filename)
+
     def skipLyrics(self):
         self.currentLyrics = "None"
+        AlbumAndLyricsScreen.songsToSkip.append("\n".join([self.currentArtist.get(),self.currentAlbum.get(),self.currentTitle.get()]))
         self.errorHandled.set(True)
 
     def nextScreen(self, event=None):
@@ -1036,8 +1219,11 @@ class AlbumAndLyricsScreen(Screen):
 
     def exitOpenHandler(self):
         Screen.window.quit()
+        # subprocess.run(
+        #     ['python',
+        #      os.path.join(Screen.baseDirectory, "Handler_Music.py")])
         subprocess.run(
-            ['python',os.path.join(Screen.baseDirectory, "Handler_Music.py")])
+            [os.path.join(Screen.baseDirectory, "Handler_Music.exe")])
 
     def scrollTextOutput(self, *args):
         for txt in self.textBoxes:
@@ -1045,7 +1231,8 @@ class AlbumAndLyricsScreen(Screen):
 
     def scrollTextOutputMouseWheel(self, event):
         for txt in self.textBoxes:
-            txt.yview("scroll", -1 * (event.delta // SCROLLSPEED), "units")
+            txt.yview("scroll", -1 * (event.delta // Screen.SCROLLSPEED),
+                      "units")
         return "break"
 
     def addToOutput(self):
@@ -1088,54 +1275,22 @@ class AlbumAndLyricsScreen(Screen):
     """
 
     def namingConventions(self, name, version):  #version = True -> title
-        replacementsDict = {
-            "/": " ",
-            ">": " ",
-            "<": " ",
-            "'": "",
-            "*": " ",
-            "-": " ",
-            "’": "",
-            "“": " ",
-            "”": " ",
-            "\"": " ",
-            "…": " ",
-            "&": "And",
-            ",": " ",
-            "|": " ",
-            "_": " ",
-            "(": " ",
-            ")": " ",
-            "+": "",
-            "=": " ",
-            "é": "e",
-            "à": "a",
-            "ñ": "n",
-            "@": "at",
-            "...": " ",
-            ".": "",
-            ":": " ",
-            "!": " ",
-            "?": " ",
-            "#": " ",
-            "$": " ",
-            "–": " "
-        }
         if not version:
-            replacementsDict["&"] = " "
+            AlbumAndLyricsScreen.replacementsDict["&"] = " "
         if "pt." in name.lower() or "part." in name.lower(
         ) or "pts." in name.lower() or "mr." in name.lower(
         ) or "vol." in name.lower():
-            replacementsDict["."] = " "
-        for key in replacementsDict:
-            name = name.replace(key, replacementsDict[key])
+            AlbumAndLyricsScreen.replacementsDict["."] = " "
+        for key in AlbumAndLyricsScreen.replacementsDict:
+            name = name.replace(key,
+                                AlbumAndLyricsScreen.replacementsDict[key])
         return "-".join(name.split()).capitalize()
 
     """
         Determines the artist and title to be used in the search for lyrics and handles the most common changes
     """
 
-    def ArtistAlbumAndTitle(self, filename,forYear):
+    def ArtistAlbumAndTitle(self, filename, forYear):
         artist = EasyID3(filename)['albumartist'][0]
         title = EasyID3(filename)['title'][0]
         album = EasyID3(filename)['album'][0]
@@ -1162,80 +1317,97 @@ class AlbumAndLyricsScreen(Screen):
             #     album = "Blues Breakers with Eric Clapton"
             # elif "The Beatles" == album:
             #     album = "The Beatles The White Album"
+            # elif "Tea In China" in album:
+            #     artist += " & The Alchemist"
+            # elif "God's" == album:
+            #     album = album.replace("'", " ")
+            # elif "Section" in album or "good kid," in album:
+            #     album.replace(".", " ")
             if (artist, album) in AlbumAndLyricsScreen.artistAlbumReplacements:
-                artist = AlbumAndLyricsScreen.artistAlbumReplacements[(artist,
-                                                                    album)][0]
-                album = AlbumAndLyricsScreen.artistAlbumReplacements[(artist,
-                                                                    album)][1]
-            if "Tea In China" in album:
-                artist += " & The Alchemist"
-            if "God's" == album:
-                album = album.replace("'", " ")
-            elif "Section" in album or "good kid," in album:
-                album.replace(".", " ")
+                tempArtist = artist
+                tempAlbum = album
+                artist = AlbumAndLyricsScreen.artistAlbumReplacements[(
+                    tempArtist, tempAlbum)][0]
+                album = AlbumAndLyricsScreen.artistAlbumReplacements[(
+                    tempArtist, tempAlbum)][1]
+                # title = AlbumAndLyricsScreen.songAttributesReplacements[(artist,
+                #                                                     album,title)][2]
+
         title = Screen.removeWordsFromWord([
             "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track",
             "Vocal Mix", "Explicit", "explicit", "Extended"
         ], title)
-        if "King's Dead" == title:
-            artist = "Jay Rock Kendrick Lamar Future & James Blake"
-        elif "various" in artist.lower():
-            artist = EasyID3(filename)['artist'][0]
-            if "," in artist:
-                artist = artist[:artist.find(",")]
-        elif "wickedskeng" in title.lower():
-            title = "wickedskengman part 4"
-        elif "Kiss and Tell" == title:
-            artist += " & Skepta"
-        elif "Short King Anthem" == title:
-            artist = "blackbear & " + artist
-        elif "Bang (feat." in title:
-            title = "Bang (Remix)"
-        elif "Psycho" in title and "Curry" in artist:
-            artist = "slowthai & Denzel Curry"
-        elif "Ripe" in title:
-            title = "Ripe & Ruin"
-        elif "Life After Death" == title:
-            title += " (Intro)"
-        elif "Strangiato" in title:
-            title += " (An Exercise In Self-Indulgence)"
-        elif "Protect Ya Neck" in title:
-            title = "Protect Ya Neck"
-        elif "Kush & Corinthians" == title:
-            title += "(His Pain)"
-        elif "P Money" == artist and "Money Over Everyone" == album and "Intro" == title:
-            title = album + " " + title
-        elif "Punch Up" in title:
-            title = title.replace("Punch Up", "Punchup")
-        elif "Breaks" == title:
-            title = "The " + title
-        elif "Packt Like" in title:
-            title = title.replace("Crushed", "Crushd")
-        elif "Curtains Close" == title:
-            title += "(Skit)"
-        elif "Paul" in title:
-            if "Marshall" in album:
-                title = "Paul Skit 2000"
-            elif "Eminem" in album:
-                title = "Paul Rosenberg Skit 2002"
-        elif "Steve Ber" in title:
-            if "Marshall" in album:
-                title = "Steve Berman Skit 2000"
-            elif "Eminem" in album:
-                title = "Steve Berman Skit 2002"
-        elif "JME" in artist and "Taking Over" in title:
-            title += " (It Ain't Working)"
-        elif "Denzel Curry" in artist and "Pig Feet" in title:
-            artist = "Terrace Martin & Denzel Curry"
-        title = title.replace("$hit", "Shit")
+
+        if "\n".join([artist, album,
+                      title]) in AlbumAndLyricsScreen.songsToSkip:
+            return True
+
+        if (artist, title) in AlbumAndLyricsScreen.artistTitleReplacements:
+            tempArtist = artist
+            tempTitle = title
+            artist = AlbumAndLyricsScreen.artistTitleReplacements[(
+                tempArtist, tempTitle)][0]
+            title = AlbumAndLyricsScreen.artistTitleReplacements[(
+                tempArtist, tempTitle)][1]
+        # if "King's Dead" == title:
+        #     artist = "Jay Rock Kendrick Lamar Future & James Blake"
+        # elif "various" in artist.lower():
+        #     artist = EasyID3(filename)['artist'][0]
+        #     if "," in artist:
+        #         artist = artist[:artist.find(",")]
+        # elif "wickedskeng" in title.lower():
+        #     title = "wickedskengman part 4"
+        # elif "Kiss and Tell" == title:
+        #     artist += " & Skepta"
+        # elif "Short King Anthem" == title:
+        #     artist = "blackbear & " + artist
+        # elif "Bang (feat." in title:
+        #     title = "Bang (Remix)"
+        # elif "Psycho" in title and "Curry" in artist:
+        #     artist = "slowthai & Denzel Curry"
+        # elif "Ripe" in title:
+        #     title = "Ripe & Ruin"
+        # elif "Life After Death" == title:
+        #     title += " (Intro)"
+        # elif "Strangiato" in title:
+        #     title += " (An Exercise In Self-Indulgence)"
+        # elif "Protect Ya Neck" in title:
+        #     title = "Protect Ya Neck"
+        # elif "Kush & Corinthians" == title:
+        #     title += "(His Pain)"
+        # elif "P Money" == artist and "Money Over Everyone" == album and "Intro" == title:
+        #     title = album + " " + title
+        # elif "Punch Up" in title:
+        #     title = title.replace("Punch Up", "Punchup")
+        # elif "Breaks" == title:
+        #     title = "The " + title
+        # elif "Packt Like" in title:
+        #     title = title.replace("Crushed", "Crushd")
+        # elif "Curtains Close" == title:
+        #     title += "(Skit)"
+        # elif "Paul" in title:
+        #     if "Marshall" in album:
+        #         title = "Paul Skit 2000"
+        #     elif "Eminem" in album:
+        #         title = "Paul Rosenberg Skit 2002"
+        # elif "Steve Ber" in title:
+        #     if "Marshall" in album:
+        #         title = "Steve Berman Skit 2000"
+        #     elif "Eminem" in album:
+        #         title = "Steve Berman Skit 2002"
+        # elif "JME" in artist and "Taking Over" in title:
+        #     title += " (It Ain't Working)"
+        # elif "Denzel Curry" in artist and "Pig Feet" in title:
+        #     artist = "Terrace Martin & Denzel Curry"
+        # title = title.replace("$hit", "Shit")
         self.currentArtist.set(artist)
         self.currentAlbum.set(album)
         self.currentTitle.set(title)
         self.currentYear.set(EasyID3(filename)['date'][0])
-        if "Marc Rebillet" in artist and "Europe" in album and "Malta" not in title:
-            return True
-        elif "Dizzee Rascal" in artist and "Face" in title:
-            return True
+        # if "Marc Rebillet" in artist and "Europe" in album and "Malta" not in title:
+        #     return True
+        # elif "Dizzee Rascal" in artist and "Face" in title:
+        #     return True
         return False
 
     def thread_function(self):
@@ -1250,15 +1422,16 @@ class AlbumAndLyricsScreen(Screen):
         return -1
 
     def checkIfWebpageExists(self, forAlbum):
-        skip=False
+        skip = False
         if forAlbum:
             name = self.namingConventions(self.currentArtist.get(),
-                                                True) + "/" + self.namingConventions(
-                                                    self.currentAlbum.get(), False)
+                                          True) + "/" + self.namingConventions(
+                                              self.currentAlbum.get(), False)
             url = "https://www.genius.com/albums/" + name
             if url in AlbumAndLyricsScreen.pagesVisited_year:
-                self.currentYear.set(AlbumAndLyricsScreen.pagesVisited_year[url])
-                skip=True
+                self.currentYear.set(
+                    AlbumAndLyricsScreen.pagesVisited_year[url])
+                skip = True
         else:
             name = self.namingConventions(
                 self.currentArtist.get() + " " + self.currentTitle.get(), True)
@@ -1286,19 +1459,20 @@ class AlbumAndLyricsScreen(Screen):
         soup = self.checkIfWebpageExists(True)
         if soup == "Skip":
             return
-        if soup!=None:
+        if soup != None:
             yearTemp = ""
             #Extract the year of the album
             for div in soup.findAll('div', attrs={'class': 'metadata_unit'}):
                 yearTemp += div.text.strip()
                 break
             year = yearTemp.split()
-            AlbumAndLyricsScreen.pagesVisited_year[self.currentUrl.get()] = year[len(year) - 1]
+            AlbumAndLyricsScreen.pagesVisited_year[
+                self.currentUrl.get()] = year[len(year) - 1]
             self.currentYear.set(year[len(year) - 1])
             return
         else:
             soup = self.checkIfWebpageExists(False)
-            if soup!=None:
+            if soup != None:
                 aux = soup.get_text(separator="\n").split(sep="\n")
                 aux = [item for item in aux if item.strip() != ""]
                 year = [
@@ -1307,12 +1481,14 @@ class AlbumAndLyricsScreen(Screen):
                 ][0]
                 try:
                     int(year[len(year) - 4:])
-                    self.currentYear.set(year[len(year) - 4 :])
+                    self.currentYear.set(year[len(year) - 4:])
                     return
                 except Exception as error:
                     print(error)
             else:
+                #TODO: handle errorSound exception, can't be started twice
                 self.errorSound.start()
+                #TODO: check if replacement works
                 key = (self.currentArtist.get(), self.currentAlbum.get())
                 self.errorHandled.set(False)
                 self.enableEntries(0)
@@ -1367,10 +1543,14 @@ class AlbumAndLyricsScreen(Screen):
                     self.romanNums[index], str(index + 1)))
                 self.removePtOrPart = False
             else:
+                #TODO: handle errorSound exception, can't be started twice
                 self.errorSound.start()
+                key = (self.currentArtist.get(), self.currentTitle.get())
                 self.errorHandled.set(False)
                 self.enableEntries(1)
                 self.btn_tryAgain.wait_variable(self.errorHandled)
+                value = [self.currentArtist.get(), self.currentTitle.get()]
+                AlbumAndLyricsScreen.artistTitleReplacements[key] = value
                 self.disableEntries()
             if self.currentLyrics.strip() == "":
                 self.setLyricsCycle()
@@ -1391,18 +1571,17 @@ class AlbumAndLyricsScreen(Screen):
             audio.add(USLT(encoding=3, text=self.currentLyrics))
             audio.save()
 
-    #TODO: save exceptions user has to define
     def lyricsAndYear(self):
         if self.newFiles != []:
             self.removePtOrPart = False
             filename = self.newFiles[0]
             self.gettingYear = True
-            self.ArtistAlbumAndTitle(filename,True)
+            self.ArtistAlbumAndTitle(filename, True)
             self.addToOutput()
             self.getYear(filename)
             self.gettingYear = False
             self.changeTag("lyrics")
-            skipLyrics = self.ArtistAlbumAndTitle(filename,False)
+            skipLyrics = self.ArtistAlbumAndTitle(filename, False)
             self.setLyrics(filename, skipLyrics)
             self.changeTag("success")
             for txt in self.textBoxes:
@@ -1417,6 +1596,7 @@ class AlbumAndLyricsScreen(Screen):
             Screen.window.after(50, self.lyricsAndYear)
         else:
             if self.finished:
+                self.saveExceptions()
                 for txt in self.textBoxes:
                     txt.delete("end-1c linestart", TK.END)
                 self.finished = False
@@ -1435,8 +1615,10 @@ if __name__ == "__main__":
     ctx.verify_mode = ssl.CERT_NONE
 
     Screen.window.title("Downloader")
-    Screen.window.iconbitmap(os.path.join(Screen.baseDirectory,"auxFiles","icons8-download-32.ico"))
-    Screen.window.configure(bg=DEFAULT_BGCOLOR)
+    Screen.window.iconbitmap(
+        os.path.join(Screen.baseDirectory, "auxFiles",
+                     "icons8-download-32.ico"))
+    Screen.window.configure(bg=Screen.DEFAULT_BGCOLOR)
     InitialScreen(TK.Frame())
     Screen.window.mainloop()
     #os.system("cls")
