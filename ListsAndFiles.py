@@ -4,6 +4,88 @@ from mutagen.mp3 import MP3
 import xml.etree.ElementTree as ET
 
 
+class MusicFile:
+    def __init__(self, filename, title, albumArtist, album, trackNumber,
+                 numberOfTracks, discNumber, numberOfDiscs, genre, year,
+                 length):
+        self.filename = filename
+        self.title = title
+        self.albumArtist = albumArtist
+        self.album = album
+        self.trackNumber = trackNumber
+        self.numberOfTracks = numberOfTracks
+        self.discNumber = discNumber
+        self.numberOfDiscs = numberOfDiscs
+        self.genre = genre
+        self.year = year
+        self.length = length
+
+    def getAttribute(self, whichOne):
+        if whichOne == "Artist":
+            return self.albumArtist
+        elif whichOne == "Album":
+            return self.album
+        elif whichOne == "Genre":
+            return self.genre
+        elif whichOne == "Year":
+            return self.year
+        elif whichOne == "Title":
+            return self.title
+        elif whichOne == "Track Number":
+            return self.trackNumber
+        elif whichOne == "Disc Number":
+            return self.discNumber
+
+    def attributeToMutagenTag(self, whichOne):
+        if whichOne == "Artist":
+            return "album" + whichOne.lower()
+        elif whichOne == "Album":
+            return whichOne.lower()
+        elif whichOne == "Genre":
+            return whichOne.lower()
+        elif whichOne == "Year":
+            return "date"
+        elif whichOne == "Title":
+            return whichOne.lower()
+        elif whichOne == "Track Number":
+            return "tracknumber"
+        elif whichOne == "Disc Number":
+            return "discnumber"
+
+
+class Album:
+    def __init__(self, albumTitle, albumArtist, numberOfTracks, numberOfDiscs,
+                 genre, year):
+        self.title = albumTitle
+        self.artist = albumArtist
+        self.numberOfTracks = numberOfTracks
+        self.numberOfDiscs = numberOfDiscs
+        self.genre = genre
+        self.year = year
+        self.tracksByDiscs = []
+        for _ in range(numberOfDiscs):
+            self.tracksByDiscs.append([])
+        self.length = 0.0
+
+    def addTrack(self, track: MusicFile):
+        self.tracksByDiscs[track.discNumber - 1].append(track)
+        for index in range(
+                len(self.tracksByDiscs[track.discNumber - 1]) - 1, 0, -1):
+            if self.tracksByDiscs[track.discNumber -
+                                  1][index].trackNumber < self.tracksByDiscs[
+                                      track.discNumber - 1][index -
+                                                            1].trackNumber:
+                aux = self.tracksByDiscs[track.discNumber - 1][index - 1]
+                self.tracksByDiscs[track.discNumber -
+                                   1][index -
+                                      1] = self.tracksByDiscs[track.discNumber
+                                                              - 1][index]
+                self.tracksByDiscs[track.discNumber - 1][index] = aux
+            else:
+                break
+        self.length += track.length
+
+
 class ListsAndFiles:
     def __init__(self):
         # Variables
@@ -47,9 +129,9 @@ class ListsAndFiles:
             tree.write(self.fileDetails)
         else:
             self.getDirectories()
-            self.files = os.listdir(self.musicDirectory)
+            self.files = os.listdir(self.musicDestinyDirectory)
             self.files = [
-                os.path.join(self.musicDirectory, f) for f in self.files
+                os.path.join(self.musicDestinyDirectory, f) for f in self.files
                 if f.endswith(".mp3")
             ]
             self.numberOfFiles = len([
@@ -57,8 +139,8 @@ class ListsAndFiles:
                 if filename.endswith(".mp3")
             ])
             self.timeOfLastModified = self.getLastModified()
-            self.getNumFilesLastModifiedFromFile()
-            self.generateGenreColorsFromFile()
+            self.getNumFilesLastModified()
+            self.getGenreColors()
         self.newFilesFound = self.numberOfFiles > self.numberOfFilesFile or self.timeOfLastModified > self.timeOfLastModifiedFile
         self.fileMusicFiles = os.path.join(self.baseDirectory, "auxFiles",
                                            "MusicFiles.xml")
@@ -68,7 +150,7 @@ class ListsAndFiles:
             tree.write(self.fileMusicFiles)
             self.numberOfFilesFile = -1
             self.timeOfLastModifiedFile = -1
-        self.fileExceptions = os.path.join(Screen.baseDirectory, "auxFiles",
+        self.fileExceptions = os.path.join(self.baseDirectory, "auxFiles",
                                            "YearLyricsExceptions.xml")
         if not os.path.isfile(self.fileExceptions):
             root = ET.Element("root")
@@ -80,7 +162,7 @@ class ListsAndFiles:
         #     root = ET.Element("root")
         #     tree = ET.ElementTree(root)
         #     tree.write(self.workoutFile)
-        self.loadWorkoutDatabase()
+        self.getWorkoutDatabase()
 
     def getLastModified(self):
         self.files.sort(key=os.path.getmtime, reverse=True)
@@ -254,7 +336,7 @@ class ListsAndFiles:
             self.replacementsDict[old] = new
 
     def saveExceptions(self):
-        filename = os.path.join(Screen.baseDirectory, "auxFiles",
+        filename = os.path.join(self.baseDirectory, "auxFiles",
                                 "YearLyricsExceptions.xml")
         tree = ET.parse(filename)
         root = tree.getroot()
@@ -365,7 +447,7 @@ class ListsAndFiles:
     def deleteFilesFromList(self):
         toDelete = []
         for obj in self.listMusicFile:
-            if os.path.join(self.musicDirectory,
+            if os.path.join(self.musicDestinyDirectory,
                             obj.filename) not in self.files:
                 toDelete.append(obj)
         for obj in toDelete:
@@ -422,7 +504,7 @@ class ListsAndFiles:
             if filename.endswith(".mp3") and os.path.getmtime(
                     filename) > self.timeOfLastModified:
                 mp3 = EasyID3(filename)
-                shortFilename = filename.replace(self.musicDirectory + os.sep,
+                shortFilename = filename.replace(self.musicDestinyDirectory + os.sep,
                                                  "")
                 genre = mp3["genre"][0]
                 album = mp3["album"][0]
