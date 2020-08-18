@@ -8,7 +8,6 @@ class Screen:
     DEFAULT_FONT2 = ("Times New Roman", 14)
     DEFAULT_FONT3 = ("Times New Roman", 12)
     DEFAULT_BGCOLOR = "#061130"
-    SCROLLSPEED = 30  #less=faster
 
     def __init__(self, masterFramePreviousScreen):
         masterFramePreviousScreen.destroy()
@@ -76,25 +75,13 @@ class Screen:
                                     dentroParenteses = False
         return word
 
-    @staticmethod
-    def correctRapGenre(genre):
-        return "Rap" if "Rap" in genre else genre
-
-    @staticmethod
-    def inverseCorrectRapGenre(genre):
-        return "Rap/Hip Hop" if "Rap" in genre else genre
-
-    @staticmethod
-    def standardFormatTime(time):
-        return str(int(time // 60)) + ":" + ("0" if time % 60 < 10 else
-                                             "") + str(int(time % 60))
 
     @staticmethod
     def generateGenreTags(textBox):
         for genre in Screen.container.genresColors:
-            textBox.tag_config(Screen.correctRapGenre(genre),
+            textBox.tag_config(Screen.container.correctRapGenre(genre),
                                foreground=Screen.container.genresColors[
-                                   Screen.correctRapGenre(genre)])
+                                   Screen.container.correctRapGenre(genre)])
 
     def backScreen(self, event=None):
         pass

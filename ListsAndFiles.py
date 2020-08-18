@@ -538,6 +538,16 @@ class ListsAndFiles:
                 return index
         return -1
 
+    def correctRapGenre(self,genre):
+        return "Rap" if "Rap" in genre else genre
+
+    def inverseCorrectRapGenre(self,genre):
+        return "Rap/Hip Hop" if "Rap" in genre else genre
+
+    def standardFormatTime(self,time):
+        return str(int(time // 60)) + ":" + ("0" if time % 60 < 10 else
+                                             "") + str(int(time % 60))
+
     def generateAlbums(self):
         for track in self.listMusicFile:
             indexOfAlbum = self.findAlbumByName(track.album)
@@ -545,10 +555,10 @@ class ListsAndFiles:
                 self.listAlbums.append(
                     Album(track.album, track.albumArtist, track.numberOfTracks,
                           track.numberOfDiscs, track.genre, track.year))
-                if Screen.correctRapGenre(track.genre) not in self.listGenres:
-                    self.listGenres.append(Screen.correctRapGenre(track.genre))
-                    if Screen.correctRapGenre(
+                if self.correctRapGenre(track.genre) not in self.listGenres:
+                    self.listGenres.append(self.correctRapGenre(track.genre))
+                    if self.correctRapGenre(
                             track.genre) not in self.genresColors:
-                        self.genresColors[Screen.correctRapGenre(
-                            track.genre)] = "black"
+                        self.genresColors[self.correctRapGenre(
+                            track.genre)] = "white"
             self.listAlbums[indexOfAlbum].addTrack(track)

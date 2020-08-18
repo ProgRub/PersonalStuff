@@ -4,466 +4,22 @@ import tkinter as TK
 import tkinter.filedialog as filedialog
 import tkinter.colorchooser as colorchooser
 from mutagen.easyid3 import EasyID3
-from mutagen.mp3 import MP3
-import xml.etree.ElementTree as ET
 import subprocess
+from Screen import Screen
+from ScrollableWidget import ScrollableWidget
 
 #TODO: comment the code
-#TODO: separate into class multiple textboxes one scrollbar
 #TODO: implement iTunes support
-
-
-class MusicFile:
-    def __init__(self, filename, title, albumArtist, album, trackNumber,
-                 numberOfTracks, discNumber, numberOfDiscs, genre, year,
-                 length):
-        self.filename = filename
-        self.title = title
-        self.albumArtist = albumArtist
-        self.album = album
-        self.trackNumber = trackNumber
-        self.numberOfTracks = numberOfTracks
-        self.discNumber = discNumber
-        self.numberOfDiscs = numberOfDiscs
-        self.genre = genre
-        self.year = year
-        self.length = length
-
-    def getAttribute(self, whichOne):
-        if whichOne == "Artist":
-            return self.albumArtist
-        elif whichOne == "Album":
-            return self.album
-        elif whichOne == "Genre":
-            return self.genre
-        elif whichOne == "Year":
-            return self.year
-        elif whichOne == "Title":
-            return self.title
-        elif whichOne == "Track Number":
-            return self.trackNumber
-        elif whichOne == "Disc Number":
-            return self.discNumber
-
-    def attributeToMutagenTag(self, whichOne):
-        if whichOne == "Artist":
-            return "album" + whichOne.lower()
-        elif whichOne == "Album":
-            return whichOne.lower()
-        elif whichOne == "Genre":
-            return whichOne.lower()
-        elif whichOne == "Year":
-            return "date"
-        elif whichOne == "Title":
-            return whichOne.lower()
-        elif whichOne == "Track Number":
-            return "tracknumber"
-        elif whichOne == "Disc Number":
-            return "discnumber"
-
-
-class Album:
-    def __init__(self, albumTitle, albumArtist, numberOfTracks, numberOfDiscs,
-                 genre, year):
-        self.title = albumTitle
-        self.artist = albumArtist
-        self.numberOfTracks = numberOfTracks
-        self.numberOfDiscs = numberOfDiscs
-        self.genre = genre
-        self.year = year
-        self.tracksByDiscs = []
-        for _ in range(numberOfDiscs):
-            self.tracksByDiscs.append([])
-        self.length = 0.0
-
-    def addTrack(self, track: MusicFile):
-        self.tracksByDiscs[track.discNumber - 1].append(track)
-        for index in range(
-                len(self.tracksByDiscs[track.discNumber - 1]) - 1, 0, -1):
-            if self.tracksByDiscs[track.discNumber -
-                                  1][index].trackNumber < self.tracksByDiscs[
-                                      track.discNumber - 1][index -
-                                                            1].trackNumber:
-                aux = self.tracksByDiscs[track.discNumber - 1][index - 1]
-                self.tracksByDiscs[track.discNumber -
-                                   1][index -
-                                      1] = self.tracksByDiscs[track.discNumber
-                                                              - 1][index]
-                self.tracksByDiscs[track.discNumber - 1][index] = aux
-            else:
-                break
-        self.length += track.length
-
-
-class ListsAndFiles:
-    def __init__(self):
-        # Variables
-        self.listMusicFile = []
-        self.listAlbums = []
-        self.listGenres = []
-        self.genresColors = {}
-        # self.genresColors = {
-        #     "Grime": "red",
-        #     "Rock": "yellow",
-        #     "Rap": "blue",  #/Hip Hop
-        #     "Alternative": "dark green",
-        #     "Pop": "pink",
-        #     "Electro": "ivory4",
-        #     "Metal": "black",
-        #     "R&B": "purple"
-        # }
-        self.workoutDatabase = {}
-        self.alreadyReadFile = False
-        self.baseDirectory = os.path.dirname(__file__)
-        self.numberOfFilesFile = -1
-        self.timeOfLastModifiedFile = -1
-
-        # Create files, if necessary
-        self.fileDetails = os.path.join(self.baseDirectory, "auxFiles",
-                                        "OtherDetails.xml")
-        if not os.path.isfile(self.fileDetails):
-            root = ET.Element("root")
-            tree = ET.ElementTree(root)
-            tree.write(self.fileDetails)
-            self.musicDirectory = "SET THE DIRECTORY WHERE YOU STORE THE MUSIC FILES"
-            self.files=[]
-            self.numberOfFiles = 0
-            self.timeOfLastModified = 0
-        else:
-            self.musicDirectory = self.getMusicDirectory()
-            self.files = os.listdir(self.musicDirectory)
-            self.files = [
-                os.path.join(self.musicDirectory, f) for f in self.files
-                if f.endswith(".mp3")
-            ]
-            self.numberOfFiles = self.getNumFiles()
-            self.timeOfLastModified = self.getLastModified()
-            self.getNumFilesLastModifiedFromFile()
-            self.generateGenreColorsFromFile()
-        self.newFilesFound = self.numberOfFiles > self.numberOfFilesFile or self.timeOfLastModified > self.timeOfLastModifiedFile
-        self.fileMusicFiles = os.path.join(self.baseDirectory, "auxFiles",
-                                           "MusicFiles.xml")
-        if not os.path.isfile(self.fileMusicFiles):
-            root = ET.Element("root")
-            tree = ET.ElementTree(root)
-            tree.write(self.fileMusicFiles)
-            self.numberOfFilesFile = -1
-            self.timeOfLastModifiedFile = -1
-        # self.workoutFile = os.path.join(self.baseDirectory, "auxFiles",
-        #                                 "WorkoutDatabase.xml")
-        # if not os.path.isfile(self.workoutFile):
-        #     root = ET.Element("root")
-        #     tree = ET.ElementTree(root)
-        #     tree.write(self.workoutFile)
-        self.loadWorkoutDatabase()
-
-    def getNumFiles(self):
-        return len(
-            [filename for filename in self.files if filename.endswith(".mp3")])
-
-    def getLastModified(self):
-        self.files.sort(key=os.path.getmtime, reverse=True)
-        return os.path.getmtime(self.files[0])
-
-    def getNumFilesLastModifiedFromFile(self):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        try:
-            self.numberOfFilesFile = int(root.find('numberfiles').text)
-            self.timeOfLastModifiedFile = float(root.find('lastmodified').text)
-        except:
-            self.numberOfFilesFile = 0
-            self.timeOfLastModifiedFile = 0
-
-    def saveNumFilesLastModified(self):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        try:
-            root.find('numberfiles').text = str(self.numberOfFiles)
-            root.find('lastmodified').text = str(self.timeOfLastModified)
-        except:
-            child = ET.Element('numberfiles')
-            child.text = str(self.numberOfFiles)
-            root.append(child)
-            child = ET.Element('lastmodified')
-            child.text = str(self.timeOfLastModified)
-            root.append(child)
-        tree.write(self.fileDetails)
-
-    def getMusicDirectory(self):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        return root.find('musicdestinydir').text
-
-    def saveMusicDirectory(self, newDirectory):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        try:
-            root.find('musicdestinydir').text = newDirectory
-        except:
-            child = ET.Element('musicdestinydir')
-            child.text = newDirectory
-            root.append(child)
-        tree.write(self.fileDetails)
-
-    def generateGenreColorsFromFile(self):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        genreColors = tree.find('genreColors')
-        if genreColors!=None:
-            for pair in genreColors:
-                genre = pair.get('genre')
-                colour = pair.get('colour')
-                self.genresColors[genre] = colour
-
-    def saveGenreColors(self):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        try:
-            genreColors = tree.find('genreColors')
-            genreColors.clear()
-        except:
-            genreColors = ET.Element('genreColors')
-            root.append(genreColors)
-        for genre in self.genresColors:
-            pair = ET.Element("pair")
-            pair.set('genre', genre)
-            pair.set('colour', self.genresColors[genre])
-            genreColors.append(pair)
-        tree.write(self.fileDetails)
-
-    def loadWorkoutDatabase(self):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        workouts = root.findall('workout')
-        for workout in workouts:
-            times = []
-            for time in workout:
-                times.append(int(time.text))
-            self.workoutDatabase[workout.text] = times
-
-    def saveWorkoutDatabase(self):
-        tree = ET.parse(self.fileDetails)
-        root = tree.getroot()
-        for child in root.findall("workout"):
-            root.remove(child)
-        for workout in self.workoutDatabase:
-            child = ET.Element('workout')
-            child.text = workout
-            for timeNumber in self.workoutDatabase[workout]:
-                time = ET.Element('time')
-                time.text = str(timeNumber)
-                child.append(time)
-            root.append(child)
-        tree.write(self.workoutFile)
-
-    def indexOf(self, obj):
-        for index in range(len(self.listMusicFile)):
-            if self.listMusicFile[index].filename == obj.filename:
-                return index
-        return -1
-
-    def checkFiles(self, screen=None):
-        if not self.alreadyReadFile and self.timeOfLastModifiedFile > 0:
-            tree = ET.parse(self.fileMusicFiles)
-            root = tree.getroot()
-            for child in root:
-                self.listMusicFile.append(
-                    MusicFile(child.text.strip(),
-                              child.find('title').text,
-                              child.find('artist').text,
-                              child.find('album').text,
-                              int(child.find('tracknumber').text),
-                              int(child.find('numbertracks').text),
-                              int(child.find('discnumber').text),
-                              int(child.find('numberdiscs').text),
-                              child.find('genre').text,
-                              int(child.find('year').text),
-                              float(child.find('length').text)))
-            if screen != None:
-                self.timeOfLastModified = self.timeOfLastModifiedFile
-                self.recalibrateList(screen)
-            elif self.numberOfFilesFile > self.numberOfFiles:
-                self.deleteFilesFromList()
-        else:
-            self.timeOfLastModified = self.timeOfLastModifiedFile
-            self.recalibrateList(screen)
-        self.generateAlbums()
-        self.timeOfLastModified = self.getLastModified()
-        self.reWriteFiles()
-        self.alreadyReadFile = True
-
-    def deleteFilesFromList(self):
-        toDelete = []
-        for obj in self.listMusicFile:
-            if os.path.join(self.musicDirectory,
-                            obj.filename) not in self.files:
-                toDelete.append(obj)
-        for obj in toDelete:
-            self.listMusicFile.remove(obj)
-
-    def reWriteFiles(self):
-        self.saveNumFilesLastModified()
-        self.saveGenreColors()
-        tree = ET.parse(self.fileMusicFiles)
-        root = tree.getroot()
-        root.clear()
-        for musicFile in self.listMusicFile:
-            child = ET.Element('musicfile')
-            elements = [
-                ET.Element('title'),
-                ET.Element('artist'),
-                ET.Element('album'),
-                ET.Element('tracknumber'),
-                ET.Element('numbertracks'),
-                ET.Element('discnumber'),
-                ET.Element('numberdiscs'),
-                ET.Element('genre'),
-                ET.Element('year'),
-                ET.Element('length')
-            ]
-            child.text = musicFile.filename
-            elements[0].text = musicFile.title
-            elements[1].text = musicFile.albumArtist
-            elements[2].text = musicFile.album
-            elements[3].text = str(musicFile.trackNumber)
-            elements[4].text = str(musicFile.numberOfTracks)
-            elements[5].text = str(musicFile.discNumber)
-            elements[6].text = str(musicFile.numberOfDiscs)
-            elements[7].text = musicFile.genre
-            elements[8].text = str(musicFile.year)
-            elements[9].text = str(musicFile.length)
-            for el in elements:
-                child.append(el)
-            root.append(child)
-        tree.write(self.fileMusicFiles)
-
-    def recalibrateList(self, screen):
-        conta = 0
-        genre = ""
-        album = ""
-        title = ""
-        albumartist = ""
-        year = 0
-        tracknumber = 0
-        discnumber = 0
-        length = 0.0
-        for filename in self.files:
-            conta += 1
-            if filename.endswith(".mp3") and os.path.getmtime(
-                    filename) > self.timeOfLastModified:
-                mp3 = EasyID3(filename)
-                shortFilename = filename.replace(self.musicDirectory + os.sep,
-                                                 "")
-                genre = mp3["genre"][0]
-                album = mp3["album"][0]
-                title = mp3["title"][0]
-                albumartist = mp3["albumartist"][0]
-                year = int(mp3["date"][0])
-                tracknumber = mp3["tracknumber"][0]
-                discnumber = mp3["discnumber"][0]
-                screen.addToOutput(albumartist, album, title, genre, year,
-                                   tracknumber, discnumber)
-                size = MP3(filename)
-                length = float(size.info.length)
-                size.save()
-                mp3.save()
-                aux = MusicFile(shortFilename, title, albumartist, album,
-                                int(tracknumber[:tracknumber.find("/")]),
-                                int(tracknumber[tracknumber.find("/") + 1:]),
-                                int(discnumber[:discnumber.find("/")]),
-                                int(discnumber[discnumber.find("/") + 1:]),
-                                genre, year, length)
-                if self.indexOf(aux) == -1:  # aux not in listMusicFile:
-                    self.listMusicFile.append(aux)
-                else:
-                    self.listMusicFile[self.indexOf(aux)] = aux
-            else:
-                break
-
-    def findAlbumByName(self, name):
-        for index in range(len(self.listAlbums)):
-            if name == self.listAlbums[index].title:
-                return index
-        return -1
-
-    def generateAlbums(self):
-        for track in self.listMusicFile:
-            indexOfAlbum = self.findAlbumByName(track.album)
-            if indexOfAlbum == -1:
-                self.listAlbums.append(
-                    Album(track.album, track.albumArtist, track.numberOfTracks,
-                          track.numberOfDiscs, track.genre, track.year))
-                if Screen.correctRapGenre(track.genre) not in self.listGenres:
-                    self.listGenres.append(Screen.correctRapGenre(track.genre))
-                    if Screen.correctRapGenre(
-                            track.genre) not in self.genresColors:
-                        self.genresColors[Screen.correctRapGenre(
-                            track.genre)] = "black"
-            self.listAlbums[indexOfAlbum].addTrack(track)
-
-
-class Screen:
-    container = ListsAndFiles()
-    window = TK.Tk()
-    DEFAULT_FONT1 = ("Times New Roman", 16)
-    DEFAULT_FONT2 = ("Times New Roman", 14)
-    DEFAULT_FONT3 = ("Times New Roman", 12)
-    DEFAULT_BGCOLOR = "#061130"
-    SCROLLSPEED = 30  #less=faster
-
-    def __init__(self, masterFramePreviousScreen):
-        masterFramePreviousScreen.destroy()
-
-        #Widget Creation
-        self.frm_master = TK.Frame(Screen.window, bg=Screen.DEFAULT_BGCOLOR)
-        self.btn_backScreen = TK.Button(self.frm_master,
-                                        text="Go Back",
-                                        command=self.backScreen,
-                                        font=Screen.DEFAULT_FONT3)
-
-        #Widget Placement
-        self.frm_master.grid(row=0, column=0)
-
-        Screen.window.bind("<Return>", self.nextScreen)
-        Screen.window.bind('<KP_Enter>', self.nextScreen)
-        Screen.window.bind("<Escape>", self.backScreen)
-
-    @staticmethod
-    def correctRapGenre(genre):
-        return "Rap" if "Rap" in genre else genre
-
-    @staticmethod
-    def inverseCorrectRapGenre(genre):
-        return "Rap/Hip Hop" if "Rap" in genre else genre
-
-    @staticmethod
-    def standardFormatTime(time):
-        return str(int(time // 60)) + ":" + ("0" if time % 60 < 10 else
-                                             "") + str(int(time % 60))
-
-    @staticmethod
-    def generateGenreTags(textBox):
-        for genre in Screen.container.genresColors:
-            textBox.tag_config(Screen.correctRapGenre(genre),
-                               foreground=Screen.container.genresColors[
-                                   Screen.correctRapGenre(genre)])
-
-    def backScreen(self, event=None):
-        pass
-
-    def nextScreen(self, event=None):
-        pass
 
 
 class InitialScreen(Screen):
     def __init__(self, masterFramePreviousScreen, firstTime=True):
         super().__init__(masterFramePreviousScreen)
         #Thread to check files in the background
-        self.firstTime = firstTime
+        self.firstTime = firstTime and os.path.isdir(Screen.container.musicDestinyDirectory)
         self.checkFilesThread = threading.Thread(
             target=Screen.container.checkFiles, daemon=True)
-        if self.firstTime and os.sep in Screen.container.musicDirectory:
+        if self.firstTime:
             self.checkFilesThread.start()
 
         #Widget Creation
@@ -488,7 +44,7 @@ class InitialScreen(Screen):
                                       width=60,
                                       state=TK.NORMAL,
                                       font=Screen.DEFAULT_FONT3)
-        self.ent_Directory.insert(TK.END, str(Screen.container.musicDirectory))
+        self.ent_Directory.insert(TK.END, str(Screen.container.musicDestinyDirectory))
         self.ent_Directory.config(state="readonly")
         self.btn_chooseDirectory = TK.Button(self.frm_whichDirectory,
                                              text="Open",
@@ -533,20 +89,17 @@ class InitialScreen(Screen):
         aux = filedialog.askdirectory(initialdir=os.path.join(
             "C:", os.sep, "Users", "ruben", "Desktop")).replace("/", "\\")
         if aux != "":
-            Screen.container.musicDirectory = aux
-            Screen.container.saveMusicDirectory(
-                Screen.container.musicDirectory)
+            Screen.container.musicDestinyDirectory = aux
+            Screen.container.saveDirectories()
             self.checkFilesThread.start()
         self.ent_Directory.config(state=TK.NORMAL)
         self.ent_Directory.delete(0, 'end')
-        self.ent_Directory.insert(TK.END, str(Screen.container.musicDirectory))
+        self.ent_Directory.insert(TK.END, str(Screen.container.musicDestinyDirectory))
         self.ent_Directory.config(state="readonly")
 
     def nextScreen(self, event=None):
         if self.firstTime:
             self.checkFilesThread.join()
-        # if not Screen.container.newFilesFound:
-        #     Screen.container.checkFiles()
         ChooseAlbumScreen(self.frm_master)
 
     def recalibrateALL(self):
@@ -674,7 +227,7 @@ class SearchLibraryScreen(Screen):
             subprocess.run([
                 os.path.join('C:', os.sep, 'Users', 'ruben', 'Desktop',
                              'Recycle.exe'),
-                os.path.join(Screen.container.musicDirectory,
+                os.path.join(Screen.container.musicDestinyDirectory,
                              self.lbx_results.get(index - numFilesDeleted))
             ])
             self.lbx_results.delete(index - numFilesDeleted)
@@ -736,7 +289,7 @@ class TrackDetailsScreen(Screen):
         ]):
             for musicFile in self.listOfFiles:
                 audio = EasyID3(
-                    os.path.join(Screen.container.musicDirectory,
+                    os.path.join(Screen.container.musicDestinyDirectory,
                                  musicFile.filename))
                 for attr in self.attributes:
                     newAttribute = self.attributes[attr][1].get()
@@ -765,7 +318,7 @@ class ChooseColorsScreen(Screen):
         for genre in Screen.container.genresColors:
             btn_genre = TK.Button(
                 self.frm_master,
-                text=Screen.inverseCorrectRapGenre(genre),
+                text=Screen.container.inverseCorrectRapGenre(genre),
                 font=Screen.DEFAULT_FONT3,
                 command=lambda genre=genre: self.changeColor(genre),
                 fg=Screen.container.genresColors[genre])
@@ -889,6 +442,16 @@ class newFilesFoundScreen(Screen):
         self.auxVar.set(
             str(self.numberOfFilesFound) + "/" + str(self.totalNewFiles) +
             " Files Found")
+        HEIGHT = 40
+        categories_width = {
+            "Artist": 35,
+            "Album": 60,
+            "Title": 75,
+            "Genre": 15,
+            "Year": 5,
+            "Track\nN.": 6,
+            "Disc\nN.": 6
+        }
 
         #Widget Creation
         self.lbl_title = TK.Label(self.frm_master,
@@ -896,38 +459,19 @@ class newFilesFoundScreen(Screen):
                                   font=Screen.DEFAULT_FONT1,
                                   bg=Screen.DEFAULT_BGCOLOR,
                                   fg="white")
-        self.frm_textOutput = TK.Frame(self.frm_master,
-                                       bg=Screen.DEFAULT_BGCOLOR)
-        self.scb_textOutput = TK.Scrollbar(self.frm_textOutput,
-                                           command=self.scrollTextOutput,
-                                           orient=TK.VERTICAL)
-        HEIGHT = 35
-        categories_width = {
-            "Artist": 30,
-            "Album": 55,
-            "Title": 70,
-            "Genre": 12,
-            "Year": 5,
-            "Track\nN.": 6,
-            "Disc\nN.": 6
-        }
-        self.textBoxes = []
+        self.scrollWidget=ScrollableWidget(self.frm_master,["Textbox" for i in range(len(categories_width))])
+        # self.textBoxes = []
         i = 0
         for category in categories_width:
-            lbl_category = TK.Label(self.frm_textOutput,
+            lbl_category = TK.Label(self.scrollWidget.frame,
                                     text=category,
                                     font=Screen.DEFAULT_FONT2,
                                     bg=Screen.DEFAULT_BGCOLOR,
                                     fg="white")
-            txt_category = TK.Text(self.frm_textOutput,
-                                   font=Screen.DEFAULT_FONT3,
-                                   width=categories_width[category],
-                                   height=HEIGHT,
-                                   bg=Screen.DEFAULT_BGCOLOR,
-                                   yscrollcommand=self.scb_textOutput.set)
-            self.textBoxes.append(txt_category)
+            self.scrollWidget.boxes[i].config(width=categories_width[category],height=HEIGHT)
             lbl_category.grid(row=0, column=i)
-            txt_category.grid(row=1, column=i)
+            self.scrollWidget.boxes[i].grid(row=1, column=i)
+            Screen.generateGenreTags(boxes[i])
             i += 1
         self.btn_advanceScreen = TK.Button(
             self.frm_master,
@@ -939,19 +483,15 @@ class newFilesFoundScreen(Screen):
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=0, padx=200)
-        self.frm_textOutput.grid(row=1, column=0)
-        self.scb_textOutput.grid(row=1, column=7, sticky=TK.NS)
+        self.scrollWidget.frame.grid(row=1, column=0)
+        self.scrollWidget.scrollbar.grid(row=1,column=i, sticky=TK.NS)
         self.btn_advanceScreen.grid(row=2, column=0, padx=200)
 
-        #Widget Configuration
-        for txt in self.textBoxes:
-            txt.bind("<MouseWheel>", self.scrollTextOutputMouseWheel)
-            Screen.generateGenreTags(txt)
         Screen.window.update_idletasks()
         Screen.container.checkFiles(self)
 
         #Delete last newline
-        for txt in self.textBoxes:
+        for txt in self.scrollWidget.boxes:
             txt.config(state=TK.NORMAL)
             txt.delete("end-1c linestart", TK.END)
             txt.config(state=TK.DISABLED)
@@ -966,16 +506,6 @@ class newFilesFoundScreen(Screen):
         else:
             Screen.window.quit()
 
-    def scrollTextOutput(self, *args):
-        for txt in self.textBoxes:
-            txt.yview(*args)
-
-    def scrollTextOutputMouseWheel(self, event):
-        for txt in self.textBoxes:
-            txt.yview("scroll", -1 * (event.delta // Screen.SCROLLSPEED),
-                      "units")
-        return "break"
-
     def addToOutput(self, artist, album, title, genre, year, trackNumber,
                     discNumber):
         self.numberOfFilesFound += 1
@@ -984,15 +514,14 @@ class newFilesFoundScreen(Screen):
             " Files Found")
         aux = [artist, album, title, genre, year, trackNumber, discNumber]
         i = 0
-        for txt in self.textBoxes:
+        for txt in self.scrollWidget.boxes:
             txt.config(state=TK.NORMAL)
             txt.insert(TK.END,
-                       str(aux[i]) + "\n", Screen.correctRapGenre(genre))
+                       str(aux[i]) + "\n", Screen.container.correctRapGenre(genre))
             txt.config(state=TK.DISABLED)
+            txt.see(TK.END)
             i += 1
         Screen.window.update_idletasks()
-        for txt in self.textBoxes:
-            txt.see(TK.END)
 
 
 class ChooseAlbumScreen(Screen):
@@ -1105,7 +634,7 @@ class ChooseAlbumScreen(Screen):
             var = TK.BooleanVar()
             btn_checkGenre = TK.Checkbutton(
                 self.frm_master,
-                text=Screen.inverseCorrectRapGenre(genre),
+                text=Screen.container.inverseCorrectRapGenre(genre),
                 variable=var,
                 fg=Screen.container.genresColors[genre],
                 bg=Screen.DEFAULT_BGCOLOR,
@@ -1241,6 +770,7 @@ class ListAlbumScreen(Screen):
                                    self.under)
         self.lists[0].sort(key=lambda album: album.length, reverse=True)
         self.lists[1].sort(key=lambda album: album.length, reverse=True)
+        HEIGHT=20
 
         #Widget Creation
         self.lbl_titleAlbumsScreen = TK.Label(
@@ -1253,30 +783,13 @@ class ListAlbumScreen(Screen):
             bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
             font=Screen.DEFAULT_FONT1)
-        self.scb_possibleAlbums = TK.Scrollbar(
-            self.frm_master,
-            command=self.bothScrollPossibleAlbums,
-            orient=TK.VERTICAL)
-        self.frm_possibleAlbums = TK.Frame(self.frm_master,
-                                           width=600,
-                                           height=305,
-                                           bd=0)
-        self.lbx_possibleAlbums = TK.Listbox(
-            self.frm_possibleAlbums,
-            font=Screen.DEFAULT_FONT3,
-            bd=0,
-            bg=Screen.DEFAULT_BGCOLOR,
+        self.scrollWidgetPossibleAlbums = ScrollableWidget(self.frm_master, ["Listbox", "Textbox"])
+        self.scrollWidgetPossibleAlbums.boxes[0].config(bd=0,
             highlightthickness=0,
-            selectborderwidth=0,
-            yscrollcommand=self.scb_possibleAlbums.set)
-        self.txt_possibleAlbumsLengths = TK.Text(
-            self.frm_possibleAlbums,
-            font=Screen.DEFAULT_FONT3,
-            width=10,
+            selectborderwidth=0,width=70,height=HEIGHT)
+        self.scrollWidgetPossibleAlbums.boxes[1].config(width=10,
             spacing3=1,
-            bg=Screen.DEFAULT_BGCOLOR,
-            borderwidth=0,
-            yscrollcommand=self.scb_possibleAlbums.set)
+            borderwidth=0,height=HEIGHT)
         self.lbl_titleHalfAlbumsScreen = TK.Label(
             self.frm_master,
             text=
@@ -1287,28 +800,13 @@ class ListAlbumScreen(Screen):
             bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
             font=Screen.DEFAULT_FONT1)
-        self.frm_PossibleHalfAlbums = TK.Frame(self.frm_master,
-                                               width=600,
-                                               height=305,
-                                               bd=0)
-        self.scb_PossibleHalfAlbums = TK.Scrollbar(
-            self.frm_master, command=self.bothScrollPossibleHalfAlbums)
-        self.lbx_PossibleHalfAlbums = TK.Listbox(
-            self.frm_PossibleHalfAlbums,
-            font=Screen.DEFAULT_FONT3,
-            bd=0,
-            bg=Screen.DEFAULT_BGCOLOR,
+        self.scrollWidgetPossibleHalfAlbums=ScrollableWidget(self.frm_master,["Listbox","Textbox"])
+        self.scrollWidgetPossibleHalfAlbums.boxes[0].config(bd=0,
             highlightthickness=0,
-            selectborderwidth=0,
-            yscrollcommand=self.scb_PossibleHalfAlbums.set)
-        self.txt_PossibleHalfAlbumsLengths = TK.Text(
-            self.frm_PossibleHalfAlbums,
-            width=10,
-            font=Screen.DEFAULT_FONT3,
+            selectborderwidth=0,width=70,height=HEIGHT)
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].config(width=10,
             spacing3=1,
-            bg=Screen.DEFAULT_BGCOLOR,
-            borderwidth=0,
-            yscrollcommand=self.scb_PossibleHalfAlbums.set)
+            borderwidth=0,height=HEIGHT)
         self.btn_showTracklist = TK.Button(self.frm_master,
                                            text="Show Tracklist",
                                            font=Screen.DEFAULT_FONT3,
@@ -1324,6 +822,58 @@ class ListAlbumScreen(Screen):
             highlightthickness=0,
             bd=0,
             height=len(Screen.container.genresColors) * 1.5 * 25)
+
+        #Widget Placement
+        self.lbl_titleAlbumsScreen.grid(row=0, column=1)
+        self.scrollWidgetPossibleAlbums.frame.grid(row=1, column=1)
+        self.scrollWidgetPossibleAlbums.boxes[0].grid(row=0,column=0,sticky=TK.NSEW)
+        self.scrollWidgetPossibleAlbums.boxes[1].grid(row=0, column=1, sticky=TK.E)
+        self.scrollWidgetPossibleAlbums.scrollbar.grid(row=0,column=2,sticky=TK.NS)
+        self.lbl_titleHalfAlbumsScreen.grid(row=2, column=1)
+        self.scrollWidgetPossibleHalfAlbums.frame.grid(row=3, column=1)
+        self.scrollWidgetPossibleHalfAlbums.boxes[0].grid(row=0,column=0,sticky=TK.NSEW)
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].grid(row=0, column=1, sticky=TK.E)
+        self.scrollWidgetPossibleHalfAlbums.scrollbar.grid(row=0,column=2,sticky=TK.NS)
+        self.btn_showTracklist.grid(row=4, column=4)
+        self.lbl_colorsLabel.grid(row=0, column=5)
+        self.cnv_colorsLabel.grid(row=1, column=5, rowspan=2)
+        self.btn_backScreen.grid(row=4, column=0)
+
+        #Widget Configuration
+        Screen.generateGenreTags(self.scrollWidgetPossibleAlbums.boxes[1])
+        Screen.generateGenreTags(self.scrollWidgetPossibleHalfAlbums.boxes[1])
+        for index in range(len(self.lists[0])):
+            album = self.lists[0][index]
+            self.scrollWidgetPossibleAlbums.boxes[0].insert(TK.END,
+                                           album.artist + " - " + album.title)
+            self.scrollWidgetPossibleAlbums.boxes[0].itemconfig(
+                index,
+                fg=Screen.container.genresColors[Screen.container.correctRapGenre(
+                    album.genre)],
+                selectbackground=Screen.container.genresColors[
+                    Screen.container.correctRapGenre(album.genre)])
+            self.scrollWidgetPossibleAlbums.boxes[1].insert(
+                TK.END,
+                Screen.container.standardFormatTime(album.length) + "\n",
+                Screen.container.correctRapGenre(album.genre))
+        for index in range(len(self.lists[1])):
+            album = self.lists[1][index]
+            self.scrollWidgetPossibleHalfAlbums.boxes[0].insert(
+                TK.END, album.artist + " - " + album.title)
+            self.scrollWidgetPossibleHalfAlbums.boxes[0].itemconfig(
+                index,
+                fg=Screen.container.genresColors[Screen.container.correctRapGenre(
+                    album.genre)],
+                selectbackground=Screen.container.genresColors[
+                    Screen.container.correctRapGenre(album.genre)])
+            self.scrollWidgetPossibleHalfAlbums.boxes[1].insert(
+                TK.END,
+                Screen.container.standardFormatTime(album.length) + "\n",
+                Screen.container.correctRapGenre(album.genre))
+        self.scrollWidgetPossibleAlbums.boxes[1].delete("end-1c linestart", TK.END)
+        self.scrollWidgetPossibleAlbums.boxes[1].config(state=TK.DISABLED)
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].delete("end-1c linestart", TK.END)
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].config(state=TK.DISABLED)
         i = 0
         for genre in Screen.container.genresColors:
             self.cnv_colorsLabel.create_rectangle(
@@ -1331,105 +881,16 @@ class ListAlbumScreen(Screen):
                 i * 25,
                 25,
                 25 + i * 25,
-                fill=Screen.container.genresColors[Screen.correctRapGenre(
+                fill=Screen.container.genresColors[Screen.container.correctRapGenre(
                     genre)])
             self.cnv_colorsLabel.create_text(
                 35,
                 13 + i * 25,
-                text=" - " + Screen.inverseCorrectRapGenre(genre),
+                text=" - " + Screen.container.inverseCorrectRapGenre(genre),
                 fill="white",
                 font=Screen.DEFAULT_FONT3,
                 anchor=TK.W)
             i += 1.5
-
-        #Widget Placement
-        self.lbl_titleAlbumsScreen.grid(row=0, column=1)
-        self.frm_possibleAlbums.grid(row=1, column=1)
-        self.frm_possibleAlbums.grid_propagate(False)
-        self.frm_possibleAlbums.rowconfigure(0, weight=2)
-        self.frm_possibleAlbums.columnconfigure(0, weight=2)
-        self.scb_possibleAlbums.grid(row=1, column=2, sticky=TK.NS)
-        self.lbx_possibleAlbums.grid(row=0, column=0, sticky=TK.NSEW)
-        self.txt_possibleAlbumsLengths.grid(row=0, column=1, sticky=TK.E)
-        self.lbl_titleHalfAlbumsScreen.grid(row=2, column=1)
-        self.frm_PossibleHalfAlbums.grid(row=3, column=1)
-        self.frm_PossibleHalfAlbums.grid_propagate(False)
-        self.frm_PossibleHalfAlbums.rowconfigure(0, weight=1)
-        self.frm_PossibleHalfAlbums.columnconfigure(0, weight=1)
-        self.scb_PossibleHalfAlbums.grid(sticky=TK.NS, row=3, column=2)
-        self.lbx_PossibleHalfAlbums.grid(row=0, column=0, sticky=TK.NSEW)
-        self.txt_PossibleHalfAlbumsLengths.grid(row=0, column=1, sticky=TK.E)
-        self.btn_showTracklist.grid(row=4, column=4)
-        self.lbl_colorsLabel.grid(row=0, column=5)
-        self.cnv_colorsLabel.grid(row=1, column=5, rowspan=2)
-        self.btn_backScreen.grid(row=4, column=0)
-
-        #Widget Configuration
-        Screen.generateGenreTags(self.txt_possibleAlbumsLengths)
-        Screen.generateGenreTags(self.txt_PossibleHalfAlbumsLengths)
-        for index in range(len(self.lists[0])):
-            album = self.lists[0][index]
-            self.lbx_possibleAlbums.insert(TK.END,
-                                           album.artist + " - " + album.title)
-            self.txt_possibleAlbumsLengths.insert(
-                TK.END,
-                Screen.standardFormatTime(album.length) + "\n",
-                Screen.correctRapGenre(album.genre))
-            self.lbx_possibleAlbums.itemconfig(
-                index,
-                fg=Screen.container.genresColors[Screen.correctRapGenre(
-                    album.genre)],
-                selectbackground=Screen.container.genresColors[
-                    Screen.correctRapGenre(album.genre)])
-        for index in range(len(self.lists[1])):
-            album = self.lists[1][index]
-            self.lbx_PossibleHalfAlbums.insert(
-                TK.END, album.artist + " - " + album.title)
-            self.txt_PossibleHalfAlbumsLengths.insert(
-                TK.END,
-                Screen.standardFormatTime(album.length) + "\n",
-                Screen.correctRapGenre(album.genre))
-            self.lbx_PossibleHalfAlbums.itemconfig(
-                index,
-                fg=Screen.container.genresColors[Screen.correctRapGenre(
-                    album.genre)],
-                selectbackground=Screen.container.genresColors[
-                    Screen.correctRapGenre(album.genre)])
-        self.lbx_possibleAlbums.bind("<MouseWheel>",
-                                     self.bothScrollPossibleAlbumsMouseWheel)
-        self.txt_possibleAlbumsLengths.bind(
-            "<MouseWheel>", self.bothScrollPossibleAlbumsMouseWheel)
-        self.lbx_PossibleHalfAlbums.bind(
-            "<MouseWheel>", self.bothScrollPossibleHalfAlbumsMouseWheel)
-        self.txt_PossibleHalfAlbumsLengths.bind(
-            "<MouseWheel>", self.bothScrollPossibleHalfAlbumsMouseWheel)
-        self.txt_possibleAlbumsLengths.delete("end-1c linestart", TK.END)
-        self.txt_PossibleHalfAlbumsLengths.delete("end-1c linestart", TK.END)
-        self.txt_possibleAlbumsLengths.config(state=TK.DISABLED)
-        self.txt_PossibleHalfAlbumsLengths.config(state=TK.DISABLED)
-
-    def bothScrollPossibleAlbums(self, *args):
-        self.lbx_possibleAlbums.yview(*args)
-        self.txt_possibleAlbumsLengths.yview(*args)
-
-    def bothScrollPossibleAlbumsMouseWheel(self, event):
-        self.lbx_possibleAlbums.yview("scroll",
-                                      -1 * (event.delta // Screen.SCROLLSPEED),
-                                      "units")
-        self.txt_possibleAlbumsLengths.yview(
-            "scroll", -1 * (event.delta // Screen.SCROLLSPEED), "units")
-        return "break"
-
-    def bothScrollPossibleHalfAlbums(self, *args):
-        self.lbx_PossibleHalfAlbums.yview(*args)
-        self.txt_PossibleHalfAlbumsLengths.yview(*args)
-
-    def bothScrollPossibleHalfAlbumsMouseWheel(self, event):
-        self.lbx_PossibleHalfAlbums.yview(
-            "scroll", -1 * (event.delta // Screen.SCROLLSPEED), "units")
-        self.txt_PossibleHalfAlbumsLengths.yview(
-            "scroll", -1 * (event.delta // Screen.SCROLLSPEED), "units")
-        return "break"
 
     def getAlbum(self, time, maxLeeway, over, under):
         listPossibleAlbums = []
@@ -1442,7 +903,7 @@ class ListAlbumScreen(Screen):
             overTime = time + leeway * int(over)
             for album in Screen.container.listAlbums:
                 lengthOfAlbum = album.length
-                genreOfAlbum = Screen.correctRapGenre(album.genre)
+                genreOfAlbum = Screen.container.correctRapGenre(album.genre)
                 if genreOfAlbum in self.genresOfAlbums:
                     if lengthOfAlbum >= underTime and lengthOfAlbum <= overTime and album not in listPossibleAlbums:
                         listPossibleAlbums.append(album)
@@ -1464,7 +925,7 @@ class ListAlbumScreen(Screen):
                     self.lbx_PossibleHalfAlbums.curselection())
                 ShowAlbumTracklistScreen(albumSelected, self.frm_master, self)
             except TK.TclError:
-                pass  #make TK.Label warning informing user
+                pass  #TODO: make TK.Label warning informing user
 
     def backScreen(self, event=None):
         ChooseAlbumScreen(self.frm_master)
@@ -1500,7 +961,7 @@ class ShowAlbumTracklistScreen(Screen):
                                      height=lenAlbum)
         self.lbl_length = TK.Label(
             self.frm_master,
-            text=("Length: " + Screen.standardFormatTime(album.length) +
+            text=("Length: " + Screen.container.standardFormatTime(album.length) +
                   " minutes"),
             bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
@@ -1533,7 +994,6 @@ class ShowAlbumTracklistScreen(Screen):
 
 
 if __name__ == "__main__":
-    # def main():
     Screen.window.title("Handler")
     Screen.window.iconbitmap(
         os.path.join(Screen.container.baseDirectory, "auxFiles",
