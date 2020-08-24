@@ -170,12 +170,6 @@ class ListsAndFiles:
             root = ET.Element("root")
             tree = ET.ElementTree(root)
             tree.write(self.fileExceptions)
-        # self.workoutFile = os.path.join(self.baseDirectory, "auxFiles",
-        #                                 "WorkoutDatabase.xml")
-        # if not os.path.isfile(self.workoutFile):
-        #     root = ET.Element("root")
-        #     tree = ET.ElementTree(root)
-        #     tree.write(self.workoutFile)
         self.getWorkoutDatabase()
         # self.thread.join()
 
@@ -343,7 +337,6 @@ class ListsAndFiles:
         for replacementPair in root.findall("pair"):
             old = replacementPair.find("old").text
             new = replacementPair.find("new").text
-            # print(old,"     ",new)
             if new == None:
                 new = ""
             self.replacementsDict[old] = new
@@ -378,24 +371,6 @@ class ListsAndFiles:
             child.append(newAlbum)
             child.append(newTitle)
             root.append(child)
-        # for exc in self.artistTitleReplacements:
-        #     child = ET.Element("exception")
-        #     mode = ET.Element("type")
-        #     mode.text = str(1)
-        #     oldArtist = ET.Element("oldartist")
-        #     newArtist = ET.Element("newartist")
-        #     oldTitle = ET.Element("oldtitle")
-        #     newTitle = ET.Element("newtitle")
-        #     oldArtist.text = exc[0]
-        #     oldTitle.text = exc[1]
-        #     newArtist.text = self.artistTitleReplacements[exc][0]
-        #     newTitle.text = self.artistTitleReplacements[exc][1]
-        #     child.append(mode)
-        #     child.append(oldArtist)
-        #     child.append(oldTitle)
-        #     child.append(newArtist)
-        #     child.append(newTitle)
-        #     root.append(child)
         for exc in self.songsToSkip:
             child = ET.Element("exception")
             mode = ET.Element("type")
