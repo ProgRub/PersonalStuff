@@ -1,5 +1,7 @@
 import tkinter as TK
 from ListsAndFiles import ListsAndFiles
+import os
+
 
 class Screen:
     container = ListsAndFiles()
@@ -14,6 +16,11 @@ class Screen:
 
         #Widget Creation
         self.frm_master = TK.Frame(Screen.window, bg=Screen.DEFAULT_BGCOLOR)
+        self.lbl_title = TK.Label(
+            self.frm_master,
+            font=Screen.DEFAULT_FONT1,
+            bg=Screen.DEFAULT_BGCOLOR,
+            fg="white")
         self.btn_backScreen = TK.Button(self.frm_master,
                                         text="Go Back",
                                         command=self.backScreen,
@@ -75,13 +82,13 @@ class Screen:
                                     dentroParenteses = False
         return word
 
-
     @staticmethod
     def generateGenreTags(textBox):
         for genre in Screen.container.genresColors:
             textBox.tag_config(Screen.container.correctRapGenre(genre),
                                foreground=Screen.container.genresColors[
                                    Screen.container.correctRapGenre(genre)])
+
 
     def backScreen(self, event=None):
         pass
