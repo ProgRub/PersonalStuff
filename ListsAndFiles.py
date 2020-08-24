@@ -1,13 +1,17 @@
 import os
+# import threading
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 import xml.etree.ElementTree as ET
+import win32com.client as win32com
+# import pythoncom
 
 
+#TODO: try and implement threading support for iTunes management
 class MusicFile:
     def __init__(self, filename, title, albumArtist, album, trackNumber,
                  numberOfTracks, discNumber, numberOfDiscs, genre, year,
-                 length):
+                 length, playCount):
         self.filename = filename
         self.title = title
         self.albumArtist = albumArtist
@@ -19,6 +23,7 @@ class MusicFile:
         self.genre = genre
         self.year = year
         self.length = length
+        self.playCount = playCount
 
     def getAttribute(self, whichOne):
         if whichOne == "Artist":
@@ -66,6 +71,7 @@ class Album:
         for _ in range(numberOfDiscs):
             self.tracksByDiscs.append([])
         self.length = 0.0
+        self.averagePlayCount=0
 
     def addTrack(self, track: MusicFile):
         self.tracksByDiscs[track.discNumber - 1].append(track)
@@ -84,20 +90,28 @@ class Album:
             else:
                 break
         self.length += track.length
+        self.averagePlayCount+=track.playCount
 
 
 class ListsAndFiles:
     def __init__(self):
         # Variables
+        self.iTunes = win32com.gencache.EnsureDispatch("iTunes.Application")
+        self.iTunesLibrary = self.iTunes.LibraryPlaylist
+        # self.iTunes_id = pythoncom.CoMarshalInterThreadInterfaceInStream(pythoncom.IID_IDispatch, self.iTunes)
+        self.recycle = os.path.join('C:', os.sep, 'Users', 'ruben', 'Desktop',
+                                    'Recycle.exe')
+        # self.thread = threading.Thread(target=self.thread_function,
+        #                                daemon=True)
+        # self.thread.start()
         self.downloadsDirectory = ""
         self.musicOriginDirectory = ""
         self.musicDestinyDirectory = ""
         self.listMusicFile = []
         self.listAlbums = []
         self.listGenres = []
-        self.artistAlbumReplacements = {}
-        self.artistTitleReplacements = {}
-        self.replacementsDict={}
+        self.exceptionsReplacements = {}
+        self.replacementsDict = {}
         self.songsToSkip = []
         self.grimeArtists = []
         self.files = []
@@ -163,6 +177,7 @@ class ListsAndFiles:
         #     tree = ET.ElementTree(root)
         #     tree.write(self.workoutFile)
         self.getWorkoutDatabase()
+        # self.thread.join()
 
     def getLastModified(self):
         self.files.sort(key=os.path.getmtime, reverse=True)
@@ -268,7 +283,7 @@ class ListsAndFiles:
             times = []
             for time in workout:
                 times.append(int(time.text))
-            self.workoutDatabase[workout.text] = times
+            self.workoutDatabase[workout.text.strip()] = times
 
     def saveWorkoutDatabase(self):
         tree = ET.parse(self.fileDetails)
@@ -283,7 +298,7 @@ class ListsAndFiles:
                 time.text = str(timeNumber)
                 child.append(time)
             root.append(child)
-        tree.write(self.workoutFile)
+        tree.write(self.fileDetails)
 
     def getGrimeArtists(self):
         tree = ET.parse(self.fileDetails)
@@ -302,6 +317,8 @@ class ListsAndFiles:
         tree.write(self.fileDetails)
 
     def getExceptions(self):
+        self.exceptionsReplacements.clear()
+        self.songsToSkip.clear()
         tree = ET.parse(self.fileExceptions)
         root = tree.getroot()
         allExceptions = root.findall("exception")
@@ -312,25 +329,21 @@ class ListsAndFiles:
                 newArtist = exc.find("newartist").text
                 oldAlbum = exc.find("oldalbum").text
                 newAlbum = exc.find("newalbum").text
-                self.artistAlbumReplacements[(oldArtist, oldAlbum)] = [
-                    newArtist, newAlbum
-                ]
-            elif excType == 1:
-                oldArtist = exc.find("oldartist").text
-                newArtist = exc.find("newartist").text
                 oldTitle = exc.find("oldtitle").text
                 newTitle = exc.find("newtitle").text
-                self.artistTitleReplacements[(oldArtist, oldTitle)] = [
-                    newArtist, newTitle
-                ]
+                self.exceptionsReplacements[(oldArtist, oldAlbum,
+                                             oldTitle)] = [
+                                                 newArtist, newAlbum, newTitle
+                                             ]
             else:
                 artist = exc.find("artist").text
                 album = exc.find("album").text
                 title = exc.find("title").text
-                self.songsToSkip.append("\n".join([artist, album, title]))
+                self.songsToSkip.append([artist, album, title])
         for replacementPair in root.findall("pair"):
             old = replacementPair.find("old").text
             new = replacementPair.find("new").text
+            # print(old,"     ",new)
             if new == None:
                 new = ""
             self.replacementsDict[old] = new
@@ -341,7 +354,7 @@ class ListsAndFiles:
         tree = ET.parse(filename)
         root = tree.getroot()
         root.clear()
-        for exc in self.artistAlbumReplacements:
+        for exc in self.exceptionsReplacements:
             child = ET.Element("exception")
             mode = ET.Element("type")
             mode.text = str(0)
@@ -349,49 +362,50 @@ class ListsAndFiles:
             newArtist = ET.Element("newartist")
             oldAlbum = ET.Element("oldalbum")
             newAlbum = ET.Element("newalbum")
-            oldArtist.text = exc[0]
-            oldAlbum.text = exc[1]
-            newArtist.text = self.artistAlbumReplacements[exc][
-                0]
-            newAlbum.text = self.artistAlbumReplacements[exc][
-                1]
-            child.append(mode)
-            child.append(oldArtist)
-            child.append(oldAlbum)
-            child.append(newArtist)
-            child.append(newAlbum)
-            root.append(child)
-        for exc in self.artistTitleReplacements:
-            child = ET.Element("exception")
-            mode = ET.Element("type")
-            mode.text = str(1)
-            oldArtist = ET.Element("oldartist")
-            newArtist = ET.Element("newartist")
             oldTitle = ET.Element("oldtitle")
             newTitle = ET.Element("newtitle")
             oldArtist.text = exc[0]
-            oldTitle.text = exc[1]
-            newArtist.text = self.artistTitleReplacements[exc][
-                0]
-            newTitle.text = self.artistTitleReplacements[exc][
-                1]
+            oldAlbum.text = exc[1]
+            oldTitle.text = exc[2]
+            newArtist.text = self.exceptionsReplacements[exc][0] if self.exceptionsReplacements[exc][0]!=None else ""
+            newAlbum.text = self.exceptionsReplacements[exc][1]if self.exceptionsReplacements[exc][1]!=None else ""
+            newTitle.text = self.exceptionsReplacements[exc][2]if self.exceptionsReplacements[exc][2]!=None else ""
             child.append(mode)
             child.append(oldArtist)
+            child.append(oldAlbum)
             child.append(oldTitle)
             child.append(newArtist)
+            child.append(newAlbum)
             child.append(newTitle)
             root.append(child)
+        # for exc in self.artistTitleReplacements:
+        #     child = ET.Element("exception")
+        #     mode = ET.Element("type")
+        #     mode.text = str(1)
+        #     oldArtist = ET.Element("oldartist")
+        #     newArtist = ET.Element("newartist")
+        #     oldTitle = ET.Element("oldtitle")
+        #     newTitle = ET.Element("newtitle")
+        #     oldArtist.text = exc[0]
+        #     oldTitle.text = exc[1]
+        #     newArtist.text = self.artistTitleReplacements[exc][0]
+        #     newTitle.text = self.artistTitleReplacements[exc][1]
+        #     child.append(mode)
+        #     child.append(oldArtist)
+        #     child.append(oldTitle)
+        #     child.append(newArtist)
+        #     child.append(newTitle)
+        #     root.append(child)
         for exc in self.songsToSkip:
             child = ET.Element("exception")
             mode = ET.Element("type")
-            mode.text = str(2)
+            mode.text = str(1)
             artist = ET.Element("artist")
             album = ET.Element("album")
             title = ET.Element("title")
-            auxArray = exc.split("\n")
-            artist.text = auxArray[0]
-            album.text = auxArray[1]
-            title.text = auxArray[2]
+            artist.text = exc[0]
+            album.text = exc[1]
+            title.text = exc[2]
             child.append(mode)
             child.append(artist)
             child.append(album)
@@ -430,7 +444,8 @@ class ListsAndFiles:
                               int(child.find('numberdiscs').text),
                               child.find('genre').text,
                               int(child.find('year').text),
-                              float(child.find('length').text)))
+                              int(child.find('length').text),
+                              int(child.find('playcount').text)))
             if screen != None:
                 self.timeOfLastModified = self.timeOfLastModifiedFile
                 self.recalibrateList(screen)
@@ -471,7 +486,8 @@ class ListsAndFiles:
                 ET.Element('numberdiscs'),
                 ET.Element('genre'),
                 ET.Element('year'),
-                ET.Element('length')
+                ET.Element('length'),
+                ET.Element('playcount')
             ]
             child.text = musicFile.filename
             elements[0].text = musicFile.title
@@ -484,6 +500,7 @@ class ListsAndFiles:
             elements[7].text = musicFile.genre
             elements[8].text = str(musicFile.year)
             elements[9].text = str(musicFile.length)
+            elements[10].text = str(musicFile.playCount)
             for el in elements:
                 child.append(el)
             root.append(child)
@@ -498,14 +515,16 @@ class ListsAndFiles:
         year = 0
         tracknumber = 0
         discnumber = 0
-        length = 0.0
+        length = 0
+        playCount = 0
+        # self.thread.join()
         for filename in self.files:
             conta += 1
             if filename.endswith(".mp3") and os.path.getmtime(
                     filename) > self.timeOfLastModified:
                 mp3 = EasyID3(filename)
-                shortFilename = filename.replace(self.musicDestinyDirectory + os.sep,
-                                                 "")
+                shortFilename = filename.replace(
+                    self.musicDestinyDirectory + os.sep, "")
                 genre = mp3["genre"][0]
                 album = mp3["album"][0]
                 title = mp3["title"][0]
@@ -515,16 +534,16 @@ class ListsAndFiles:
                 discnumber = mp3["discnumber"][0]
                 screen.addToOutput(albumartist, album, title, genre, year,
                                    tracknumber, discnumber)
-                size = MP3(filename)
-                length = float(size.info.length)
-                size.save()
+                track = self.findiTunesTrack(title, album)
+                length = track.Duration
+                playCount = track.PlayedCount
                 mp3.save()
                 aux = MusicFile(shortFilename, title, albumartist, album,
                                 int(tracknumber[:tracknumber.find("/")]),
                                 int(tracknumber[tracknumber.find("/") + 1:]),
                                 int(discnumber[:discnumber.find("/")]),
                                 int(discnumber[discnumber.find("/") + 1:]),
-                                genre, year, length)
+                                genre, year, length, playCount)
                 if self.indexOf(aux) == -1:  # aux not in listMusicFile:
                     self.listMusicFile.append(aux)
                 else:
@@ -538,13 +557,28 @@ class ListsAndFiles:
                 return index
         return -1
 
-    def correctRapGenre(self,genre):
+    def findiTunesTrack(self, title, album):
+        tracks = self.iTunesLibrary.Search(title, 5)
+        if len(tracks) == 1:
+            return tracks.Item(1)
+        for track in tracks:
+            if track.Album == album:
+                return track
+
+    def updatePlayCounts(self):
+        for track in self.listMusicFile:
+            iTunesPlayCount = self.findiTunesTrack(track.title,
+                                                   track.album).PlayedCount
+            if track.playCount < iTunesPlayCount:
+                track.playCount = iTunesPlayCount
+
+    def correctRapGenre(self, genre):
         return "Rap" if "Rap" in genre else genre
 
-    def inverseCorrectRapGenre(self,genre):
+    def inverseCorrectRapGenre(self, genre):
         return "Rap/Hip Hop" if "Rap" in genre else genre
 
-    def standardFormatTime(self,time):
+    def standardFormatTime(self, time):
         return str(int(time // 60)) + ":" + ("0" if time % 60 < 10 else
                                              "") + str(int(time % 60))
 
@@ -562,3 +596,8 @@ class ListsAndFiles:
                         self.genresColors[self.correctRapGenre(
                             track.genre)] = "white"
             self.listAlbums[indexOfAlbum].addTrack(track)
+        for album in self.listAlbums:
+            totalTracks = 0
+            for disc in album.tracksByDiscs:
+                totalTracks+=len(disc)
+            album.averagePlayCount=album.averagePlayCount/totalTracks
