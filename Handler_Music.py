@@ -23,7 +23,10 @@ class InitialScreen(Screen):
             self.checkFilesThread.start()
 
         #Widget Creation
-        self.lbl_title.config(text="Welcome to the Music Handler Program!\nYou can search your library for a certain file\nOr choose an album to listen to!")
+        self.lbl_title.config(
+            text=
+            "Welcome to the Music Handler Program!\nYou can search your library for a certain file\nOr choose an album to listen to!"
+        )
         self.frm_whichDirectory = TK.Frame(self.frm_master,
                                            width=750,
                                            height=250,
@@ -149,7 +152,7 @@ class SearchLibraryScreen(Screen):
                                  fg="white")
             ent_field = TK.Entry(self.frm_master,
                                  textvariable=stringVar,
-                                 width=60,
+                                 width=80,
                                  font=Screen.DEFAULT_FONT3)
             lbl_field.grid(row=i, column=1)
             ent_field.grid(row=i, column=2)
@@ -180,6 +183,8 @@ class SearchLibraryScreen(Screen):
         self.scrollableWidget.boxes[0].bind("<Delete>", self.deleteTracks)
 
     def backScreen(self, event=None):
+        Screen.container.generateAlbums()
+        Screen.container.reWriteFiles()
         InitialScreen(self.frm_master, False)
 
     def nextScreen(self, event=None):
@@ -217,12 +222,16 @@ class SearchLibraryScreen(Screen):
             self.scrollableWidget.boxes[0].insert(TK.END, obj.filename)
 
     def deleteTracks(self, event=None):
+        #TODO: also remove from iTunes
         numFilesDeleted = 0
         for index in self.scrollableWidget.boxes[0].curselection():
+            Screen.container.findiTunesTrack()
             subprocess.run([
                 Screen.container.recycle,
-                os.path.join(Screen.container.musicDestinyDirectory,
-                             self.scrollableWidget.boxes[0].get(index - numFilesDeleted))
+                os.path.join(
+                    Screen.container.musicDestinyDirectory,
+                    self.scrollableWidget.boxes[0].get(index -
+                                                       numFilesDeleted))
             ])
             self.scrollableWidget.boxes[0].delete(index - numFilesDeleted)
             numFilesDeleted += 1
@@ -239,7 +248,8 @@ class TrackDetailsScreen(Screen):
             "Track Number": [],
             "Disc Number": [],
             "Genre": [],
-            "Year": []
+            "Year": [],
+            "Play Count":[]
         }
         self.listOfFiles = listOfFiles
 
@@ -254,7 +264,7 @@ class TrackDetailsScreen(Screen):
                              fg="white")
             entry = TK.Entry(self.frm_master,
                              font=Screen.DEFAULT_FONT3,
-                             width=30)
+                             width=80)
             attribute = self.listOfFiles[0].getAttribute(attr)
             entry.insert(TK.END, str(attribute))
             for musicFile in self.listOfFiles:
@@ -272,7 +282,6 @@ class TrackDetailsScreen(Screen):
         self.btn_backScreen.grid(row=i, column=0)
 
     def backScreen(self, event=None):
-        #TODO: re-update the database if files are changed
         if not all([
                 self.attributes[attr][0] == self.attributes[attr][1].get()
                 for attr in self.attributes
@@ -286,6 +295,7 @@ class TrackDetailsScreen(Screen):
                     if self.attributes[attr][0] != newAttribute:
                         audio[musicFile.attributeToMutagenTag(
                             attr)] = newAttribute
+                        musicFile.setAttribute(attr,newAttribute)
                 audio.save()
         SearchLibraryScreen(self.frm_master)
 
@@ -295,7 +305,9 @@ class ChooseColorsScreen(Screen):
         super().__init__(masterFramePreviousScreen)
 
         #Widget Creation
-        self.lbl_title.config(text="Click the button of the Genre which color you want to change")
+        self.lbl_title.config(
+            text="Click the button of the Genre which color you want to change"
+        )
         i = 1
         Screen.container.getGenreColors()
         self.genreButtons = {}
@@ -344,7 +356,10 @@ class WorkoutRegistryScreen(Screen):
         self.time = TK.StringVar()
 
         #Widget Creation
-        self.lbl_title.config(text="Input the name of the workout and how long it took (format MM:SS)")
+        self.lbl_title.config(
+            text=
+            "Input the name of the workout and how long it took (format MM:SS)"
+        )
         self.lbl_workoutName = TK.Label(self.frm_master,
                                         text="Name of the Workout",
                                         bg=Screen.DEFAULT_BGCOLOR,
@@ -648,6 +663,8 @@ class ChooseAlbumScreen(Screen):
                              '%P', '%d'))
         self.ent_chooseTime.delete(0, TK.END)
         self.ent_chooseLeeway.delete(0, TK.END)
+        self.ent_chooseTime.bind("<1>",self.hideMissingLabels)
+        self.ent_chooseLeeway.bind("<1>",self.hideMissingLabels)
 
     # restricts entry to only accept digits
     def testVal(self, inStr, acttyp):
@@ -708,18 +725,22 @@ class ChooseAlbumScreen(Screen):
                 genresOfAlbums.append(Screen.container.listGenres[i])
         return genresOfAlbums
 
+    def hideMissingLabels(self,event=None):
+        self.lbl_missingTime.grid_forget()
+        self.lbl_missingLeeway.grid_forget()
+
     def nextScreen(self, event=None):
         advance = True
         try:
             self.time.get()
             self.lbl_missingTime.grid_forget()
-        except ValueError:
+        except TK.TclError:
             advance = False
             self.lbl_missingTime.grid(row=1, column=2, padx=25)
         try:
             self.leeway.get()
             self.lbl_missingLeeway.grid_forget()
-        except ValueError:
+        except TK.TclError:
             advance = False
             self.lbl_missingLeeway.grid(row=2, column=2, padx=25)
         if advance:
@@ -745,10 +766,17 @@ class ListAlbumScreen(Screen):
         self.under = self.overUnderLeeway <= 2 and self.overUnderLeeway != 1
         self.lists = self.getAlbum(self.time * 60, self.leeway * 60, self.over,
                                    self.under)
-        self.lists[0].sort(key=lambda album: album.length, reverse=True)
-        self.lists[1].sort(key=lambda album: album.length, reverse=True)
+        self.possibleAlbums = self.lists[0]
+        self.possibleHalfAlbums = self.lists[1]
+        self.sortTimeMostToLeastPA = True
+        self.sortPlayCountMostToLeastPA = False
+        self.sortTimeMostToLeastPHA = True
+        self.sortPlayCountMostToLeastPHA = False
+        self.possibleAlbums.sort(key=lambda album: album.length,
+                                 reverse=self.sortTimeMostToLeastPA)
+        self.possibleHalfAlbums.sort(key=lambda album: album.length,
+                                     reverse=self.sortTimeMostToLeastPHA)
         HEIGHT = 20
-        #TODO: allow sorting by time or play count
 
         #Widget Creation
         self.lbl_titleAlbumsScreen = TK.Label(
@@ -762,7 +790,7 @@ class ListAlbumScreen(Screen):
             fg="white",
             font=Screen.DEFAULT_FONT1)
         self.scrollWidgetPossibleAlbums = ScrollableWidget(
-            self.frm_master, ["Listbox", "Textbox","Textbox"])
+            self.frm_master, ["Listbox", "Textbox", "Textbox"])
         self.scrollWidgetPossibleAlbums.boxes[0].config(bd=0,
                                                         highlightthickness=0,
                                                         selectborderwidth=0,
@@ -776,6 +804,20 @@ class ListAlbumScreen(Screen):
                                                         spacing3=1,
                                                         borderwidth=0,
                                                         height=HEIGHT)
+        self.btn_sortByTimePossibleAlbums = TK.Button(
+            self.scrollWidgetPossibleAlbums.frame,
+            text="Time",
+            font=Screen.DEFAULT_FONT3,
+            bg=Screen.DEFAULT_BGCOLOR,
+            fg="white",
+            command=lambda: self.sortAlbums(0, 0))
+        self.btn_sortByPlayCountPossibleAlbums = TK.Button(
+            self.scrollWidgetPossibleAlbums.frame,
+            text="Play Count",
+            font=Screen.DEFAULT_FONT3,
+            bg=Screen.DEFAULT_BGCOLOR,
+            fg="white",
+            command=lambda: self.sortAlbums(0, 1))
         self.lbl_titleHalfAlbumsScreen = TK.Label(
             self.frm_master,
             text=
@@ -787,7 +829,7 @@ class ListAlbumScreen(Screen):
             fg="white",
             font=Screen.DEFAULT_FONT1)
         self.scrollWidgetPossibleHalfAlbums = ScrollableWidget(
-            self.frm_master, ["Listbox", "Textbox","Textbox"])
+            self.frm_master, ["Listbox", "Textbox", "Textbox"])
         self.scrollWidgetPossibleHalfAlbums.boxes[0].config(
             bd=0,
             highlightthickness=0,
@@ -799,9 +841,23 @@ class ListAlbumScreen(Screen):
                                                             borderwidth=0,
                                                             height=HEIGHT)
         self.scrollWidgetPossibleHalfAlbums.boxes[2].config(width=10,
-                                                        spacing3=1,
-                                                        borderwidth=0,
-                                                        height=HEIGHT)
+                                                            spacing3=1,
+                                                            borderwidth=0,
+                                                            height=HEIGHT)
+        self.btn_sortByTimePossibleHalfAlbums = TK.Button(
+            self.scrollWidgetPossibleHalfAlbums.frame,
+            text="Time",
+            font=Screen.DEFAULT_FONT3,
+            bg=Screen.DEFAULT_BGCOLOR,
+            fg="white",
+            command=lambda: self.sortAlbums(1, 0))
+        self.btn_sortByPlayCountPossibleHalfAlbums = TK.Button(
+            self.scrollWidgetPossibleHalfAlbums.frame,
+            text="Play Count",
+            font=Screen.DEFAULT_FONT3,
+            bg=Screen.DEFAULT_BGCOLOR,
+            fg="white",
+            command=lambda: self.sortAlbums(1, 1))
         self.btn_showTracklist = TK.Button(self.frm_master,
                                            text="Show Tracklist",
                                            font=Screen.DEFAULT_FONT3,
@@ -821,30 +877,34 @@ class ListAlbumScreen(Screen):
         #Widget Placement
         self.lbl_titleAlbumsScreen.grid(row=0, column=1)
         self.scrollWidgetPossibleAlbums.frame.grid(row=1, column=1)
-        self.scrollWidgetPossibleAlbums.boxes[0].grid(row=0,
+        self.btn_sortByTimePossibleAlbums.grid(row=0, column=1)
+        self.btn_sortByPlayCountPossibleAlbums.grid(row=0, column=2)
+        self.scrollWidgetPossibleAlbums.boxes[0].grid(row=1,
                                                       column=0,
                                                       sticky=TK.NSEW)
-        self.scrollWidgetPossibleAlbums.boxes[1].grid(row=0,
+        self.scrollWidgetPossibleAlbums.boxes[1].grid(row=1,
                                                       column=1,
                                                       sticky=TK.E)
-        self.scrollWidgetPossibleAlbums.boxes[2].grid(row=0,
+        self.scrollWidgetPossibleAlbums.boxes[2].grid(row=1,
                                                       column=2,
                                                       sticky=TK.E)
-        self.scrollWidgetPossibleAlbums.scrollbar.grid(row=0,
+        self.scrollWidgetPossibleAlbums.scrollbar.grid(row=1,
                                                        column=3,
                                                        sticky=TK.NS)
         self.lbl_titleHalfAlbumsScreen.grid(row=2, column=1)
         self.scrollWidgetPossibleHalfAlbums.frame.grid(row=3, column=1)
-        self.scrollWidgetPossibleHalfAlbums.boxes[0].grid(row=0,
+        self.btn_sortByTimePossibleHalfAlbums.grid(row=0, column=1)
+        self.btn_sortByPlayCountPossibleHalfAlbums.grid(row=0, column=2)
+        self.scrollWidgetPossibleHalfAlbums.boxes[0].grid(row=1,
                                                           column=0,
                                                           sticky=TK.NSEW)
-        self.scrollWidgetPossibleHalfAlbums.boxes[1].grid(row=0,
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].grid(row=1,
                                                           column=1,
                                                           sticky=TK.E)
-        self.scrollWidgetPossibleHalfAlbums.boxes[2].grid(row=0,
+        self.scrollWidgetPossibleHalfAlbums.boxes[2].grid(row=1,
                                                           column=2,
                                                           sticky=TK.E)
-        self.scrollWidgetPossibleHalfAlbums.scrollbar.grid(row=0,
+        self.scrollWidgetPossibleHalfAlbums.scrollbar.grid(row=1,
                                                            column=3,
                                                            sticky=TK.NS)
         self.btn_showTracklist.grid(row=4, column=4)
@@ -857,54 +917,8 @@ class ListAlbumScreen(Screen):
         Screen.generateGenreTags(self.scrollWidgetPossibleHalfAlbums.boxes[1])
         Screen.generateGenreTags(self.scrollWidgetPossibleAlbums.boxes[2])
         Screen.generateGenreTags(self.scrollWidgetPossibleHalfAlbums.boxes[2])
-        for index in range(len(self.lists[0])):
-            album = self.lists[0][index]
-            self.scrollWidgetPossibleAlbums.boxes[0].insert(
-                TK.END, album.artist + " - " + album.title)
-            self.scrollWidgetPossibleAlbums.boxes[0].itemconfig(
-                index,
-                fg=Screen.container.genresColors[
-                    Screen.container.correctRapGenre(album.genre)],
-                selectbackground=Screen.container.genresColors[
-                    Screen.container.correctRapGenre(album.genre)])
-            self.scrollWidgetPossibleAlbums.boxes[1].insert(
-                TK.END,
-                Screen.container.standardFormatTime(album.length) + "\n",
-                Screen.container.correctRapGenre(album.genre))
-            self.scrollWidgetPossibleAlbums.boxes[2].insert(
-                TK.END,
-                str(round(album.averagePlayCount,3)) + "\n",
-                Screen.container.correctRapGenre(album.genre))
-        for index in range(len(self.lists[1])):
-            album = self.lists[1][index]
-            self.scrollWidgetPossibleHalfAlbums.boxes[0].insert(
-                TK.END, album.artist + " - " + album.title)
-            self.scrollWidgetPossibleHalfAlbums.boxes[0].itemconfig(
-                index,
-                fg=Screen.container.genresColors[
-                    Screen.container.correctRapGenre(album.genre)],
-                selectbackground=Screen.container.genresColors[
-                    Screen.container.correctRapGenre(album.genre)])
-            self.scrollWidgetPossibleHalfAlbums.boxes[1].insert(
-                TK.END,
-                Screen.container.standardFormatTime(album.length) + "\n",
-                Screen.container.correctRapGenre(album.genre))
-            self.scrollWidgetPossibleHalfAlbums.boxes[2].insert(
-                TK.END,
-                str(round(album.averagePlayCount,3)) + "\n",
-                Screen.container.correctRapGenre(album.genre))
-        self.scrollWidgetPossibleAlbums.boxes[1].delete(
-            "end-1c linestart", TK.END)
-        self.scrollWidgetPossibleAlbums.boxes[1].config(state=TK.DISABLED)
-        self.scrollWidgetPossibleHalfAlbums.boxes[1].delete(
-            "end-1c linestart", TK.END)
-        self.scrollWidgetPossibleHalfAlbums.boxes[1].config(state=TK.DISABLED)
-        self.scrollWidgetPossibleAlbums.boxes[2].delete(
-            "end-1c linestart", TK.END)
-        self.scrollWidgetPossibleAlbums.boxes[2].config(state=TK.DISABLED)
-        self.scrollWidgetPossibleHalfAlbums.boxes[2].delete(
-            "end-1c linestart", TK.END)
-        self.scrollWidgetPossibleHalfAlbums.boxes[2].config(state=TK.DISABLED)
+        self.writePossibleAlbums()
+        self.writePossibleHalfAlbums()
         i = 0
         for genre in Screen.container.genresColors:
             self.cnv_colorsLabel.create_rectangle(
@@ -922,6 +936,93 @@ class ListAlbumScreen(Screen):
                 font=Screen.DEFAULT_FONT3,
                 anchor=TK.W)
             i += 1.5
+
+    def sortAlbums(self, boxIndex, whatSort):  #whatSort=0 -> by Time
+        if boxIndex == 0:
+            if whatSort == 0:
+                self.sortTimeMostToLeastPA = not self.sortTimeMostToLeastPA
+                self.possibleAlbums.sort(key=lambda album: album.length,
+                                         reverse=self.sortTimeMostToLeastPA)
+            else:
+                self.sortPlayCountMostToLeastPA = not self.sortPlayCountMostToLeastPA
+                self.possibleAlbums.sort(
+                    key=lambda album: album.averagePlayCount,
+                    reverse=self.sortPlayCountMostToLeastPA)
+            self.writePossibleAlbums()
+        else:
+            if whatSort == 0:
+                self.sortTimeMostToLeastPHA = not self.sortTimeMostToLeastPHA
+                self.possibleHalfAlbums.sort(
+                    key=lambda album: album.length,
+                    reverse=self.sortTimeMostToLeastPHA)
+            else:
+                self.sortPlayCountMostToLeastPHA = not self.sortPlayCountMostToLeastPHA
+                self.possibleHalfAlbums.sort(
+                    key=lambda album: album.averagePlayCount,
+                    reverse=self.sortPlayCountMostToLeastPHA)
+            self.writePossibleHalfAlbums()
+
+    def writePossibleAlbums(self):
+        self.scrollWidgetPossibleAlbums.boxes[1].config(state=TK.NORMAL)
+        self.scrollWidgetPossibleAlbums.boxes[2].config(state=TK.NORMAL)
+        self.scrollWidgetPossibleAlbums.boxes[0].delete(0, TK.END)
+        self.scrollWidgetPossibleAlbums.boxes[1].delete("1.0", TK.END)
+        self.scrollWidgetPossibleAlbums.boxes[2].delete("1.0", TK.END)
+        for index in range(len(self.possibleAlbums)):
+            album = self.possibleAlbums[index]
+            self.scrollWidgetPossibleAlbums.boxes[0].insert(
+                TK.END, album.artist + " - " + album.title)
+            self.scrollWidgetPossibleAlbums.boxes[0].itemconfig(
+                index,
+                fg=Screen.container.genresColors[
+                    Screen.container.correctRapGenre(album.genre)],
+                selectbackground=Screen.container.genresColors[
+                    Screen.container.correctRapGenre(album.genre)])
+            self.scrollWidgetPossibleAlbums.boxes[1].insert(
+                TK.END,
+                Screen.container.standardFormatTime(album.length) + "\n",
+                Screen.container.correctRapGenre(album.genre))
+            self.scrollWidgetPossibleAlbums.boxes[2].insert(
+                TK.END,
+                str(round(album.averagePlayCount, 3)) + "\n",
+                Screen.container.correctRapGenre(album.genre))
+        self.scrollWidgetPossibleAlbums.boxes[1].delete(
+            "end-1c linestart", TK.END)
+        self.scrollWidgetPossibleAlbums.boxes[1].config(state=TK.DISABLED)
+        self.scrollWidgetPossibleAlbums.boxes[2].delete(
+            "end-1c linestart", TK.END)
+        self.scrollWidgetPossibleAlbums.boxes[2].config(state=TK.DISABLED)
+
+    def writePossibleHalfAlbums(self):
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].config(state=TK.NORMAL)
+        self.scrollWidgetPossibleHalfAlbums.boxes[2].config(state=TK.NORMAL)
+        self.scrollWidgetPossibleHalfAlbums.boxes[0].delete(0, TK.END)
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].delete("1.0", TK.END)
+        self.scrollWidgetPossibleHalfAlbums.boxes[2].delete("1.0", TK.END)
+        for index in range(len(self.possibleHalfAlbums)):
+            album = self.possibleHalfAlbums[index]
+            self.scrollWidgetPossibleHalfAlbums.boxes[0].insert(
+                TK.END, album.artist + " - " + album.title)
+            self.scrollWidgetPossibleHalfAlbums.boxes[0].itemconfig(
+                index,
+                fg=Screen.container.genresColors[
+                    Screen.container.correctRapGenre(album.genre)],
+                selectbackground=Screen.container.genresColors[
+                    Screen.container.correctRapGenre(album.genre)])
+            self.scrollWidgetPossibleHalfAlbums.boxes[1].insert(
+                TK.END,
+                Screen.container.standardFormatTime(album.length) + "\n",
+                Screen.container.correctRapGenre(album.genre))
+            self.scrollWidgetPossibleHalfAlbums.boxes[2].insert(
+                TK.END,
+                str(round(album.averagePlayCount, 3)) + "\n",
+                Screen.container.correctRapGenre(album.genre))
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].delete(
+            "end-1c linestart", TK.END)
+        self.scrollWidgetPossibleHalfAlbums.boxes[1].config(state=TK.DISABLED)
+        self.scrollWidgetPossibleHalfAlbums.boxes[2].delete(
+            "end-1c linestart", TK.END)
+        self.scrollWidgetPossibleHalfAlbums.boxes[2].config(state=TK.DISABLED)
 
     def getAlbum(self, time, maxLeeway, over, under):
         listPossibleAlbums = []
@@ -980,7 +1081,8 @@ class ShowAlbumTracklistScreen(Screen):
             lenAlbum += len(disc)
 
         #Widget Creation
-        self.lbl_title.config(text="This is the tracklist of " +self.albumTitle)
+        self.lbl_title.config(text="This is the tracklist of " +
+                              self.albumTitle)
         #NO SCROLLABLE WIDGET
         self.txt_tracklist = TK.Text(self.frm_master,
                                      fg="white",
