@@ -38,11 +38,14 @@ from ScrollableWidget import ScrollableWidget
 
 
 class InitialScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         Screen.container.getDirectories()
         #Widget Creation
-        self.lbl_title.config(text="Welcome to the Download Helper!\nYou want help moving files related to school or music?")
+        self.lbl_title.config(
+            text=
+            "Welcome to the Download Helper!\nYou want help moving files related to school or music?"
+        )
         # self.btn_schoolVersion = TK.Button(self.frm_master,
         #                                    font=Screen.DEFAULT_FONT3,
         #                                    text="School",
@@ -146,6 +149,7 @@ class InitialScreen(Screen):
         if aux != "":
             if whichOne == 0:
                 Screen.container.downloadsDirectory = aux
+                ent_Directory = self.ent_downloadsDirectory
             elif whichOne == 1:
                 Screen.container.musicOriginDirectory = aux
                 ent_Directory = self.ent_musicOriginDirectory
@@ -165,11 +169,10 @@ class InitialScreen(Screen):
         MusicScreen(self.frm_master, True)
 
     def albumLyricsScreen(self):
-        AlbumAndLyricsScreen(
-            self.frm_master,
-            [
-                f for f in Screen.container.files if os.path.getmtime(f) > Screen.container.timeOfLastModifiedFile
-            ])
+        AlbumAndLyricsScreen(self.frm_master, [
+            f for f in Screen.container.files
+            if os.path.getmtime(f) > Screen.container.timeOfLastModifiedFile
+        ])
 
     def allFiles(self):
         AlbumAndLyricsScreen(self.frm_master, Screen.container.files)
@@ -179,7 +182,7 @@ class InitialScreen(Screen):
 
 
 class GrimeArtistsAndExceptionsScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         #Tkinter Vars
         self.firstEntryVar = TK.StringVar()
@@ -195,7 +198,9 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         #3 - exception
 
         #Widget Creation
-        self.lbl_title.config(text="Insert New Grime Artist or Remove or create Url Replacement Pair")
+        self.lbl_title.config(
+            text=
+            "Insert New Grime Artist or Remove or create Url Replacement Pair")
         self.lbl_1st = TK.Label(self.frm_master,
                                 font=Screen.DEFAULT_FONT2,
                                 fg="white",
@@ -492,7 +497,7 @@ class GrimeArtistsAndExceptionsScreen(Screen):
 
 
 # class SchoolScreen(Screen):
-#     def __init__(self, masterFramePreviousScreen):
+#     def __init__(self, masterFramePreviousScreen: TK.Frame):
 #         super().__init__(masterFramePreviousScreen)
 #         #Tkinter Vars
 #         self.title = TK.StringVar()
@@ -657,16 +662,21 @@ class GrimeArtistsAndExceptionsScreen(Screen):
 
 
 class MusicScreen(Screen):
-    def __init__(self, masterFramePreviousScreen, firstTime):
+    def __init__(self, masterFramePreviousScreen: TK.Frame, firstTime):
         super().__init__(masterFramePreviousScreen)
         if firstTime:
-            os.startfile(r"C:\Users\ruben\Desktop\deemix\start.bat")
+            openThread = threading.Thread(target=lambda: os.startfile(
+                os.path.join(Screen.container.baseDirectory, "auxFiles",
+                             "deemix.lnk")),
+                                          daemon=True)
+            openThread.start()
 
         #Tkinter Vars
         self.numberOfFilesFound = 0
         self.numberOfFilesMoved = 0
         self.buffer = []
         self.checkMusicCondition = True
+        self.canAdvance = False
         self.newFiles = []
         self.title = TK.StringVar()
         self.title.set(str(self.numberOfFilesFound) + " Files Found")
@@ -707,12 +717,15 @@ class MusicScreen(Screen):
     def nextScreen(self, event=None):
         if self.checkMusicCondition:
             self.checkMusicCondition = False
+            self.scrollableWidget.boxes[0].config(state=TK.NORMAL)
             self.scrollableWidget.boxes[0].delete("end-1c linestart", TK.END)
+            self.scrollableWidget.boxes[0].config(state=TK.DISABLED)
             self.moveOutOfBuffer()
-            self.scrollableWidget.boxes[1].delete("end-1c linestart", TK.END)
-            self.btn_nextScreen.config(text="Get Album Year and Lyrics")
+            self.btn_nextScreen.config(text="Get Album Year and Lyrics",
+                                       state=TK.DISABLED)
         else:
-            AlbumAndLyricsScreen(self.frm_master, self.newFiles)
+            if self.canAdvance:
+                AlbumAndLyricsScreen(self.frm_master, self.newFiles)
 
     def checkMusic(self):
         for filename in os.listdir(Screen.container.musicOriginDirectory):
@@ -748,7 +761,6 @@ class MusicScreen(Screen):
 
     def moveOutOfBuffer(self):
         if self.buffer != []:
-            Screen.window.update_idletasks()
             old = self.buffer[0]
             filename = old.replace("f_ck", "fuck").replace(
                 "f___", "fuck").replace("f__k", "fuck").replace(
@@ -846,30 +858,49 @@ class MusicScreen(Screen):
                                 Screen.container.musicDestinyDirectory,
                                 filename))
             self.buffer.remove(old)
+            Screen.window.update_idletasks()
             self.scrollableWidget.boxes[1].see(TK.END)
             self.title.set(str(self.numberOfFilesMoved) + " Files Moved")
-            self.moveOutOfBuffer()
+            Screen.window.after(10, self.moveOutOfBuffer)
+            # self.moveOutOfBuffer()
+        else:
+            self.canAdvance = True
+            self.btn_nextScreen.config(state=TK.NORMAL)
+            self.scrollableWidget.boxes[1].config(state=TK.NORMAL)
+            self.scrollableWidget.boxes[1].delete("end-1c linestart", TK.END)
+            self.scrollableWidget.boxes[1].config(state=TK.DISABLED)
 
     def slightTagChanges(self, filename, newFilename):
         mp3 = EasyID3(filename)
+        mp3['album'] = Screen.removeWordsFromWord(
+            ["Remaster", "Anniversary", "Deluxe", "Expanded"], mp3['album'][0])
+        mp3['title'] = Screen.removeWordsFromWord([
+            "Remaster", "Album Version", "Stereo", "Hidden Track", "Explicit",
+            "explicit"
+        ], mp3['title'][0])
+        mp3['title'] = mp3['title'][0].replace("f*ck", "fuck").replace(
+            "f***",
+            "fuck").replace("f**k", "fuck").replace("sh*t", "shit").replace(
+                "s**t", "shit").replace("sh**", "shit").replace(
+                    "ni**as", "niggas").replace("F*ck", "Fuck").replace(
+                        "F**k", "Fuck").replace("F***", "Fuck").replace(
+                            "Sh*t", "Shit").replace("S**t", "Shit").replace(
+                                "Sh**", "Shit").replace("Ni**as", "Niggas")
         if "King Gizzard and the Lizard Wizard".lower(
         ) in mp3['albumartist'][0].lower():
             mp3['artist'] = mp3['artist'][0].replace("And", "&")
             mp3['albumartist'] = mp3['albumartist'][0].replace("And", "&")
         elif "&" in mp3['albumartist'][0] and mp3['album'][
                 0] != "Without Warning" and " Mayall " not in mp3[
-                    'albumartist'][0]:
+                    'albumartist'][0] and "King Gizzard" not in mp3[
+                        'albumartist'][0]:
             mp3['albumartist'] = mp3['albumartist'][0].split(" & ")[0]
         elif mp3['album'][0] == "Without Warning":
             mp3['albumartist'] = "21 Savage, Offset & Metro Boomin"
         if "/" in mp3['albumartist'][0]:
             mp3['albumartist'] = mp3['albumartist'][0].split("/")[0]
-        if "Remaster" in mp3['title'][0] or "Album Version" in mp3['title'][
-                0] or "Stereo" in mp3['title'][0]:
-            mp3['title'] = Screen.removeWordsFromWord([
-                "Remaster", "Album Version", "Stereo", "Hidden Track",
-                "Explicit", "explicit"
-            ], mp3['title'][0])
+        if "/" in mp3['artist'][0]:
+            mp3['artist'] = mp3['artist'][0].replace("/", ", ")
         if mp3['albumartist'][0] in Screen.container.grimeArtists:
             mp3['genre'] = "Grime"
         elif "Electro" in mp3['genre'][0]:
@@ -880,29 +911,15 @@ class MusicScreen(Screen):
             mp3['genre'] = "Rap/Hip Hop"
         elif "Alternativa" in mp3['genre'][0]:
             mp3['genre'] = "Alternative"
-        if "f*ck" in mp3['title'][0].lower() or "f***" in mp3['title'][
-                0].lower() or "f**k" in mp3['title'][0].lower(
-                ) or "sh*t" in mp3['title'][0].lower() or "sh**" in mp3[
-                    'title'][0].lower() or "s**t" in mp3['title'][0].lower(
-                    ) or "ni**as" in mp3['title'][0].lower():
-            mp3['title'] = mp3['title'][0].replace("f*ck", "fuck").replace(
-                "f***", "fuck").replace("f**k", "fuck").replace(
-                    "sh*t", "shit").replace("s**t", "shit").replace(
-                        "sh**", "shit").replace("ni**as", "niggas").replace(
-                            "F*ck", "Fuck").replace("F**k", "Fuck").replace(
-                                "F***",
-                                "Fuck").replace("Sh*t", "Shit").replace(
-                                    "S**t",
-                                    "Shit").replace("Sh**", "Shit").replace(
-                                        "Ni**as", "Niggas")
         mp3.save()
 
 
 class AlbumAndLyricsScreen(Screen):
     pagesVisited_year = {}
 
-    def __init__(self, masterFramePreviousScreen, newFiles):
+    def __init__(self, masterFramePreviousScreen: TK.Frame, newFiles: list):
         super().__init__(masterFramePreviousScreen)
+        Screen.window.state('zoomed')
         Screen.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         #Tkinter Vars
@@ -1087,17 +1104,18 @@ class AlbumAndLyricsScreen(Screen):
     def exitOpenHandler(self):
         Screen.container.saveExceptions()
         Screen.window.quit()
-        # subprocess.run(
-        #     ['python',
-        #      os.path.join(Screen.container.baseDirectory, "Handler_Music.py")])
-        # subprocess.run(
-        #     [os.path.join(Screen.container.baseDirectory, "Handler_Music.exe")])
+        os.system("taskkill /f /im  deemix-pyweb.exe")
+        if "GitHub" in Screen.container.baseDirectory:
+            subprocess.run(
+            ['python',
+             os.path.join(Screen.container.baseDirectory, "Handler_Music.py")])
+        else:
+            subprocess.run(
+            [os.path.join(Screen.container.baseDirectory, "Handler_Music","Handler_Music.exe")])
 
     def changeOutput(self, index, inYear):
-        # print("CHEGOU")
         self.scrollableWidget.boxes[index].delete("end-1c linestart", TK.END)
         Screen.window.update_idletasks()
-        # time.sleep(5)
         if index == 0:
             toAdd = self.currentArtist.get()
         elif index == 1:
@@ -1173,21 +1191,11 @@ class AlbumAndLyricsScreen(Screen):
     """
 
     def ArtistAlbumAndTitle(self, artist, album, title, forYear):
-        # artist = EasyID3(filename)['albumartist'][0]
-        # title = self.iTunesTrack.Name
-        # album = self.iTunesTrack.Album
-        # album = Screen.removeWordsFromWord(
-        #     ["Remaster", "Anniversary", "Deluxe", "Expanded"], album)
-        # title = Screen.removeWordsFromWord([
-        #     "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track",
-        #     "Vocal Mix", "Explicit", "explicit", "Extended"
-        # ], title)
         if forYear:
+            self.currentYear.set(self.iTunesTrack.Year)
             for key in Screen.container.exceptionsReplacements:
                 if self.key[0] == key[0] and self.key[1] == key[1] and key[
                         2] == None:
-                    # artist = Screen.container.exceptionsReplacements[key][0]
-                    # album = Screen.container.exceptionsReplacements[key][1]
                     self.currentArtist.set(
                         Screen.container.exceptionsReplacements[key][0])
                     self.currentAlbum.set(
@@ -1195,22 +1203,16 @@ class AlbumAndLyricsScreen(Screen):
                     self.changeOutput(0, True)
                     self.changeOutput(1, True)
                     break
-        if not forYear or (self.iTunesTrack.TrackCount < 5
-                           and self.iTunesTrack.Year > 1985):
+        if not forYear or self.iTunesTrack.TrackCount < 5:  #and self.iTunesTrack.Year > 1985
             for key in Screen.container.exceptionsReplacements:
                 if self.key[0] == key[0] and self.key[1] == key[1] and key[
                         2] == None:
-                    # artist = Screen.container.exceptionsReplacements[key][0]
-                    # album = Screen.container.exceptionsReplacements[key][1]
                     self.currentArtist.set(
                         Screen.container.exceptionsReplacements[key][0])
                     self.currentAlbum.set(
                         Screen.container.exceptionsReplacements[key][1])
                 elif self.key[0] == key[0] and self.key[1] == key[
                         1] and key[2] != None and self.key[2] == key[2]:
-                    # artist = Screen.container.exceptionsReplacements[key][0]
-                    # album = Screen.container.exceptionsReplacements[key][1]
-                    # title = Screen.container.exceptionsReplacements[key][2]
                     self.currentArtist.set(
                         Screen.container.exceptionsReplacements[key][0])
                     self.currentAlbum.set(
@@ -1219,103 +1221,7 @@ class AlbumAndLyricsScreen(Screen):
                         Screen.container.exceptionsReplacements[key][2])
                     self.changeOutput(0, False)
                     self.changeOutput(2, False)
-                    # self.changeOutput(1,True)
                     break
-        # self.currentArtist.set(artist)
-        # self.currentAlbum.set(album)
-        # self.currentTitle.set(title)
-        self.currentYear.set(self.iTunesTrack.Year)
-        # if "OKNOTOK" in album:
-        #     album = "OK Computer"
-        # elif "Piñata" == album or "Bandana" == album:
-        #     artist += " & Madlib"
-        # elif "What A Time To Be Alive" == album:
-        #     artist += " & Future"
-        # elif "Alfredo" == album:
-        #     artist += " & The Alchemist"
-        # elif "sign of the times" in album.lower():
-        #     album = artist
-        # elif "UNLOCKED" == album:
-        #     artist += " & Kenny Beats"
-        # elif "Watch The Throne" == album:
-        #     artist += " & Kanye West"
-        # elif "Tonight" == album:
-        #     album += ": Franz Ferdinand"
-        # elif "Bluesbreakers" == album:
-        #     album = "Blues Breakers with Eric Clapton"
-        # elif "The Beatles" == album:
-        #     album = "The Beatles The White Album"
-        # elif "Tea In China" in album:
-        #     artist += " & The Alchemist"
-        # elif "God's" == album:
-        #     album = album.replace("'", " ")
-        # elif "Section" in album or "good kid," in album:
-        #     album.replace(".", " ")
-        # title = AlbumAndLyricsScreen.songAttributesReplacements[(artist,
-        #                                                     album,title)][2]
-
-        # if (artist, title) in Screen.container.artistTitleReplacements:
-        #     tempArtist = artist
-        #     tempTitle = title
-        #     artist = Screen.container.artistTitleReplacements[(tempArtist,
-        #                                                        tempTitle)][0]
-        #     title = Screen.container.artistTitleReplacements[(tempArtist,
-        #                                                       tempTitle)][1]
-        # if "King's Dead" == title:
-        #     artist = "Jay Rock Kendrick Lamar Future & James Blake"
-        # elif "various" in artist.lower():
-        #     artist = EasyID3(filename)['artist'][0]
-        #     if "," in artist:
-        #         artist = artist[:artist.find(",")]
-        # elif "wickedskeng" in title.lower():
-        #     title = "wickedskengman part 4"
-        # elif "Kiss and Tell" == title:
-        #     artist += " & Skepta"
-        # elif "Short King Anthem" == title:
-        #     artist = "blackbear & " + artist
-        # elif "Bang (feat." in title:
-        #     title = "Bang (Remix)"
-        # elif "Psycho" in title and "Curry" in artist:
-        #     artist = "slowthai & Denzel Curry"
-        # elif "Ripe" in title:
-        #     title = "Ripe & Ruin"
-        # elif "Life After Death" == title:
-        #     title += " (Intro)"
-        # elif "Strangiato" in title:
-        #     title += " (An Exercise In Self-Indulgence)"
-        # elif "Protect Ya Neck" in title:
-        #     title = "Protect Ya Neck"
-        # elif "Kush & Corinthians" == title:
-        #     title += "(His Pain)"
-        # elif "P Money" == artist and "Money Over Everyone" == album and "Intro" == title:
-        #     title = album + " " + title
-        # elif "Punch Up" in title:
-        #     title = title.replace("Punch Up", "Punchup")
-        # elif "Breaks" == title:
-        #     title = "The " + title
-        # elif "Packt Like" in title:
-        #     title = title.replace("Crushed", "Crushd")
-        # elif "Curtains Close" == title:
-        #     title += "(Skit)"
-        # elif "Paul" in title:
-        #     if "Marshall" in album:
-        #         title = "Paul Skit 2000"
-        #     elif "Eminem" in album:
-        #         title = "Paul Rosenberg Skit 2002"
-        # elif "Steve Ber" in title:
-        #     if "Marshall" in album:
-        #         title = "Steve Berman Skit 2000"
-        #     elif "Eminem" in album:
-        #         title = "Steve Berman Skit 2002"
-        # elif "JME" in artist and "Taking Over" in title:
-        #     title += " (It Ain't Working)"
-        # elif "Denzel Curry" in artist and "Pig Feet" in title:
-        #     artist = "Terrace Martin & Denzel Curry"
-        # title = title.replace("$hit", "Shit")
-        # if "Marc Rebillet" in artist and "Europe" in album and "Malta" not in title:
-        #     return True
-        # elif "Dizzee Rascal" in artist and "Face" in title:
-        #     return True
 
     def titleContainsRomanNumeral(self):
         for index in range(len(self.romanNums)):
@@ -1371,11 +1277,12 @@ class AlbumAndLyricsScreen(Screen):
             year = int(year[len(year) - 1])
             self.currentYear.set(year)
             AlbumAndLyricsScreen.pagesVisited_year[
-                self.currentUrl.get().replace("https://www.genius.com/albums/","")] = year
+                self.currentUrl.get().replace("https://www.genius.com/albums/",
+                                              "")] = year
             return
         else:
-            if self.iTunesTrack.TrackCount < 5 and self.iTunesTrack.Year > 1985:
-                # print(self.currentArtist.get())
+            if self.iTunesTrack.TrackCount < 5:
+                # print(self.currentArtist.get())  and self.iTunesTrack.Year > 1985
                 soup = self.checkIfWebpageExists(False)
                 if soup != None:
                     auxList = soup.findAll(
@@ -1410,6 +1317,17 @@ class AlbumAndLyricsScreen(Screen):
                     break
                 except:
                     pass
+            if self.iTunesTrack.TrackCount < 5:
+                webbrowser.open("https://www.google.com.tr/search?q={}".format(
+                    self.currentArtist.get().replace(" &", "").replace(
+                        " ", "+") + "+" + self.currentTitle.get().replace(
+                            " &", "").replace(" ", "+") +
+                    "+lyrics+site:Genius.com"))
+            else:
+                webbrowser.open("https://www.google.com.tr/search?q={}".format(
+                    self.currentArtist.get().replace(" &", "").replace(
+                        " ", "+") + "+" + self.currentAlbum.get().replace(
+                            " &", "").replace(" ", "+") + "+site:Genius.com"))
             self.errorHandled.set(False)
             self.enableEntries(0)
             self.btn_tryAgain.wait_variable(self.errorHandled)
@@ -1437,18 +1355,36 @@ class AlbumAndLyricsScreen(Screen):
             for div in soup.findAll('div', attrs={'class': 'lyrics'}):
                 self.currentLyrics += div.text.strip()
             if self.currentLyrics.strip() == "":
+                aux = []
                 for div in soup.findAll(
                         'div',
                         attrs={
-                            'class': lambda x: x and x.startswith("Lyrics__Container")
+                            'class':
+                            lambda x: x and x.startswith("Lyrics__Container")
                         }):
-                    linha = ''
-                    for elem in div.recursiveChildGenerator():
-                        if isinstance(elem, str):
-                            linha += elem.strip()
-                        elif elem.name == 'br':
-                            linha += '\n'
-                    self.currentLyrics += linha
+                    for elem in div.contents:
+                        try:
+                            if str(elem) != "<br/>":
+                                aux.append(elem.text)
+                        except:
+                            aux.append(str(elem))
+                for index in range(len(aux)):
+                    if aux[index].startswith("[") and aux[index - 1] != "":
+                        aux.insert(index, "")
+                self.currentLyrics = "\n".join(aux).strip()
+                # for div in soup.findAll(
+                #         'div',
+                #         attrs={
+                #             'class':
+                #             lambda x: x and x.startswith("Lyrics__Container")
+                #         }):
+                #     linha = ''
+                #     for elem in div.recursiveChildGenerator():
+                #         if isinstance(elem, str):
+                #             linha += elem.strip()
+                #         elif elem.name == 'br':
+                #             linha += '\n'
+                #     self.currentLyrics += linha
             if self.currentLyrics.strip() == "":
                 self.setLyricsCycle()
         else:
@@ -1476,6 +1412,11 @@ class AlbumAndLyricsScreen(Screen):
                         pass
                 self.errorHandled.set(False)
                 self.enableEntries(1)
+                webbrowser.open("https://www.google.com.tr/search?q={}".format(
+                    self.currentArtist.get().replace(" &", "").replace(
+                        " ", "+") + "+" + self.currentTitle.get().replace(
+                            " &", "").replace(" ", "+") +
+                    "+lyrics+site:Genius.com"))
                 self.btn_tryAgain.wait_variable(self.errorHandled)
                 self.value = [
                     self.currentArtist.get(),
@@ -1487,6 +1428,7 @@ class AlbumAndLyricsScreen(Screen):
                 self.disableEntries()
             if self.currentLyrics.strip() == "":
                 self.setLyricsCycle()
+        return
 
     """
         Gets the lyrics of the file passed as parameter, writing them in the metaTags of the file, given it has the metaTags defined correctly
@@ -1513,8 +1455,6 @@ class AlbumAndLyricsScreen(Screen):
             artist = EasyID3(filename)['albumartist'][0]
             title = self.iTunesTrack.Name
             album = self.iTunesTrack.Album
-            album = Screen.removeWordsFromWord(
-                ["Remaster", "Anniversary", "Deluxe", "Expanded"], album)
             title = Screen.removeWordsFromWord([
                 "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track",
                 "Vocal Mix", "Explicit", "explicit", "Extended"
@@ -1524,16 +1464,16 @@ class AlbumAndLyricsScreen(Screen):
             self.currentTitle.set(title)
             self.key = [artist, album, title]
             self.addToOutput()
-            # artistTrace = self.currentArtist.trace(
-            #     "w", lambda x, y, z: self.changeOutput(0,inYear))
-            # albumTrace = self.currentAlbum.trace(
-            #     "w", lambda x, y, z: self.changeOutput(1,inYear))
-            # titleTrace = self.currentTitle.trace(
-            #     "w", lambda x, y, z: self.changeOutput(2,inYear))
             self.ArtistAlbumAndTitle(artist, album, title, True)
+            self.getYear(filename)
+            while True:
+                try:
+                    self.iTunesTrack.Year = self.currentYear.get()
+                    break
+                except:
+                    pass
             if self.iTunesTrack.Year < 1985:
                 self.iTunesTrack.VolumeAdjustment = 50
-            self.getYear(filename)
             inYear = False
             if self.exceptionRaised and self.key != self.value:
                 if self.key[2] == self.value[2]:
@@ -1544,8 +1484,6 @@ class AlbumAndLyricsScreen(Screen):
                 self.exceptionRaised = False
             self.changeTag("lyrics")
             self.ArtistAlbumAndTitle(artist, album, title, False)
-            # if "King's Dead" == self.currentTitle.get():
-            #     self.currentArtist.set("Jay Rock, Kendrick Lamar, Future & James Blake")
             if [
                     self.currentArtist.get(),
                     self.currentAlbum.get(),
@@ -1562,15 +1500,12 @@ class AlbumAndLyricsScreen(Screen):
                 txt.insert(TK.END, "\n")
                 txt.see(TK.END)
             self.numberOfFilesProcessed += 1
-            # self.currentArtist.trace_vdelete("w", artistTrace)
-            # self.currentAlbum.trace_vdelete("w", albumTrace)
-            # self.currentTitle.trace_vdelete("w", titleTrace)
             self.title.set(
                 str(self.numberOfFilesProcessed) + "/" +
                 str(self.totalNewFiles) + " Files Processed")
             Screen.window.update_idletasks()
             self.newFiles.remove(filename)
-            Screen.window.after(50, self.lyricsAndYear)
+            Screen.window.after(10, self.lyricsAndYear)
         else:
             if self.finished:
                 for txt in self.scrollableWidget.boxes:
@@ -1596,97 +1531,15 @@ if __name__ == "__main__":
     InitialScreen(TK.Frame())
     Screen.window.mainloop()
     # os.system("cls")
-    # # url = "https://genius.com/Stormzy-sounds-of-the-skeng-lyrics"
-    # url = "https://genius.com/Jpegmafia-bald-lyrics"
-    # # print(url)
-    # # webbrowser.open(url)
-    # # url = "https://www.google.com.tr/search?q={}".format(
-    # #     "Radiohead".replace(" &", "").replace(" ", "+") + "+" +
-    # #     "A Punch Up At A Wedding".replace(" &", "").replace(" ", "+") +
-    # #     "+lyrics+site:Genius.com")
+    # url = "https://genius.com/albums/Travis-scott/astroworld"
     # req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     # webpage = urlopen(req).read()
     # soup = BeautifulSoup(webpage, 'html.parser')
-    # currentLyrics = ""
-    # for div in soup.findAll('div', attrs={'class': 'lyrics'}):
-    #     currentLyrics += div.text.strip()
-    # if currentLyrics.strip() == "":
-    #     # print(soup.prettify)
-    #     print("Here")
-    #     for div in soup.findAll('div',
-    #                             attrs={
-    #                                 'class': lambda x: x and x.startswith("Lyrics__Container")
-    #                                 #'Lyrics__Container-sc-1ynbvzw-2 iVKelV'
-    #                             }):
-    #         linha = ''
-    #         for elem in div.recursiveChildGenerator():
-    #             if isinstance(elem, str):
-    #                 linha += elem.strip()
-    #             elif elem.name == 'br':
-    #                 linha += '\n'
-    #         currentLyrics += linha
-    # print(currentLyrics)
     # yearTemp = ""
-    # # print(soup.prettify())
-    # if soup.findAll('div', attrs={'class': 'HeaderMetadata__Section-sc-1p42fnf-2 hAhJBU'})!=[]:
-    #     # print(soup.findAll('div', attrs={'class': 'HeaderMetadata__Section-sc-1p42fnf-2 hAhJBU'}))
-    #     for div in soup.findAll('div', attrs={'class': 'HeaderMetadata__Section-sc-1p42fnf-2 hAhJBU'}):
-    #         if "Release Date" in div.text:
-    #             # print(div.text)
-    #             aux = div.text.split()
-    #             year=aux[len(aux)-1]
-    #     # print(soup.findAll('div', attrs={'class': 'HeaderMetadata__Section-sc-1p42fnf-2 hAhJBU'})[1].text)
-    #     # aux = soup.findAll('div', attrs={'class': 'HeaderMetadata__Section-sc-1p42fnf-2 hAhJBU'})[1].text.split()
-    #     # print(aux[len(aux)-1])
-    # else:
-    #     # print("2nd")
-    #     # print(soup.findAll('div', attrs={'class': 'metadata_unit metadata_unit--table_row'}))
-    #     for div in soup.findAll('div', attrs={'class': 'metadata_unit metadata_unit--table_row'}):
-    #         if "Release Date" in div.text:
-    #             # print(div.text)
-    #             aux = div.text.split()
-    #             year = aux[len(aux) - 1]
-    # print(int(year))
-    # print(soup.findAll('div', attrs={'class': 'metadata_unit metadata_unit--table_row'}))
-    # print(soup.findAll('div', attrs={'class': 'metadata_unit metadata_unit--table_row'})[7].text)
-    # aux=soup.findAll('div', attrs={'class': 'metadata_unit metadata_unit--table_row'})[7].text.split()
-    # print(aux[len(aux)-1])
-    # for div in soup.findAll('div', attrs={'class': 'HeaderMetadata__Section-sc-1p42fnf-2 hAhJBU'}):
-    #     print(div)
-    #     # yearTemp += div.text.strip()
-    #     # break
-    # for div in soup.findAll('div', attrs={'class': 'metadata_unit metadata_unit--table_row'}):
-    # print(div)
-    # yearTemp += div.text.strip()
+    #         #Extract the year of the album
+    # for div in soup.findAll('div', attrs={'class': 'metadata_unit'}):
+    #     yearTemp += div.text.strip()
+    #     break
     # year = yearTemp.split()
-    # print(year[2])
-    # links = soup.findAll("a", href=re.compile("(?<=/url\?q=)(htt.*://.*)"))
-    # url2 = str(links[0])[str(links[0]).find("https"):str(links[0]).find("&")]
-    # print(url2)
-    # req2 = Request(url2, headers={'User-Agent': 'Mozilla/5.0'})
-    # webpage2 = urlopen(req2).read()
-    # soup2 = BeautifulSoup(webpage2, 'html.parser')
-    # aux = soup.get_text(separator="\n").split(sep="\n")
-    # aux = [f for f in aux if f.strip() != ""]
-    # print(aux)
-    # for i in range(len(aux)):
-    #     if "release date" in aux[i].lower():
-    #         #print(aux[i])
-    #         print(aux[i + 1][len(aux[i + 1]) - 4:])
-    #         break
-    # lyrics = ""
-    # while lyrics.strip() == "":
-    #     for div in soup2.findAll('div', attrs={'class': 'lyrics'}):
-    #         lyrics += div.text.strip()
-    #     if lyrics.strip() == "":
-    #         for div in soup2.findAll(
-    #                 'div',
-    #                 attrs={'class': 'Lyrics__Container-sc-1ynbvzw-2 iVKelV'}):
-    #             linha = ''
-    #             for elem in div.recursiveChildGenerator():
-    #                 if isinstance(elem, str):
-    #                     linha += elem.strip()
-    #                 elif elem.name == 'br':
-    #                     linha += '\n'
-    #             lyrics += linha
-    # print(lyrics)
+    # year = int(year[len(year) - 1])
+    # print(year)
