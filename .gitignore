@@ -1,4 +1,6 @@
 auxFiles/
 __pycache__/
+deemix/
 PyInstallerCmd.py
 testiTunesCOM.py
+Recycle.exe
