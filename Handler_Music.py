@@ -5,6 +5,7 @@ import tkinter.filedialog as filedialog
 import tkinter.colorchooser as colorchooser
 from mutagen.easyid3 import EasyID3
 import subprocess
+from ListsAndFiles import Album
 from Screen import Screen
 from ScrollableWidget import ScrollableWidget
 
@@ -12,7 +13,7 @@ from ScrollableWidget import ScrollableWidget
 
 
 class InitialScreen(Screen):
-    def __init__(self, masterFramePreviousScreen, firstTime=True):
+    def __init__(self, masterFramePreviousScreen: TK.Frame, firstTime=True):
         super().__init__(masterFramePreviousScreen)
         #Thread to check files in the background
         self.firstTime = firstTime and os.path.isdir(
@@ -122,12 +123,13 @@ class InitialScreen(Screen):
     def searchLibraryScreen(self):
         if self.firstTime:
             self.checkFilesThread.join()
-            Screen.container.updatePlayCounts()
+            # Screen.container.updatePlayCounts()
+            # TODO: make update play counts screen
         SearchLibraryScreen(self.frm_master)
 
 
 class SearchLibraryScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         # Possible attributes to search
         self.searchableAttrs = {
@@ -206,8 +208,11 @@ class SearchLibraryScreen(Screen):
             if self.searchableAttrs[attr].get().strip() != "":
                 while index < lenPossHits:
                     musicFile = self.listOfResults[index]
-                    if self.searchableAttrs[attr].get().lower(
-                    ) not in musicFile.getAttribute(attr).lower():
+                    try:
+                        fileAttribute = musicFile.getAttribute(attr).lower()
+                    except:
+                        fileAttribute = str(musicFile.getAttribute(attr))
+                    if self.searchableAttrs[attr].get().lower() not in fileAttribute:
                         self.listOfResults.remove(musicFile)
                         index -= 1
                         lenPossHits -= 1
@@ -222,23 +227,25 @@ class SearchLibraryScreen(Screen):
             self.scrollableWidget.boxes[0].insert(TK.END, obj.filename)
 
     def deleteTracks(self, event=None):
-        #TODO: also remove from iTunes
         numFilesDeleted = 0
         for index in self.scrollableWidget.boxes[0].curselection():
-            Screen.container.findiTunesTrack()
+            filename = self.scrollableWidget.boxes[0].get(index -
+                                                          numFilesDeleted)
+            musicFile = Screen.container.listMusicFile[
+                Screen.container.indexOf(filename)]
+            Screen.container.findiTunesTrack(musicFile.title,
+                                             musicFile.album).Delete()
+            Screen.container.listMusicFile.remove(musicFile)
             subprocess.run([
                 Screen.container.recycle,
-                os.path.join(
-                    Screen.container.musicDestinyDirectory,
-                    self.scrollableWidget.boxes[0].get(index -
-                                                       numFilesDeleted))
+                os.path.join(Screen.container.musicDestinyDirectory, filename)
             ])
             self.scrollableWidget.boxes[0].delete(index - numFilesDeleted)
             numFilesDeleted += 1
 
 
 class TrackDetailsScreen(Screen):
-    def __init__(self, masterFramePreviousScreen, listOfFiles):
+    def __init__(self, masterFramePreviousScreen: TK.Frame, listOfFiles:list):
         super().__init__(masterFramePreviousScreen)
         #Attributes
         self.attributes = {
@@ -249,7 +256,7 @@ class TrackDetailsScreen(Screen):
             "Disc Number": [],
             "Genre": [],
             "Year": [],
-            "Play Count":[]
+            "Play Count": []
         }
         self.listOfFiles = listOfFiles
 
@@ -291,17 +298,34 @@ class TrackDetailsScreen(Screen):
                     os.path.join(Screen.container.musicDestinyDirectory,
                                  musicFile.filename))
                 for attr in self.attributes:
+                    oldAttribute=self.attributes[attr][0]
                     newAttribute = self.attributes[attr][1].get()
-                    if self.attributes[attr][0] != newAttribute:
-                        audio[musicFile.attributeToMutagenTag(
-                            attr)] = newAttribute
-                        musicFile.setAttribute(attr,newAttribute)
+                    if oldAttribute != newAttribute:
+                        if attr != "Play Count":
+                            if attr=="Track Number":
+                                audio[musicFile.attributeToMutagenTag(
+                                attr)] = newAttribute+"/"+musicFile.numberOfTracks
+                            elif attr=="Disc Number":
+                                audio[musicFile.attributeToMutagenTag(
+                                attr)] = newAttribute+"/"+musicFile.numberOfDiscs
+                            else:
+                                audio[musicFile.attributeToMutagenTag(
+                                attr)] = newAttribute
+                        else:
+                            if newAttribute.startswith("+"):
+                                newAttribute = musicFile.getAttribute(attr) + int(newAttribute[1:])
+                            elif newAttribute.startswith("-"):
+                                newAttribute = max(min(1515, musicFile.getAttribute(attr) - int(newAttribute[1:])), 0)
+                            Screen.container.findiTunesTrack(musicFile.title,musicFile.album).PlayedCount = newAttribute
+                        if isinstance(musicFile.getAttribute(attr), int):
+                            newAttribute=int(newAttribute)
+                        musicFile.setAttribute(attr, newAttribute)
                 audio.save()
         SearchLibraryScreen(self.frm_master)
 
 
 class ChooseColorsScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
 
         #Widget Creation
@@ -334,7 +358,7 @@ class ChooseColorsScreen(Screen):
         self.lbl_title.grid(row=0, column=0, padx=100)
         self.btn_backScreen.grid(row=i, column=1)
 
-    def changeColor(self, genre):
+    def changeColor(self, genre:str):
         color = colorchooser.askcolor()[1]
         Screen.container.genresColors[genre] = color
         self.genreButtons[genre].configure(
@@ -348,7 +372,7 @@ class ChooseColorsScreen(Screen):
 
 
 class WorkoutRegistryScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
 
         #Tkinter Vars
@@ -392,7 +416,7 @@ class WorkoutRegistryScreen(Screen):
         self.btn_confirm.grid(row=3, column=1)
         self.btn_backScreen.grid(row=3, column=0)
 
-    def convertStrTimeToFloat(self, time):
+    def convertStrTimeToFloat(self, time:str):
         try:
             minutes = time.split(":")[0]
             seconds = time.split(":")[1]
@@ -424,7 +448,7 @@ class WorkoutRegistryScreen(Screen):
 
 
 class newFilesFoundScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         #Tkinter Vars
         self.numberOfFilesFound = 0
@@ -498,8 +522,8 @@ class newFilesFoundScreen(Screen):
         else:
             Screen.window.quit()
 
-    def addToOutput(self, artist, album, title, genre, year, trackNumber,
-                    discNumber):
+    def addToOutput(self, artist:str, album:str, title:str, genre:str, year:str, trackNumber:str,
+                    discNumber:str):
         self.numberOfFilesFound += 1
         self.auxVar.set(
             str(self.numberOfFilesFound) + "/" + str(self.totalNewFiles) +
@@ -518,7 +542,7 @@ class newFilesFoundScreen(Screen):
 
 
 class ChooseAlbumScreen(Screen):
-    def __init__(self, masterFramePreviousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         #Tkinter Vars
         self.overUnderLeeway = TK.IntVar()
@@ -622,7 +646,7 @@ class ChooseAlbumScreen(Screen):
         i = 8
         self.booleanValsGenres = []
         self.checkButtons = []
-        for genre in Screen.container.listGenres:
+        for genre in Screen.container.genresColors:
             var = TK.BooleanVar()
             btn_checkGenre = TK.Checkbutton(
                 self.frm_master,
@@ -663,8 +687,8 @@ class ChooseAlbumScreen(Screen):
                              '%P', '%d'))
         self.ent_chooseTime.delete(0, TK.END)
         self.ent_chooseLeeway.delete(0, TK.END)
-        self.ent_chooseTime.bind("<1>",self.hideMissingLabels)
-        self.ent_chooseLeeway.bind("<1>",self.hideMissingLabels)
+        self.ent_chooseTime.bind("<1>", self.hideMissingLabels)
+        self.ent_chooseLeeway.bind("<1>", self.hideMissingLabels)
 
     # restricts entry to only accept digits
     def testVal(self, inStr, acttyp):
@@ -711,7 +735,7 @@ class ChooseAlbumScreen(Screen):
         self.btn_forCar.grid(row=2, column=3)
 
     def forCar(self):
-        self.time.set(25)
+        self.time.set(35)
         self.leeway.set(5)
 
     def tickAllCheckButtons(self):
@@ -719,13 +743,14 @@ class ChooseAlbumScreen(Screen):
             val.set(self.selectAllGenres.get())
 
     def genresPicked(self):
+        listGenres = [key for key in Screen.container.genresColors]
         genresOfAlbums = []
-        for i in range(len(Screen.container.listGenres)):
+        for i in range(len(listGenres)):
             if self.booleanValsGenres[i].get():
-                genresOfAlbums.append(Screen.container.listGenres[i])
+                genresOfAlbums.append(listGenres[i])
         return genresOfAlbums
 
-    def hideMissingLabels(self,event=None):
+    def hideMissingLabels(self, event=None):
         self.lbl_missingTime.grid_forget()
         self.lbl_missingLeeway.grid_forget()
 
@@ -753,8 +778,8 @@ class ChooseAlbumScreen(Screen):
 
 
 class ListAlbumScreen(Screen):
-    def __init__(self, masterFramePreviousScreen, time, leeway,
-                 overUnderLeeway, previousScreen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame, time:int, leeway:int,
+                 overUnderLeeway:int, previousScreen:ChooseAlbumScreen):
         super().__init__(masterFramePreviousScreen)
         #Getting albums to display
         self.previousScreen = previousScreen
@@ -873,6 +898,11 @@ class ListAlbumScreen(Screen):
             highlightthickness=0,
             bd=0,
             height=len(Screen.container.genresColors) * 1.5 * 25)
+        self.lbl_pickAlbum = TK.Label(self.frm_master,
+                                      text="Pick an Album!",
+                                      font=Screen.DEFAULT_FONT2,
+                                      bg=Screen.DEFAULT_BGCOLOR,
+                                      fg="red")
 
         #Widget Placement
         self.lbl_titleAlbumsScreen.grid(row=0, column=1)
@@ -937,7 +967,7 @@ class ListAlbumScreen(Screen):
                 anchor=TK.W)
             i += 1.5
 
-    def sortAlbums(self, boxIndex, whatSort):  #whatSort=0 -> by Time
+    def sortAlbums(self, boxIndex:int, whatSort:int):  #whatSort=0 -> by Time
         if boxIndex == 0:
             if whatSort == 0:
                 self.sortTimeMostToLeastPA = not self.sortTimeMostToLeastPA
@@ -1024,7 +1054,7 @@ class ListAlbumScreen(Screen):
             "end-1c linestart", TK.END)
         self.scrollWidgetPossibleHalfAlbums.boxes[2].config(state=TK.DISABLED)
 
-    def getAlbum(self, time, maxLeeway, over, under):
+    def getAlbum(self, time:int, maxLeeway:int, over:bool, under:bool):
         listPossibleAlbums = []
         listPossibleHalfAlbums = []
         leeway = 60
@@ -1058,15 +1088,15 @@ class ListAlbumScreen(Screen):
                            curselection())
                 ShowAlbumTracklistScreen(albumSelected, self.frm_master, self)
             except TK.TclError:
-                pass  #TODO: make TK.Label warning informing user
+                self.lbl_pickAlbum.grid(row=3, column=5)
 
     def backScreen(self, event=None):
         ChooseAlbumScreen(self.frm_master)
 
 
 class ShowAlbumTracklistScreen(Screen):
-    def __init__(self, albumSelected, masterFramePreviousScreen,
-                 previousScreen):
+    def __init__(self, albumSelected: Album, masterFramePreviousScreen: TK.Frame,
+                 previousScreen:ListAlbumScreen):
         super().__init__(masterFramePreviousScreen)
         #Determine selected Album
         self.previousScreen = previousScreen
