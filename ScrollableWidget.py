@@ -4,16 +4,16 @@ import tkinter as TK
 class ScrollableWidget():
     DEFAULTFONT = ("Times New Roman", 12)
     DEFAULTBGCOLOR = "#061130"
-    SCROLLSPEED = 30  #less=faster
+    SCROLLSPEED = 25  #less=faster
 
-    def __init__(self, frm_master, whatBoxes):
-        self.whatBoxes = whatBoxes
-        self.boxes = []
+    def __init__(self, frm_master: TK.Frame, whatBoxes :list):
+        self.whatBoxes = whatBoxes #the list of how many and what boxes to create (either Listbox or Text)
+        self.boxes = [] #the list of actual boxes (TK entities) created
 
         self.frame = TK.Frame(frm_master, bg=ScrollableWidget.DEFAULTBGCOLOR)
         self.scrollbar = TK.Scrollbar(self.frame,
                                       command=self.scrollOutput,
-                                      orient=TK.VERTICAL)
+                                      orient=TK.VERTICAL) #the scrollbar that is controlling all boxes
         for boxType in self.whatBoxes:
             if boxType == "Textbox":
                 box = TK.Text(self.frame,
@@ -27,14 +27,14 @@ class ScrollableWidget():
                                  fg="white",
                                  font=ScrollableWidget.DEFAULTFONT,
                                  yscrollcommand=self.scrollbar.set)
-            box.bind("<MouseWheel>", self.scrollOutputViaMouseWheel)
+            box.bind("<MouseWheel>", self.scrollOutputViaMouseWheel) #this makes sure we can scroll the boxes with the mouse wheel
             self.boxes.append(box)
 
-    def scrollOutput(self, *args):
+    def scrollOutput(self, *args): #method to change the y view of the boxes by clicking and dragging the scrollbar
         for box in self.boxes:
             box.yview(*args)
 
-    def scrollOutputViaMouseWheel(self, event):
+    def scrollOutputViaMouseWheel(self, event): #method to change the y view of the boxes based on the mouse wheel travel
         for box in self.boxes:
             box.yview("scroll",
                       -1 * (event.delta // ScrollableWidget.SCROLLSPEED),
