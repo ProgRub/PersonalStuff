@@ -1,8 +1,6 @@
 import tkinter as TK
 from ListsAndFiles import ListsAndFiles
 
-#TODO: comment the code
-
 
 class Screen:
     container = ListsAndFiles(
