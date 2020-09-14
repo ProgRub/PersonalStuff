@@ -146,7 +146,6 @@ class InitialScreen(Screen):
 class UpdatePlayCountsScreen(Screen):
     def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
-        #FIXME: Not updating the file's play count
         Screen.window.state('zoomed')
         #Attributes to show, with the width of the box
         self.attributes = {
