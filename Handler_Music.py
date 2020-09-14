@@ -4,15 +4,13 @@ import threading
 import tkinter as TK
 import tkinter.filedialog as filedialog
 import tkinter.colorchooser as colorchooser
-from PIL import ImageTk,Image
+from PIL import ImageTk, Image
 from mutagen.id3 import ID3, APIC
 from mutagen.easyid3 import EasyID3
 import subprocess
 from ListsAndFiles import Album
 from Screen import Screen
 from ScrollableWidget import ScrollableWidget
-
-#TODO: comment the code
 
 
 class InitialScreen(Screen):
@@ -58,12 +56,13 @@ class InitialScreen(Screen):
                                            font=Screen.DEFAULT_FONT3)
         self.btn_recalibrateAll = TK.Button(self.frm_master,
                                             text="Recalibrate All Files",
-                                            command=self.recalibrateAll,
+                                            command=self.recalibrateAllScreen,
                                             font=Screen.DEFAULT_FONT3)
-        self.btn_updatePlayCounts = TK.Button(self.frm_master,
-                                            text="Update Play Counts (From iTunes)",
-                                            command=self.updatePC,
-                                            font=Screen.DEFAULT_FONT3)
+        self.btn_updatePlayCounts = TK.Button(
+            self.frm_master,
+            text="Update Play Counts (From iTunes)",
+            command=self.updatePCScreen,
+            font=Screen.DEFAULT_FONT3)
         self.btn_chooseGenreColors = TK.Button(
             self.frm_master,
             text="Genre Colors",
@@ -92,6 +91,10 @@ class InitialScreen(Screen):
         self.btn_searchLibrary.grid(row=7, column=2)
         self.btn_updatePlayCounts.grid(row=8, column=2)
 
+    """
+        Method that prompts the dialog to the user to change the directory where music is stored and changes it in the file (and variable)
+    """
+
     def chooseDirectory(self):
         aux = filedialog.askdirectory(initialdir=os.path.join(
             "C:", os.sep, "Users", "ruben", "Desktop")).replace("/", "\\")
@@ -110,7 +113,7 @@ class InitialScreen(Screen):
             self.checkFilesThread.join()
         ChooseAlbumScreen(self.frm_master)
 
-    def recalibrateAll(self):
+    def recalibrateAllScreen(self):
         if self.firstTime:
             self.checkFilesThread.join()
         Screen.container.listMusicFile.clear()
@@ -118,7 +121,7 @@ class InitialScreen(Screen):
         Screen.container.timeOfLastModified = Screen.container.timeOfLastModifiedFile = 0
         NewFilesFoundScreen(self.frm_master)
 
-    def updatePC(self):
+    def updatePCScreen(self):
         if self.firstTime:
             self.checkFilesThread.join()
         UpdatePlayCountsScreen(self.frm_master)
@@ -173,22 +176,28 @@ class UpdatePlayCountsScreen(Screen):
             label.grid(row=0, column=index)
             self.scrollWidget.boxes[index].grid(row=1, column=index)
             index += 1
-        self.btn_backScreen.config(text="Back", state=TK.DISABLED,command=self.backScreen)
+        self.btn_backScreen.config(text="Back",
+                                   state=TK.DISABLED,
+                                   command=self.backScreen)
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=0, padx=150)
         self.scrollWidget.frame.grid(row=1, column=0)
-        self.scrollWidget.scrollbar.grid(row=1, column=index,sticky=TK.NS)
+        self.scrollWidget.scrollbar.grid(row=1, column=index, sticky=TK.NS)
         self.btn_backScreen.grid(row=2, column=0, padx=200)
 
         Screen.window.update_idletasks()
-        Screen.window.after(10,lambda: Screen.container.updatePlayCounts(self))
-        # Screen.container.updatePlayCounts(self)
+        Screen.window.after(10, lambda: Screen.container.updatePlayCounts(self)
+                            )  #for visual purposes
 
     def backScreen(self, event=None):
         if self.numberOfFilesProcessed == Screen.container.numberOfFiles:
             Screen.container.reWriteFiles()
             InitialScreen(self.frm_master, False)
+
+    """
+        Method that adds the file's properties to the output
+    """
 
     def addToOutput(self, artist, album, title, playCount):
         self.numberOfFilesProcessed += 1
@@ -272,20 +281,25 @@ class SearchLibraryScreen(Screen):
         aux = [
             self.scrollableWidget.boxes[0].get(index)
             for index in self.scrollableWidget.boxes[0].curselection()
-        ]
+        ]  #list of filenames that were choosen
         if len(aux) != 0:
             TrackDetailsScreen(self.frm_master, [
                 musicFile for musicFile in self.listOfResults
                 if musicFile.filename in aux
-            ])
+            ])  #we pass the list of music files that were chosen by the user
+
+    """
+        Method that updates the list of results, list of files that correspond to all atributes that user is searching
+    """
 
     def updateResults(self, *args):
         self.listOfResults = Screen.container.listMusicFile.copy()
         lenPossHits = len(self.listOfResults)
         for attr in self.searchableAttrs:
             index = 0
-            if self.searchableAttrs[attr].get().strip() != "":
-                while index < lenPossHits:
+            if self.searchableAttrs[attr].get().strip(
+            ) != "":  #if the user is searching for the attribute
+                while index < lenPossHits:  #we remove all files whose attribute doesn't match
                     musicFile = self.listOfResults[index]
                     try:
                         fileAttribute = musicFile.getAttribute(attr).lower()
@@ -299,12 +313,20 @@ class SearchLibraryScreen(Screen):
                     index += 1
         self.writeResults()
 
+    """
+        Method that writes the list of results
+    """
+
     def writeResults(self):
         self.scrollableWidget.boxes[0].config(state=TK.NORMAL)
         self.scrollableWidget.boxes[0].delete(0, TK.END)
         self.listOfResults.sort(key=lambda x: x.filename)
         for obj in self.listOfResults:
             self.scrollableWidget.boxes[0].insert(TK.END, obj.filename)
+
+    """
+        Method that deletes the tracks the user selected, from file, from the directory and from iTunes
+    """
 
     def deleteTracks(self, event=None):
         numFilesDeleted = 0
@@ -368,11 +390,15 @@ class TrackDetailsScreen(Screen):
         self.lbl_title.grid(row=0, column=2)
         self.btn_backScreen.grid(row=i, column=0)
 
+    """
+        When the user goes to the previous screen we take care of changing the attributes of the files
+    """
+
     def backScreen(self, event=None):
         if not all([
                 self.attributes[attr][0] == self.attributes[attr][1].get()
                 for attr in self.attributes
-        ]):
+        ]):  #check if any attributes have been changed
             for musicFile in self.listOfFiles:
                 audio = EasyID3(
                     os.path.join(Screen.container.musicDestinyDirectory,
@@ -385,24 +411,26 @@ class TrackDetailsScreen(Screen):
                             if attr == "Track Number":
                                 audio[musicFile.attributeToMutagenTag(
                                     attr
-                                )] = newAttribute + "/" + musicFile.numberOfTracks
+                                )] = newAttribute + "/" + musicFile.numberOfTracks  #preserves the format
                             elif attr == "Disc Number":
                                 audio[musicFile.attributeToMutagenTag(
                                     attr
-                                )] = newAttribute + "/" + musicFile.numberOfDiscs
+                                )] = newAttribute + "/" + musicFile.numberOfDiscs  #preserves the format
                             else:
                                 audio[musicFile.attributeToMutagenTag(
                                     attr)] = newAttribute
                         else:
-                            if newAttribute.startswith("+"):
+                            if newAttribute.startswith(
+                                    "+"
+                            ):  #if it starts with a '+' we add to the existing play count
                                 newAttribute = musicFile.getAttribute(
                                     attr) + int(newAttribute[1:])
-                            elif newAttribute.startswith("-"):
+                            elif newAttribute.startswith(
+                                    "-"
+                            ):  #subtract to the existing play count, with a clamp, to make sure it's not negative
                                 newAttribute = max(
-                                    min(
-                                        1515,
-                                        musicFile.getAttribute(attr) -
-                                        int(newAttribute[1:])), 0)
+                                    musicFile.getAttribute(attr) -
+                                    int(newAttribute[1:]), 0)
                             Screen.container.findiTunesTrack(
                                 musicFile.title,
                                 musicFile.album).PlayedCount = newAttribute
@@ -447,6 +475,10 @@ class ChooseColorsScreen(Screen):
         self.lbl_title.grid(row=0, column=0, padx=100)
         self.btn_backScreen.grid(row=i, column=1)
 
+    """
+        Method that pops up the dialog to change the color and changes it if the user selects a color
+    """
+
     def changeColor(self, genre: str):
         color = colorchooser.askcolor()[1]
         Screen.container.genresColors[genre] = color
@@ -467,14 +499,24 @@ class WorkoutRegistryScreen(Screen):
         #Tkinter Vars
         self.workoutName = TK.StringVar()
         self.time = TK.StringVar()
+        self.workoutChosen = TK.StringVar()
+        self.workoutsList = list(Screen.container.workoutDatabase.keys())
+        self.workoutsList.append("New Workout")
+        self.workoutChosen.set(self.workoutsList[0])
+        self.workoutChosen.trace("w", self.workoutChosenChanged)
 
         #Widget Creation
         self.lbl_title.config(
             text=
             "Input the name of the workout and how long it took (format MM:SS)"
         )
+        self.lbl_dropdownWorkout = TK.Label(self.frm_master,
+                                            text="Workout Database",
+                                            bg=Screen.DEFAULT_BGCOLOR,
+                                            fg="white",
+                                            font=Screen.DEFAULT_FONT2)
         self.lbl_workoutName = TK.Label(self.frm_master,
-                                        text="Name of the Workout",
+                                        text="Name of the New Workout",
                                         bg=Screen.DEFAULT_BGCOLOR,
                                         fg="white",
                                         font=Screen.DEFAULT_FONT2)
@@ -483,10 +525,16 @@ class WorkoutRegistryScreen(Screen):
                                  bg=Screen.DEFAULT_BGCOLOR,
                                  fg="white",
                                  font=Screen.DEFAULT_FONT2)
+        self.dropdownMenu = TK.OptionMenu(self.frm_master, self.workoutChosen,
+                                          *self.workoutsList)
+        self.dropdownMenu.config(font=Screen.DEFAULT_FONT3,
+                                 bg=Screen.DEFAULT_BGCOLOR,
+                                 fg="white")
         self.ent_workoutName = TK.Entry(self.frm_master,
                                         textvariable=self.workoutName,
                                         font=Screen.DEFAULT_FONT3,
-                                        width=30)
+                                        width=30,
+                                        state=TK.DISABLED)
         self.ent_time = TK.Entry(self.frm_master,
                                  textvariable=self.time,
                                  font=Screen.DEFAULT_FONT3,
@@ -498,14 +546,27 @@ class WorkoutRegistryScreen(Screen):
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=1)
-        self.lbl_workoutName.grid(row=1, column=0)
-        self.lbl_time.grid(row=2, column=0)
-        self.ent_workoutName.grid(row=1, column=1, sticky=TK.W)
-        self.ent_time.grid(row=2, column=1, sticky=TK.W)
-        self.btn_confirm.grid(row=3, column=1)
-        self.btn_backScreen.grid(row=3, column=0)
+        self.lbl_dropdownWorkout.grid(row=1, column=0)
+        self.lbl_workoutName.grid(row=2, column=0)
+        self.lbl_time.grid(row=3, column=0)
+        self.dropdownMenu.grid(row=1, column=1)
+        self.ent_workoutName.grid(row=2, column=1, sticky=TK.W)
+        self.ent_time.grid(row=3, column=1, sticky=TK.W)
+        self.btn_confirm.grid(row=4, column=1)
+        self.btn_backScreen.grid(row=4, column=0)
 
-    def convertStrTimeToFloat(self, time: str):
+    def workoutChosenChanged(self, *args):
+        if self.workoutChosen.get() == "New Workout":
+            self.ent_workoutName.config(state=TK.NORMAL)
+        else:
+            self.ent_workoutName.config(state=TK.DISABLED)
+
+    """
+        Method that converts the time format HH:MM to an int which is the total number of seconds
+        If the format is not HH:MM, returns -1
+    """
+
+    def convertStrTimeToInt(self, time: str):
         try:
             minutes = time.split(":")[0]
             seconds = time.split(":")[1]
@@ -517,18 +578,34 @@ class WorkoutRegistryScreen(Screen):
         except (ValueError, IndexError) as e:
             return -1
 
+    """
+        Method that doesn't advance to a screen but adds the time to the chosen workout, and adds a new workout, if there is one
+    """
+
     def nextScreen(self, event=None):
-        time = int(self.convertStrTimeToFloat(self.time.get()))
-        workoutName = self.workoutName.get().strip()
+        time = int(self.convertStrTimeToInt(self.time.get()))
         if time != -1:
-            if workoutName in Screen.container.workoutDatabase:
-                Screen.container.workoutDatabase[workoutName].append(time)
+            if self.ent_workoutName["state"] == TK.DISABLED:
+                workoutName = self.workoutChosen.get()
             else:
-                Screen.container.workoutDatabase[workoutName] = [time]
-            self.time.set("")
-        else:
-            self.workoutName.set("")
-            self.ent_workoutName.focus()
+                workoutName = self.workoutName.get().strip()
+                if workoutName not in Screen.container.workoutDatabase:
+                    Screen.container.workoutDatabase[workoutName] = []
+                    self.workoutsList[len(self.workoutsList) - 1] = workoutName
+                    self.workoutsList.append("New Workout")
+                    #[Down] Updating the dropdown menu options to add the new workout
+                    menu = self.dropdownMenu["menu"]
+                    menu.delete(0, "end")
+                    for string in self.workoutsList:
+                        menu.add_command(label=string,
+                                         command=lambda value=string: self.
+                                         workoutChosen.set(value))
+                else:
+                    self.workoutChosen.set(workoutName)
+                self.workoutName.set("")
+                self.ent_workoutName.config(state=TK.DISABLED)
+            Screen.container.workoutDatabase[workoutName].append(time)
+        self.time.set("")
 
     def backScreen(self, event=None):
         Screen.container.saveWorkoutDatabase()
@@ -594,13 +671,19 @@ class NewFilesFoundScreen(Screen):
         self.btn_advanceScreen.grid(row=2, column=0, padx=200)
 
         Screen.window.update_idletasks()
-        Screen.window.after(10,lambda: Screen.container.checkFiles(self))
+        Screen.window.after(
+            10,
+            lambda: Screen.container.checkFiles(self))  #for visual purposes
 
     def nextScreen(self, event=None):
         if not Screen.container.newFilesFound:
             ChooseAlbumScreen(self.frm_master)
         else:
             Screen.window.quit()
+
+    """
+        Method that adds the file's attributes to the output, the textboxes
+    """
 
     def addToOutput(self, artist: str, album: str, title: str, genre: str,
                     year: int, trackNumber: int, discNumber: int):
@@ -641,6 +724,7 @@ class ChooseAlbumScreen(Screen):
         self.time = TK.IntVar()
         self.leeway = TK.IntVar()
         self.workoutName = TK.StringVar()
+
         #Widget Creation
         self.lbl_infoChooseAlbum = TK.Label(
             self.frm_master,
@@ -706,10 +790,10 @@ class ChooseAlbumScreen(Screen):
                                           font=Screen.DEFAULT_FONT2,
                                           bg=Screen.DEFAULT_BGCOLOR,
                                           fg="white")
-        self.ent_workoutName = TK.Entry(self.frm_master,
-                                        textvariable=self.workoutName,
-                                        font=Screen.DEFAULT_FONT3,
-                                        width=30)
+        self.dropdown_workoutName = TK.OptionMenu(
+            self.frm_master, self.workoutName,
+            *list(Screen.container.workoutDatabase.keys()))
+        self.dropdown_workoutName.config(font=Screen.DEFAULT_FONT3, width=20)
         self.btn_confirmWorkout = TK.Button(self.frm_master,
                                             text="Confirm Workout",
                                             command=self.workoutChosen,
@@ -777,8 +861,10 @@ class ChooseAlbumScreen(Screen):
                              '%P', '%d'))
         self.ent_chooseTime.delete(0, TK.END)
         self.ent_chooseLeeway.delete(0, TK.END)
-        self.ent_chooseTime.bind("<1>", self.hideMissingLabels)
-        self.ent_chooseLeeway.bind("<1>", self.hideMissingLabels)
+        self.ent_chooseTime.bind("<1>",
+                                 self.hideMissingLabels)  #bind to any digit
+        self.ent_chooseLeeway.bind("<1>",
+                                   self.hideMissingLabels)  #bind to any digit
 
     # restricts entry to only accept digits
     def testVal(self, inStr, acttyp):
@@ -793,13 +879,21 @@ class ChooseAlbumScreen(Screen):
         self.time.set(240)
         self.leeway.set(240)
 
+    """
+        Method bound to the button that lets choose a workout, placing all the necessary widgets
+    """
+
     def forWorkout(self):
         self.lbl_chooseWorkout.grid(row=0, column=3)
-        self.ent_workoutName.grid(row=1, column=3)
+        self.dropdown_workoutName.grid(row=1, column=3)
         self.btn_confirmWorkout.grid(row=2, column=3)
         self.btn_forCar.grid_forget()
         self.btn_forWorkout.grid_forget()
         pass
+
+    """
+        Method that gets the name of the chosen workout and determines its average completion time and maximum leeway, max between average and fastest time and average and slowest time
+    """
 
     def workoutChosen(self):
         workoutName = self.workoutName.get()
@@ -819,7 +913,7 @@ class ChooseAlbumScreen(Screen):
             self.time.set(average)
         self.workoutName.set("")
         self.lbl_chooseWorkout.grid_forget()
-        self.ent_workoutName.grid_forget()
+        self.dropdown_workoutName.grid_forget()
         self.btn_confirmWorkout.grid_forget()
         self.btn_forWorkout.grid(row=1, column=3)
         self.btn_forCar.grid(row=2, column=3)
@@ -843,6 +937,10 @@ class ChooseAlbumScreen(Screen):
     def hideMissingLabels(self, event=None):
         self.lbl_missingTime.grid_forget()
         self.lbl_missingLeeway.grid_forget()
+
+    """
+        Method that, if the user has given a time and leeway, advances to the next screen, otherwise the user is informed somethin is missing
+    """
 
     def nextScreen(self, event=None):
         advance = True
@@ -879,7 +977,7 @@ class ListAlbumScreen(Screen):
         self.time = float(time)
         self.leeway = float(leeway)
         self.over = self.overUnderLeeway <= 1
-        self.under = self.overUnderLeeway <= 2 and self.overUnderLeeway != 1
+        self.under = self.overUnderLeeway % 2 == 0
         self.lists = self.getAlbum(self.time * 60, self.leeway * 60, self.over,
                                    self.under)
         self.possibleAlbums = self.lists[0]
@@ -938,9 +1036,8 @@ class ListAlbumScreen(Screen):
             self.frm_master,
             text=
             ("These are the albums where half of their length varies between "
-             + str(int(self.time - (self.leeway * int(self.under)))) +
-             " and " + str(int(self.time +
-                               (self.leeway * int(self.over)))) + " minutes."),
+             + str(int(self.time - self.leeway)) + " and " +
+             str(int(self.time + self.leeway)) + " minutes."),
             bg=Screen.DEFAULT_BGCOLOR,
             fg="white",
             font=Screen.DEFAULT_FONT1)
@@ -1041,7 +1138,7 @@ class ListAlbumScreen(Screen):
         self.writePossibleAlbums()
         self.writePossibleHalfAlbums()
         i = 0
-        for genre in Screen.container.genresColors:
+        for genre in Screen.container.genresColors:  # creates the label that explains which color corresponds to which genre
             self.cnv_colorsLabel.create_rectangle(
                 0,
                 i * 25,
@@ -1058,30 +1155,40 @@ class ListAlbumScreen(Screen):
                 anchor=TK.W)
             i += 1.5
 
+    """
+        Method that sorts the chosen list based on the chosen attribute to sort
+        boxIndex = 0, sort the list of possible albums; boxIndex = 1, sort the list of possible half albums
+        whatSort = 0, sort the chosen list by time; whatSort=1, sort the list by the average play count of the album
+    """
+
     def sortAlbums(self, boxIndex: int, whatSort: int):  #whatSort=0 -> by Time
         if boxIndex == 0:
             if whatSort == 0:
-                self.sortTimeMostToLeastPA = not self.sortTimeMostToLeastPA
+                self.sortTimeMostToLeastPA = not self.sortTimeMostToLeastPA  #if we have previously sorted from longest to shortest now we sort from shortest to longest and vice-versa
                 self.possibleAlbums.sort(key=lambda album: album.length,
                                          reverse=self.sortTimeMostToLeastPA)
             else:
-                self.sortPlayCountMostToLeastPA = not self.sortPlayCountMostToLeastPA
+                self.sortPlayCountMostToLeastPA = not self.sortPlayCountMostToLeastPA  #if we have previously sorted from most to least average play count now we sort from least to most and vice-versa
                 self.possibleAlbums.sort(
                     key=lambda album: album.averagePlayCount,
                     reverse=self.sortPlayCountMostToLeastPA)
             self.writePossibleAlbums()
         else:
             if whatSort == 0:
-                self.sortTimeMostToLeastPHA = not self.sortTimeMostToLeastPHA
+                self.sortTimeMostToLeastPHA = not self.sortTimeMostToLeastPHA  #see above
                 self.possibleHalfAlbums.sort(
                     key=lambda album: album.length,
                     reverse=self.sortTimeMostToLeastPHA)
             else:
-                self.sortPlayCountMostToLeastPHA = not self.sortPlayCountMostToLeastPHA
+                self.sortPlayCountMostToLeastPHA = not self.sortPlayCountMostToLeastPHA  #see above
                 self.possibleHalfAlbums.sort(
                     key=lambda album: album.averagePlayCount,
                     reverse=self.sortPlayCountMostToLeastPHA)
             self.writePossibleHalfAlbums()
+
+    """
+        Method that clears and writes again the list of possible albums, used in the beginning and when the user sorts the list
+    """
 
     def writePossibleAlbums(self):
         self.scrollWidgetPossibleAlbums.boxes[1].config(state=TK.NORMAL)
@@ -1114,6 +1221,10 @@ class ListAlbumScreen(Screen):
             "end-1c linestart", TK.END)
         self.scrollWidgetPossibleAlbums.boxes[2].config(state=TK.DISABLED)
 
+    """
+        Method that clears and writes again the list of possible half albums, used in the beginning and when the user sorts the list
+    """
+
     def writePossibleHalfAlbums(self):
         self.scrollWidgetPossibleHalfAlbums.boxes[1].config(state=TK.NORMAL)
         self.scrollWidgetPossibleHalfAlbums.boxes[2].config(state=TK.NORMAL)
@@ -1145,28 +1256,41 @@ class ListAlbumScreen(Screen):
             "end-1c linestart", TK.END)
         self.scrollWidgetPossibleHalfAlbums.boxes[2].config(state=TK.DISABLED)
 
+    """
+        Method that gets the list of albums in the given time frame, and list of "half albums" in the given time frame
+    """
+
     def getAlbum(self, time: int, maxLeeway: int, over: bool, under: bool):
         listPossibleAlbums = []
         listPossibleHalfAlbums = []
-        leeway = 60
         underTime = 0
         overTime = 0
-        while leeway <= maxLeeway:
-            underTime = time - leeway * int(under)
-            overTime = time + leeway * int(over)
-            for album in Screen.container.listAlbums:
-                lengthOfAlbum = album.length
-                genreOfAlbum = Screen.container.correctRapGenre(album.genre)
-                if genreOfAlbum in self.genresOfAlbums:
-                    if lengthOfAlbum >= underTime and lengthOfAlbum <= overTime and album not in listPossibleAlbums:
+        for album in Screen.container.listAlbums:
+            leeway = 60
+            lengthOfAlbum = album.length
+            genreOfAlbum = Screen.container.correctRapGenre(album.genre)
+            if genreOfAlbum in self.genresOfAlbums:
+                while leeway <= maxLeeway:
+                    underTime = time - leeway * int(under)
+                    overTime = time + leeway * int(over)
+                    if lengthOfAlbum >= underTime and lengthOfAlbum <= overTime:  # and album not in listPossibleAlbums
                         listPossibleAlbums.append(album)
-                        if album in listPossibleHalfAlbums:
-                            listPossibleHalfAlbums.remove(album)
-                    elif lengthOfAlbum / 2 >= underTime and lengthOfAlbum / 2 <= overTime and album not in listPossibleHalfAlbums and album not in listPossibleAlbums:
+                        break
+                        # if album in listPossibleHalfAlbums:
+                        #     listPossibleHalfAlbums.remove(album)
+                    elif lengthOfAlbum / 2 >= (
+                            time - leeway
+                    ) and lengthOfAlbum / 2 <= (
+                            time + leeway
+                    ):  # and album not in listPossibleAlbums:# and album not in listPossibleAlbums:
                         listPossibleHalfAlbums.append(album)
-            leeway += 60
+                        break
+                    leeway += 60
         return [listPossibleAlbums, listPossibleHalfAlbums]
 
+    """
+        If the user hasn't selected an album, we pop a label to let him know
+    """
     def nextScreen(self, event=None):
         try:
             albumSelected = self.scrollWidgetPossibleAlbums.boxes[0].get(
@@ -1198,18 +1322,30 @@ class ShowAlbumTracklistScreen(Screen):
             if album.artist == self.albumArtist and album.title == self.albumTitle:
                 self.albumSelected = album
                 break
-        for disc in self.albumSelected.tracksByDiscs:
+        for disc in self.albumSelected.tracksByDiscs: #this helps us get the artwork for the album
             for track in disc:
-                filen = ID3(os.path.join(Screen.container.musicDestinyDirectory, track.filename))
+                filen = ID3(
+                    os.path.join(Screen.container.musicDestinyDirectory,
+                                 track.filename))
                 aux_artwork = filen.getall("APIC")[0].data
-                artwork = open(os.path.join(Screen.container.baseDirectory,"auxFiles","image.jpg"), 'wb')
+                try:
+                    os.remove(
+                        os.path.join(Screen.container.baseDirectory,
+                                     "auxFiles", "image.jpg"))
+                except:
+                    pass
+                artwork = open(
+                    os.path.join(Screen.container.baseDirectory, "auxFiles",
+                                 "image.jpg"), 'wb')
                 artwork.write(aux_artwork)
                 break
         lenAlbum = 0
         for disc in self.albumSelected.tracksByDiscs:
             lenAlbum += len(disc)
-        img = Image.open(os.path.join(Screen.container.baseDirectory, "auxFiles", "image.jpg"))
-        self.cover = ImageTk.PhotoImage(img.resize((300,300)))
+        img = Image.open(
+            os.path.join(Screen.container.baseDirectory, "auxFiles",
+                         "image.jpg"))
+        self.cover = ImageTk.PhotoImage(img.resize((300, 300)))
 
         #Widget Creation
         self.lbl_title.config(text="This is the tracklist of " +
@@ -1232,7 +1368,7 @@ class ShowAlbumTracklistScreen(Screen):
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=1)
-        self.lbl_image.grid(row=1,column=2)
+        self.lbl_image.grid(row=1, column=2)
         self.btn_backScreen.grid(row=2, column=0)
         self.txt_tracklist.grid(row=1, column=1)
         self.lbl_length.grid(row=2, column=1)
