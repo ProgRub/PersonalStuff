@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.8
 import os
 import time
 import threading
@@ -17,23 +18,6 @@ import subprocess
 from Screen import Screen
 from ScrollableWidget import ScrollableWidget
 
-# OneDrive = os.path.join('C:', os.path.sep, 'Users', 'ruben',
-#                         'Onedrive - Universidade da Madeira', 'Ano_2',
-#                         'Semestre_2')
-# ACaulas = os.path.join(OneDrive, 'AC', 'Aulas')
-# ACpl = os.path.join(OneDrive, 'AC', 'PL')
-# ACtp = os.path.join(OneDrive, 'AC', 'TP')
-# ACfreq = os.path.join(OneDrive, 'AC', 'Frequências')
-# ACgeral = os.path.join(OneDrive, 'AC')
-# MNIOtp = os.path.join(OneDrive, 'MNIO', 'TP')
-# MNIOformularios_geral = os.path.join(OneDrive, 'MNIO')
-# POOaulas = os.path.join(OneDrive, 'POO', 'Aulas')
-# POOpl = os.path.join(OneDrive, 'POO', 'PL')
-# POOgeral = os.path.join(OneDrive, 'POO')
-# TFCaulas = os.path.join(OneDrive, 'TFC', 'Aulas')
-# TFCtp = os.path.join(OneDrive, 'TFC', 'TP')
-# TFCgeral = os.path.join(OneDrive, 'TFC')
-
 #TODO: comment the code
 
 
@@ -41,15 +25,16 @@ class InitialScreen(Screen):
     def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         Screen.container.getDirectories()
+
         #Widget Creation
         self.lbl_title.config(
             text=
             "Welcome to the Download Helper!\nYou want help moving files related to school or music?"
         )
-        # self.btn_schoolVersion = TK.Button(self.frm_master,
-        #                                    font=Screen.DEFAULT_FONT3,
-        #                                    text="School",
-        #                                    command=self.schoolScreen)
+        self.btn_schoolVersion = TK.Button(self.frm_master,
+                                           font=Screen.DEFAULT_FONT3,
+                                           text="School",
+                                           command=self.schoolScreen)
         self.btn_musicVersion = TK.Button(self.frm_master,
                                           font=Screen.DEFAULT_FONT3,
                                           text="Music (Downloaded)",
@@ -58,11 +43,11 @@ class InitialScreen(Screen):
             self.frm_master,
             font=Screen.DEFAULT_FONT3,
             text="Music (Files Modified)",
-            command=self.albumLyricsScreen)
+            command=self.albumLyricsOnlyModified)
         self.btn_allMusicFiles = TK.Button(self.frm_master,
                                            font=Screen.DEFAULT_FONT3,
                                            text="Music (All Files)",
-                                           command=self.allFiles)
+                                           command=self.albumLyricsAllFiles)
         self.btn_grimeArtistsExceptions = TK.Button(
             self.frm_master,
             text="Grime Artists And Exceptions",
@@ -116,7 +101,7 @@ class InitialScreen(Screen):
 
         #Widget Placement
         self.lbl_title.grid(row=0, column=0, padx=200)
-        # self.btn_schoolVersion.grid(row=2, column=1)
+        self.btn_schoolVersion.grid(row=2, column=1)
         self.btn_musicVersion.grid(row=3, column=1)
         self.btn_musicModifiedVersion.grid(row=4, column=1)
         self.btn_allMusicFiles.grid(row=5, column=1)
@@ -142,10 +127,13 @@ class InitialScreen(Screen):
         self.ent_musicDestinyDirectory.config(state="readonly")
         Screen.container.getExceptions()
 
+    """
+        Method that prompts the dialog to the user to change the directory he chose to change and changes it in the file (and variable)
+    """
+
     def chooseDirectory(self, whichOne):
-        aux = filedialog.askdirectory(initialdir=os.path.join(
-            "C:", os.path.sep, "Users", "ruben", "Desktop")).replace(
-                "/", "\\")
+        aux = filedialog.askdirectory(
+            initialdir=Screen.container.baseDirectory.replace("/", "\\"))
         if aux != "":
             if whichOne == 0:
                 Screen.container.downloadsDirectory = aux
@@ -162,19 +150,19 @@ class InitialScreen(Screen):
             ent_Directory.insert(TK.END, aux)
             ent_Directory.config(state="readonly")
 
-    # def schoolScreen(self):
-    #     SchoolScreen(self.frm_master)
+    def schoolScreen(self):
+        SchoolScreen(self.frm_master)
 
     def musicScreen(self):
         MusicScreen(self.frm_master, True)
 
-    def albumLyricsScreen(self):
+    def albumLyricsOnlyModified(self):
         AlbumAndLyricsScreen(self.frm_master, [
             f for f in Screen.container.files
             if os.path.getmtime(f) > Screen.container.timeOfLastModifiedFile
         ])
 
-    def allFiles(self):
+    def albumLyricsAllFiles(self):
         AlbumAndLyricsScreen(self.frm_master, Screen.container.files)
 
     def grimeArtistsExceptionsScreen(self):
@@ -185,77 +173,36 @@ class GrimeArtistsAndExceptionsScreen(Screen):
     def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         #Tkinter Vars
-        self.firstEntryVar = TK.StringVar()
-        self.secondEntryVar = TK.StringVar()
-        self.thirdEntryVar = TK.StringVar()
-        self.fourthEntryVar = TK.StringVar()
-        self.fifthEntryVar = TK.StringVar()
-        self.sixthEntryVar = TK.StringVar()
+        self.widgetGroupsDict = {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} #0 - label, 1 - stringVar, 2 - entry
         Screen.container.getGrimeArtists()
         self.mode = 0
-        #1 -  Grime Artist
-        #2 -  Url replacement pair
+        #1 - Grime Artist
+        #2 - Url replacement pair
         #3 - exception
 
         #Widget Creation
         self.lbl_title.config(
             text=
-            "Insert New Grime Artist or Remove or create Url Replacement Pair")
-        self.lbl_1st = TK.Label(self.frm_master,
+            "Alter Grime Artists, Url Replacement Pairs or add new Exception")
+        for key in self.widgetGroupsDict:
+            label = TK.Label(self.frm_master,
                                 font=Screen.DEFAULT_FONT2,
                                 fg="white",
                                 bg=Screen.DEFAULT_BGCOLOR)
-        self.lbl_2nd = TK.Label(self.frm_master,
-                                text="New Replacement",
-                                font=Screen.DEFAULT_FONT2,
-                                fg="white",
-                                bg=Screen.DEFAULT_BGCOLOR)
-        self.lbl_3rd = TK.Label(self.frm_master,
-                                text="Old Title",
-                                font=Screen.DEFAULT_FONT2,
-                                fg="white",
-                                bg=Screen.DEFAULT_BGCOLOR)
-        self.lbl_4th = TK.Label(self.frm_master,
-                                text="New Artist",
-                                font=Screen.DEFAULT_FONT2,
-                                fg="white",
-                                bg=Screen.DEFAULT_BGCOLOR)
-        self.lbl_5th = TK.Label(self.frm_master,
-                                text="New Album",
-                                font=Screen.DEFAULT_FONT2,
-                                fg="white",
-                                bg=Screen.DEFAULT_BGCOLOR)
-        self.lbl_6th = TK.Label(self.frm_master,
-                                text="New Title",
-                                font=Screen.DEFAULT_FONT2,
-                                fg="white",
-                                bg=Screen.DEFAULT_BGCOLOR)
+            self.widgetGroupsDict[key].append(label)
+            stringVar = TK.StringVar()
+            self.widgetGroupsDict[key].append(stringVar)
+            entry = TK.Entry(self.frm_master,
+                                textvariable=stringVar,
+                                font=Screen.DEFAULT_FONT3,
+                                width=50)
+            self.widgetGroupsDict[key].append(entry)
+        self.widgetGroupsDict[2][0].config(text="Old Title")
+        self.widgetGroupsDict[3][0].config(text="New Artist")
+        self.widgetGroupsDict[4][0].config(text="New Album")
+        self.widgetGroupsDict[5][0].config(text="New Title")
         self.scrollableWidget = ScrollableWidget(self.frm_master, ["Listbox"])
         self.scrollableWidget.boxes[0].config(height=15, width=100)
-        self.ent_1st = TK.Entry(self.frm_master,
-                                textvariable=self.firstEntryVar,
-                                font=Screen.DEFAULT_FONT3,
-                                width=50)
-        self.ent_2nd = TK.Entry(self.frm_master,
-                                textvariable=self.secondEntryVar,
-                                font=Screen.DEFAULT_FONT3,
-                                width=50)
-        self.ent_3rd = TK.Entry(self.frm_master,
-                                textvariable=self.thirdEntryVar,
-                                font=Screen.DEFAULT_FONT3,
-                                width=50)
-        self.ent_4th = TK.Entry(self.frm_master,
-                                textvariable=self.fourthEntryVar,
-                                font=Screen.DEFAULT_FONT3,
-                                width=50)
-        self.ent_5th = TK.Entry(self.frm_master,
-                                textvariable=self.fifthEntryVar,
-                                font=Screen.DEFAULT_FONT3,
-                                width=50)
-        self.ent_6th = TK.Entry(self.frm_master,
-                                textvariable=self.sixthEntryVar,
-                                font=Screen.DEFAULT_FONT3,
-                                width=50)
         self.btn_grimeArtist = TK.Button(self.frm_master,
                                          text="Grime Artist",
                                          font=Screen.DEFAULT_FONT3,
@@ -272,7 +219,8 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         self.btn_confirm = TK.Button(self.frm_master,
                                      text="Add New One",
                                      font=Screen.DEFAULT_FONT3,
-                                     command=self.nextScreen)
+                                     command=self.nextScreen,
+                                     state=TK.DISABLED)
         self.btn_previousScreen = TK.Button(self.frm_master,
                                             text="Go Back",
                                             font=Screen.DEFAULT_FONT3,
@@ -316,29 +264,15 @@ class GrimeArtistsAndExceptionsScreen(Screen):
             selected = selected[8:]
             if " ---> " in selected:
                 key = selected[:selected.find(" ---> ")]
-                # value = selected[selected.find(" ---> ") + len(" ---> "):]
             else:
                 key = selected.split(", ")
             if excType == 0:
-                # self.scrollableWidget.boxes[0].insert(
-                #     TK.END, "Type: 0 " + key[0] + ", " + key[1] + " - " + key[2] +
-                #     " ---> " + Screen.container.exceptionsReplacements[key][0] +
-                #     ", " + Screen.container.exceptionsReplacements[key][1] +
-                #     " - " + Screen.container.exceptionsReplacements[key][2])
                 artist = key[:key.find(", ")]
                 album = key[key.find(", ") + len(", "):key.find(" - ")]
                 title = key[key.find(" - ") + len(" - "):]
                 if title == "None": title = None
                 Screen.container.exceptionsReplacements.pop(
                     (artist, album, title))
-                # newArtist = value[:value.find(" - ")]
-                # newAlbum = value[value.find(" - ") + len(" - "):]
-            # elif excType == 1:
-            #     artist = key[:key.find(" - ")]
-            #     title = key[key.find(" - ") + len(" - "):]
-            #     Screen.container.artistTitleReplacements.pop((artist, title))
-            #     # newArtist = value[:value.find(" - ")]
-            #     # newTitle = value[value.find(" - ") + len(" - "):]
             else:
                 artist = key[0]
                 album = key[1]
@@ -347,80 +281,78 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         self.scrollableWidget.boxes[0].delete(
             self.scrollableWidget.boxes[0].curselection())
 
+    """
+        Method that doesn't really go to a different "Screen" but it's called when the user presses the confirm button (or hits enter) and takes care of adding what the user inputted to the correct colection
+    """
     def nextScreen(self, event=None):
-        if self.mode == 1:
-            artist = self.firstEntryVar.get().strip()
-            if artist != "":
-                Screen.container.grimeArtists.append(artist)
-        elif self.mode == 2:
-            oldPair = self.firstEntryVar.get()
-            newPair = self.secondEntryVar.get()
-            try:
-                old = oldPair[oldPair.find("\"") + 1:oldPair.rfind("\"")]
-                new = newPair[newPair.find("\"") + 1:newPair.rfind("\"")]
-                Screen.container.replacementsDict[old] = new
-            except:
-                print("ERROR")
-        else:
-            oldArtist = self.firstEntryVar.get().strip()
-            oldAlbum = self.secondEntryVar.get().strip()
-            oldTitle = self.thirdEntryVar.get().strip()
-            newArtist = self.fourthEntryVar.get().strip()
-            newAlbum = self.fifthEntryVar.get().strip()
-            newTitle = self.sixthEntryVar.get().strip()
-            if newArtist == "" and newAlbum == "" and newTitle == "":
-                if oldArtist != "" and oldAlbum != "" and oldTitle != "":
-                    Screen.container.songsToSkip.append(
-                        [oldArtist, oldAlbum, oldTitle])
+        if self.btn_confirm["state"]==TK.NORMAL:
+            if self.mode == 1:
+                artist = self.widgetGroupsDict[0][1].get().strip()
+                if artist != "":
+                    Screen.container.grimeArtists.append(artist)
+            elif self.mode == 2:
+                oldPair = self.widgetGroupsDict[0][1].get()
+                newPair = self.widgetGroupsDict[1][1].get()
+                try:
+                    old = oldPair[oldPair.find("\"") + 1:oldPair.rfind("\"")]
+                    new = newPair[newPair.find("\"") + 1:newPair.rfind("\"")]
+                    Screen.container.replacementsDict[old] = new
+                except:
+                    pass
             else:
-                Screen.container.exceptionsReplacements[(oldArtist, oldAlbum,
-                                                         oldTitle)] = [
-                                                             newArtist,
-                                                             newAlbum, newTitle
-                                                         ]
-        self.firstEntryVar.set("")
-        self.secondEntryVar.set("")
-        self.thirdEntryVar.set("")
-        self.fourthEntryVar.set("")
-        self.fifthEntryVar.set("")
-        self.sixthEntryVar.set("")
-        self.scrollableWidget.boxes[0].delete(0, TK.END)
-        self.lbl_title.config(
-            text=
-            "Alter Grime Artists, Url Replacement Pairs or add new Exception")
-        self.btn_grimeArtist.grid(row=2, column=1)
-        self.btn_urlReplacementPair.grid(row=3, column=1)
-        self.btn_exceptions.grid(row=4, column=1)
-        self.btn_previousScreen.grid(row=5, column=0)
-        self.lbl_1st.grid_forget()
-        self.lbl_2nd.grid_forget()
-        self.lbl_3rd.grid_forget()
-        self.lbl_4th.grid_forget()
-        self.lbl_5th.grid_forget()
-        self.lbl_6th.grid_forget()
-        self.ent_1st.grid_forget()
-        self.ent_2nd.grid_forget()
-        self.ent_3rd.grid_forget()
-        self.ent_4th.grid_forget()
-        self.ent_5th.grid_forget()
-        self.ent_6th.grid_forget()
-        self.btn_confirm.grid_forget()
+                oldArtist = self.widgetGroupsDict[0][1].get().strip()
+                oldAlbum = self.widgetGroupsDict[1][1].get().strip()
+                oldTitle = self.widgetGroupsDict[2][1].get().strip()
+                newArtist = self.widgetGroupsDict[3][1].get().strip()
+                newAlbum = self.widgetGroupsDict[4][1].get().strip()
+                newTitle = self.widgetGroupsDict[5][1].get().strip()
+                if newArtist == "" and newAlbum == "" and newTitle == "":
+                    if oldArtist != "" and oldAlbum != "" and oldTitle != "":
+                        Screen.container.songsToSkip.append(
+                            [oldArtist, oldAlbum, oldTitle])
+                else:
+                    Screen.container.exceptionsReplacements[(oldArtist, oldAlbum,
+                                                            oldTitle)] = [
+                                                                newArtist,
+                                                                newAlbum, newTitle
+                                                            ]
+            for key in self.widgetGroupsDict:
+                self.widgetGroupsDict[key][1].set("")
+                self.widgetGroupsDict[key][0].grid_forget()
+                self.widgetGroupsDict[key][2].grid_forget()
+            self.scrollableWidget.boxes[0].delete(0, TK.END)
+            self.lbl_title.config(
+                text=
+                "Alter Grime Artists, Url Replacement Pairs or add new Exception")
+            self.btn_grimeArtist.grid(row=2, column=1)
+            self.btn_urlReplacementPair.grid(row=3, column=1)
+            self.btn_exceptions.grid(row=4, column=1)
+            self.btn_previousScreen.grid(row=5, column=0)
+            self.btn_confirm.config(state=TK.DISABLED)
+            self.btn_confirm.grid_forget()
 
+    """
+        Method that sets the screen so the user can add or remove a grime artist
+    """
     def alterGrimeArtists(self):
         self.mode = 1
         self.lbl_title.config(text="Insert the name of the Artist")
         self.scrollableWidget.boxes[0].delete(0, TK.END)
         for artist in Screen.container.grimeArtists:
             self.scrollableWidget.boxes[0].insert(0, artist)
-        self.lbl_1st.config(text="Artist")
-        self.lbl_1st.grid(row=1, column=1)
-        self.ent_1st.grid(row=1, column=2)
+        self.widgetGroupsDict[0][0].config(text="Artist")
+        self.widgetGroupsDict[0][0].grid(row=1, column=1)
+        self.widgetGroupsDict[0][2].grid(row=1, column=2)
         self.btn_confirm.grid(row=2, column=2)
+        self.btn_confirm.config(state=TK.NORMAL)
         self.btn_grimeArtist.grid_forget()
         self.btn_urlReplacementPair.grid_forget()
         self.btn_exceptions.grid_forget()
         self.btn_previousScreen.grid_forget()
 
+    """
+        Method that sets the screen so the user can add or remove a replacement url pair
+    """
     def alterReplacementPair(self):
         self.mode = 2
         self.lbl_title.config(
@@ -430,18 +362,22 @@ class GrimeArtistsAndExceptionsScreen(Screen):
             self.scrollableWidget.boxes[0].insert(
                 TK.END, "\"" + key + "\"\t--->\t\"" +
                 Screen.container.replacementsDict[key] + "\"")
-        self.lbl_1st.config(text="Old Replacement")
-        self.lbl_2nd.config(text="New Replacement")
-        self.lbl_1st.grid(row=1, column=1)
-        self.lbl_2nd.grid(row=2, column=1)
-        self.ent_1st.grid(row=1, column=2)
-        self.ent_2nd.grid(row=2, column=2)
+        self.widgetGroupsDict[0][0].config(text="Old Replacement")
+        self.widgetGroupsDict[1][0].config(text="New Replacement")
+        self.widgetGroupsDict[0][0].grid(row=1, column=1)
+        self.widgetGroupsDict[1][0].grid(row=2, column=1)
+        self.widgetGroupsDict[0][2].grid(row=1, column=2)
+        self.widgetGroupsDict[1][2].grid(row=2, column=2)
         self.btn_confirm.grid(row=3, column=2)
+        self.btn_confirm.config(state=TK.NORMAL)
         self.btn_grimeArtist.grid_forget()
         self.btn_urlReplacementPair.grid_forget()
         self.btn_exceptions.grid_forget()
         self.btn_previousScreen.grid_forget()
 
+    """
+        Method that sets the screen so the user can add or remove an exception
+    """
     def alterExceptions(self):
         self.mode = 3
         self.lbl_title.config(text="Insert the exception")
@@ -456,209 +392,252 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         for key in Screen.container.songsToSkip:
             self.scrollableWidget.boxes[0].insert(TK.END,
                                                   "Type: 1 " + ", ".join(key))
-        self.lbl_1st.config(text="Old Artist")
-        self.lbl_2nd.config(text="Old Album")
-        self.lbl_3rd.config(text="Old Title")
-        self.lbl_4th.config(text="New Artist")
-        self.lbl_5th.config(text="New Album")
-        self.lbl_6th.config(text="New Title")
-        self.lbl_1st.grid(row=1, column=1)
-        self.lbl_2nd.grid(row=2, column=1)
-        self.lbl_3rd.grid(row=3, column=1)
-        self.lbl_4th.grid(row=4, column=1)
-        self.lbl_5th.grid(row=5, column=1)
-        self.lbl_6th.grid(row=6, column=1)
-        self.ent_1st.grid(row=1, column=2)
-        self.ent_2nd.grid(row=2, column=2)
-        self.ent_3rd.grid(row=3, column=2)
-        self.ent_4th.grid(row=4, column=2)
-        self.ent_5th.grid(row=5, column=2)
-        self.ent_6th.grid(row=6, column=2)
-        self.btn_confirm.grid(row=7, column=2)
+        self.widgetGroupsDict[0][0].config(text="Old Artist")
+        self.widgetGroupsDict[1][0].config(text="Old Album")
+        self.widgetGroupsDict[2][0].config(text="Old Title")
+        self.widgetGroupsDict[3][0].config(text="New Artist")
+        self.widgetGroupsDict[4][0].config(text="New Album")
+        self.widgetGroupsDict[5][0].config(text="New Title")
+        for key in self.widgetGroupsDict:
+            self.widgetGroupsDict[key][0].grid(row=key+1,column=1)
+            self.widgetGroupsDict[key][2].grid(row=key+1,column=2)
+        self.btn_confirm.grid(row=len(self.widgetGroupsDict)+1, column=2)
+        self.btn_confirm.config(state=TK.NORMAL)
         self.btn_grimeArtist.grid_forget()
         self.btn_urlReplacementPair.grid_forget()
         self.btn_exceptions.grid_forget()
         self.btn_previousScreen.grid_forget()
 
-    # def removeArtist(self):
-    #     self.mode = 2
-    #     self.lbl_title.config(text="Insert the name of the Artist")
-    #     self.scrollableWidget.boxes[0].delete(0, TK.END)
-    #     for artist in Screen.container.grimeArtists:
-    #         self.scrollableWidget.boxes[0].insert(0, artist)
-    #     self.lbl_1st.config(text="Artist")
-    #     self.lbl_1st.grid(row=1, column=1)
-    #     self.ent_1st.grid(row=1, column=2)
-    #     self.btn_confirm.grid(row=2, column=2)
-    #     self.btn_addArtist.grid_forget()
-    #     self.btn_removeArtist.grid_forget()
-    #     self.btn_addUrlReplacementPair.grid_forget()
-    #     self.btn_previousScreen.grid_forget()
 
+class SchoolScreen(Screen):
+    def __init__(self, masterFramePreviousScreen: TK.Frame):
+        super().__init__(masterFramePreviousScreen)
+        #Tkinter Vars
+        self.tempoAtual = time.time()
+        self.OneDrive = os.path.join('C:', os.path.sep, 'Users', 'ruben',
+                                     'Onedrive - Universidade da Madeira',
+                                     'Ano_2', 'Semestre_2')
+        self.title = TK.StringVar()
+        self.pathSelected = TK.StringVar()
+        self.possibleDirs = []
+        for direc in os.listdir(self.OneDrive):
+            if os.path.isdir(os.path.join(self.OneDrive, direc)):
+                self.possibleDirs.append(direc)
+                self.addDirectories(os.path.join(self.OneDrive, direc))
+        self.pathSelected.set(self.possibleDirs[0])
+        self.possibleDirs.append("Delete File")
+        self.possibleDirs.append("Skip File")
+        self.fileFound = False
 
-# class SchoolScreen(Screen):
-#     def __init__(self, masterFramePreviousScreen: TK.Frame):
-#         super().__init__(masterFramePreviousScreen)
-#         #Tkinter Vars
-#         self.title = TK.StringVar()
-#         self.numberOfFiles = 0
-#         self.title.set(str(self.numberOfFiles) + " Files Found")
+        self.numberOfFiles = 0
+        self.title.set(str(self.numberOfFiles) + " Files Found")
 
-#         #Widget Creation
-#         self.lbl_title.config(textvariable=self.title)
-#         self.txt_filesFound = TK.Text(self.frm_master,
-#                                       bg=Screen.DEFAULT_BGCOLOR,
-#                                       fg="white",
-#                                       font=Screen.DEFAULT_FONT3)
-#         self.txt_filesMoved = TK.Text(self.frm_master,
-#                                       bg=Screen.DEFAULT_BGCOLOR,
-#                                       fg="white",
-#                                       font=Screen.DEFAULT_FONT3)
-#         self.btn_stopCycle = TK.Button(self.frm_master,
-#                                        text="Stop",
-#                                        font=Screen.DEFAULT_FONT3,
-#                                        command=self.stopCheckDownloads)
+        #Widget Creation
+        self.lbl_title.config(textvariable=self.title)
+        self.scrollWidget = ScrollableWidget(self.frm_master,
+                                             ["Textbox", "Textbox"])
+        self.btn_stopCycle = TK.Button(self.frm_master,
+                                       text="Stop",
+                                       font=Screen.DEFAULT_FONT3,
+                                       command=self.stopCheckDownloads)
+        self.frm_choosePath = TK.Frame(self.frm_master,
+                                       bg=Screen.DEFAULT_BGCOLOR)
+        self.dropdownMenu = TK.OptionMenu(self.frm_choosePath,
+                                          self.pathSelected,
+                                          *self.possibleDirs)
+        self.dropdownMenu.config(font=Screen.DEFAULT_FONT3,
+                                 bg=Screen.DEFAULT_BGCOLOR,
+                                 fg="white",
+                                 state=TK.DISABLED)
+        self.ent_newFilename = TK.Entry(self.frm_choosePath,
+                                        width=50,
+                                        font=Screen.DEFAULT_FONT3,
+                                        state=TK.DISABLED)
+        self.btn_confirm = TK.Button(self.frm_choosePath,
+                                     text="Confirm",
+                                     state=TK.DISABLED,
+                                     font=Screen.DEFAULT_FONT3)
 
-#         #Widget Placement
-#         self.lbl_title.grid(row=0, column=0, padx=200)
-#         self.txt_filesFound.grid(row=1, column=0)
-#         self.txt_filesMoved.grid(row=1, column=1)
-#         self.btn_stopCycle.grid(row=2, column=0)
+        #Widget Placement
+        self.lbl_title.grid(row=0, column=0, padx=200)
+        self.scrollWidget.frame.grid(row=1, column=0)
+        self.scrollWidget.boxes[0].grid(row=0, column=0)
+        self.scrollWidget.boxes[1].grid(row=0, column=1)
+        self.scrollWidget.scrollbar.grid(row=0, column=2, sticky=TK.NS)
+        self.frm_choosePath.grid(row=2, column=0)
+        self.ent_newFilename.grid(row=0, column=0)
+        self.dropdownMenu.grid(row=1, column=0)
+        self.btn_confirm.grid(row=2, column=0)
+        self.btn_stopCycle.grid(row=3, column=0)
 
-#         Screen.window.update_idletasks()
+        Screen.window.update_idletasks()
 
-#         self.cycleCondition = True
-#         webbrowser.open("https://moodle.cee.uma.pt/login/index.php", new=2)
-#         webbrowser.open("https://infoalunos.uma.pt", new=2)
-#         self.txt_filesMoved.tag_config("existed", fg="yellow")
-#         self.txt_filesMoved.tag_config("notExisted", fg="green")
-#         self.txt_filesMoved.tag_config("deleted/Skipped", fg="red")
-#         self.checkDownloads()
+        self.cycleCondition = True
+        # webbrowser.open("https://moodle.cee.uma.pt/login/index.php", new=2)
+        # webbrowser.open("https://infoalunos.uma.pt", new=2)
+        self.checkDownloads()
 
-#     def stopCheckDownloads(self):
-#         self.cycleCondition = False
-#         self.btn_stopCycle.destroy()
+    def nextScreen(self, event=None):
+        if self.btn_confirm["state"] == TK.NORMAL:
+            self.fileFound = True
 
-#     def addToOutput(self, fileFound, fileMoved, tag):
-#         self.numberOfFiles += 1
-#         self.title.set(str(self.numberOfFiles) + " Files Found")
-#         self.txt_filesFound.config(state=TK.NORMAL)
-#         self.txt_filesMoved.config(state=TK.NORMAL)
-#         self.txt_filesFound.insert(TK.END, fileFound + "\n")
-#         self.txt_filesMoved.insert(TK.END, fileMoved + "\n", tag)
-#         self.txt_filesFound.config(state=TK.DISABLED)
-#         self.txt_filesMoved.config(state=TK.DISABLED)
-#         Screen.window.update_idletasks()
-#         self.txt_filesFound.see(TK.END)
-#         self.txt_filesMoved.see(TK.END)
+    def addDirectories(self, directory):
+        if directory.replace(self.OneDrive + os.sep, "").count(os.sep) >= 2:
+            return
+        for direc in os.listdir(directory):
+            if os.path.isdir(os.path.join(directory, direc)):
+                self.possibleDirs.append(
+                    os.path.join(directory.replace(self.OneDrive + os.sep, ""),
+                                 direc))
+                self.addDirectories(os.path.join(directory, direc))
 
-#     def checkDownloads(self):
-#         #FIXME: need to adapt this to the GUI and the new disciplines when the time comes
-#         if self.cycleCondition:
-#             Screen.window.after(1000, self.checkDownloads)
-#             for filename in os.listdir(Screen.container.downloadsDirectory):
-#                 #try:
-#                 if os.path.getctime(os.path.join(
-#                         Screen.container.downloadsDirectory,
-#                         filename)) > Screen.tempoAtual and os.path.getsize(
-#                             os.path.join(
-#                                 Screen.container.downloadsDirectory,
-#                                 filename)) > 0 and filename.endswith(".pdf"):
-#                     destino = self.whichFolder(filename)
-#                     if "False" != destino:
-#                         count += 1
-#                         try:
-#                             os.rename(
-#                                 os.path.join(Screen.container.downloadsDirectory, filename),
-#                                 destino)
-#                             self.addToOutput(filename, destino, "notExisted")
-#                             # print("File downloaded succesfully")
-#                         except FileExistsError:
-#                             os.remove(destino)
-#                             os.rename(
-#                                 os.path.join(Screen.container.downloadsDirectory, filename),
-#                                 destino)
-#                             self.addToOutput(filename, destino, "existed")
-#                             #print("File replaced succesfully")
-#                     else:
-#                         self.addToOutput(filename, "REMOVED/SKIPPED",
-#                                          "deleted/Skipped")
-#                         #print("File skipped/deleted")
-#                 # except FileNotFoundError:
-#                 #     if not filename.endswith(".part"):
-#                 #         print(filename + "\nERRO")
-#                 #         break
+    def stopCheckDownloads(self):
+        self.cycleCondition = False
+        self.btn_stopCycle.destroy()
 
-#     def whichFolder(self, filename):
-#         if filename.startswith("PT_AC_"):
-#             return os.path.join(ACaulas,
-#                                 filename[len("PT_AC_"):].replace("T_", ""))
-#         elif filename.startswith("Apresentação") or filename.startswith(
-#                 "Guia"):
-#             return os.path.join(ACpl, filename)
-#         elif filename.startswith("Aula_"):
-#             return os.path.join(ACtp, filename)
-#         elif filename.startswith("T1") or filename.startswith("T2"):
-#             if "Frequencia" in filename:
-#                 return os.path.join(
-#                     ACfreq, 'Normal',
-#                     filename[len("T1_"):].replace("_AC",
-#                                                   "").replace("_PT", ""))
-#             elif "Recurso" in filename:
-#                 return os.path.join(
-#                     ACfreq, 'Recurso', filename[len("T1_T2_"):].replace(
-#                         "_AC", "").replace("_PT", "").replace("_20", ""))
-#             elif "Especial" in filename:
-#                 return os.path.join(
-#                     ACfreq, 'EpocaEspecial', filename[len("T1_T2_"):].replace(
-#                         "_AC", "").replace("_PT", "").replace("_20", ""))
-#         elif filename.startswith("AC_P"):
-#             return os.path.join(ACgeral,
-#                                 "Enunciado Projeto " + filename[4] + ".pdf")
-#         elif filename[2] == ".":
-#             return os.path.join(POOaulas, filename)
-#         elif filename.startswith("Ficha"):
-#             diretoria = os.path.join(
-#                 POOpl, filename[:filename.find(".")].replace(" ", ""))
-#             try:
-#                 os.makedirs(diretoria)
-#             except FileExistsError:
-#                 print("Directory already existed")
-#             return os.path.join(diretoria, filename)
-#         elif filename.startswith("MNIO_FichaExerc"):
-#             return os.path.join(MNIOtp, filename[len("MNIO_"):])
-#         elif filename.startswith("MNIO_Formulario"):
-#             return os.path.join(MNIOformularios_geral, filename[len("MNIO_"):])
-#         elif filename.startswith("Folha"):
-#             return os.path.join(TFCtp, filename.replace("TFC1920", ""))
-#         elif filename.startswith("TFC1920"):
-#             numero = filename[filename.rfind("Semana") +
-#                               6:filename.rfind("Handout") - 1]
-#             return os.path.join(
-#                 TFCaulas,
-#                 filename.replace("TFC1920", "").replace("-", "")[0:12] +
-#                 numero + ".pdf")
-#         else:
-#             rename = input(
-#                 "This is the file " + filename +
-#                 "\nDo you want to rename it? (y/n, d to delete, s to skip)\n")
-#             if rename == "y":
-#                 filename = input("Rename the file: ") + ".pdf"
-#             elif rename == "d":
-#                 os.remove(os.path.join(Screen.container.downloadsDirectory, filename))
-#                 return "False"
-#             elif rename == "s":
-#                 return "False"
-#             op = input(
-#                 "Choose the discipline:\n1.AC\n2.POO\n3.TFC\n4.MNIO\nOption: ")
-#             if op == "1":
-#                 return os.path.join(ACgeral, filename)
-#             elif op == "2":
-#                 return os.path.join(POOgeral, filename)
-#             elif op == "3":
-#                 return os.path.join(TFCgeral, filename)
-#             elif op == "4":
-#                 return os.path.join(MNIOformularios_geral, filename)
+    def addToOutput(self, fileFound, fileMoved):
+        self.numberOfFiles += 1
+        self.title.set(str(self.numberOfFiles) + " Files Found")
+        self.scrollWidget.boxes[0].config(state=TK.NORMAL)
+        self.scrollWidget.boxes[1].config(state=TK.NORMAL)
+        self.scrollWidget.boxes[0].insert(TK.END, fileFound + "\n")
+        self.scrollWidget.boxes[1].insert(TK.END, fileMoved + "\n")
+        self.scrollWidget.boxes[0].config(state=TK.DISABLED)
+        self.scrollWidget.boxes[1].config(state=TK.DISABLED)
+        Screen.window.update_idletasks()
+        self.scrollWidget.boxes[0].see(TK.END)
+        self.scrollWidget.boxes[1].see(TK.END)
+
+    def checkDownloads(self):
+        #FIXME: need to adapt this to the new disciplines when the time comes and test it
+        if self.cycleCondition:
+            Screen.window.after(1000, self.checkDownloads)
+            for filename in os.listdir(Screen.container.downloadsDirectory):
+                if os.path.getctime(
+                        os.path.join(Screen.container.downloadsDirectory,
+                                     filename)
+                ) > self.tempoAtual and os.path.getsize(
+                        os.path.join(
+                            Screen.container.downloadsDirectory,
+                            filename)) > 0 and filename.endswith(".pdf"):
+                    self.ent_newFilename.config(state=TK.NORMAL)
+                    self.ent_newFilename.insert(0, filename)
+                    self.dropdownMenu.config(state=TK.NORMAL)
+                    self.btn_confirm.config(state=TK.NORMAL)
+                    self.btn_confirm.wait_variable(self.fileFound)
+                    self.ent_newFilename.config(state=TK.DISABLED)
+                    self.dropdownMenu.config(state=TK.DISABLED)
+                    self.btn_confirm.config(state=TK.DISABLED)
+                    self.fileFound = False
+                    oldFile = os.path.join(Screen.container.downloadsDirectory,
+                                           filename)
+                    newFile = os.path.join(self.OneDrive, self.pathSelected,
+                                           self.ent_newFilename.get())
+                    if self.pathSelected.get(
+                    ) != "Delete" and self.pathSelected.get() != "Skip":
+                        while True:
+                            try:
+                                os.rename(oldFile, newFile)
+                                self.addToOutput(oldFile, newFile)
+                                break
+                            except FileExistsError:
+                                os.remove(newFile)
+                    else:
+                        if self.pathSelected.get() == "Delete":
+                            subprocess.run([Screen.container.recycle, oldFile])
+                            self.addToOutput(
+                                oldFile, newFile[newFile.rfind(os.sep) + 1:] +
+                                " deleted")
+                        else:
+                            self.addToOutput(oldFile, oldFile)
+                    # destino = self.whichFolder(filename)
+                    # if "False" != destino:
+                    #     try:
+                    #         os.rename(
+                    #             os.path.join(Screen.container.downloadsDirectory, filename),
+                    #             destino)
+                    #         self.addToOutput(filename, destino, "notExisted")
+                    #     except FileExistsError:
+                    #         os.remove(destino)
+                    #         os.rename(
+                    #             os.path.join(Screen.container.downloadsDirectory, filename),
+                    #             destino)
+                    #         self.addToOutput(filename, destino, "existed")
+                    # else:
+                    #     self.addToOutput(filename, "REMOVED/SKIPPED",
+                    #                      "deleted/Skipped")
+
+    # def whichFolder(self, filename):
+    #     if filename.startswith("PT_AC_"):
+    #         return os.path.join(self.ACaulas,
+    #                             filename[len("PT_AC_"):].replace("T_", ""))
+    #     elif filename.startswith("Apresentação") or filename.startswith(
+    #             "Guia"):
+    #         return os.path.join(self.ACpl, filename)
+    #     elif filename.startswith("Aula_"):
+    #         return os.path.join(self.ACtp, filename)
+    #     elif filename.startswith("T1") or filename.startswith("T2"):
+    #         if "Frequencia" in filename:
+    #             return os.path.join(
+    #                 self.ACfreq, 'Normal',
+    #                 filename[len("T1_"):].replace("_AC",
+    #                                               "").replace("_PT", ""))
+    #         elif "Recurso" in filename:
+    #             return os.path.join(
+    #                 self.ACfreq, 'Recurso', filename[len("T1_T2_"):].replace(
+    #                     "_AC", "").replace("_PT", "").replace("_20", ""))
+    #         elif "Especial" in filename:
+    #             return os.path.join(
+    #                 self.ACfreq, 'EpocaEspecial', filename[len("T1_T2_"):].replace(
+    #                     "_AC", "").replace("_PT", "").replace("_20", ""))
+    #     elif filename.startswith("AC_P"):
+    #         return os.path.join(self.ACgeral,
+    #                             "Enunciado Projeto " + filename[4] + ".pdf")
+    #     elif filename[2] == ".":
+    #         return os.path.join(self.POOaulas, filename)
+    #     elif filename.startswith("Ficha"):
+    #         diretoria = os.path.join(
+    #             self.POOpl, filename[:filename.find(".")].replace(" ", ""))
+    #         try:
+    #             os.makedirs(diretoria)
+    #         except FileExistsError:
+    #             pass
+    #             # print("Directory already existed")
+    #         return os.path.join(diretoria, filename)
+    #     elif filename.startswith("MNIO_FichaExerc"):
+    #         return os.path.join(self.MNIOtp, filename[len("MNIO_"):])
+    #     elif filename.startswith("MNIO_Formulario"):
+    #         return os.path.join(self.MNIOformularios_geral, filename[len("MNIO_"):])
+    #     elif filename.startswith("Folha"):
+    #         return os.path.join(self.TFCtp, filename.replace("TFC1920", ""))
+    #     elif filename.startswith("TFC1920"):
+    #         numero = filename[filename.rfind("Semana") +
+    #                           6:filename.rfind("Handout") - 1]
+    #         return os.path.join(
+    #             self.TFCaulas,
+    #             filename.replace("TFC1920", "").replace("-", "")[0:12] +
+    #             numero + ".pdf")
+    #     else:
+    #         rename = input(
+    #             "This is the file " + filename +
+    #             "\nDo you want to rename it? (y/n, d to delete, s to skip)\n")
+    #         if rename == "y":
+    #             filename = input("Rename the file: ") + ".pdf"
+    #         elif rename == "d":
+    #             os.remove(os.path.join(Screen.container.downloadsDirectory, filename))
+    #             return "False"
+    #         elif rename == "s":
+    #             return "False"
+    #         op = input(
+    #             "Choose the discipline:\n1.AC\n2.POO\n3.TFC\n4.MNIO\nOption: ")
+    #         if op == "1":
+    #             return os.path.join(self.ACgeral, filename)
+    #         elif op == "2":
+    #             return os.path.join(self.POOgeral, filename)
+    #         elif op == "3":
+    #             return os.path.join(self.TFCgeral, filename)
+    #         elif op == "4":
+    #             return os.path.join(self.MNIOformularios_geral, filename)
 
 
 class MusicScreen(Screen):
@@ -667,7 +646,7 @@ class MusicScreen(Screen):
         if firstTime:
             openThread = threading.Thread(target=lambda: os.startfile(
                 os.path.join(Screen.container.baseDirectory, "auxFiles",
-                             "deemix.lnk")),
+                             "deemix", "start.bat")),
                                           daemon=True)
             openThread.start()
 
@@ -714,6 +693,9 @@ class MusicScreen(Screen):
 
         self.checkMusic()
 
+    """
+        Method that stops the cycle first and then, if called again (by button click or Enter), advances to the next Screen
+    """
     def nextScreen(self, event=None):
         if self.checkMusicCondition:
             self.checkMusicCondition = False
@@ -727,6 +709,9 @@ class MusicScreen(Screen):
             if self.canAdvance:
                 AlbumAndLyricsScreen(self.frm_master, self.newFiles)
 
+    """
+        Method that checks, while self.checkMusicCondition is true, for new files and adds them to the output and buffer
+    """
     def checkMusic(self):
         for filename in os.listdir(Screen.container.musicOriginDirectory):
             if filename.endswith(".mp3") and filename not in self.buffer:
@@ -759,6 +744,9 @@ class MusicScreen(Screen):
         self.scrollableWidget.boxes[1].insert(TK.END, filename + "\n")
         self.scrollableWidget.boxes[1].config(state=TK.DISABLED)
 
+    """
+        Method that takes care of moving the downloaded files to the correct directory and renames them if necessary
+    """
     def moveOutOfBuffer(self):
         if self.buffer != []:
             old = self.buffer[0]
@@ -862,7 +850,6 @@ class MusicScreen(Screen):
             self.scrollableWidget.boxes[1].see(TK.END)
             self.title.set(str(self.numberOfFilesMoved) + " Files Moved")
             Screen.window.after(10, self.moveOutOfBuffer)
-            # self.moveOutOfBuffer()
         else:
             self.canAdvance = True
             self.btn_nextScreen.config(state=TK.NORMAL)
@@ -870,6 +857,9 @@ class MusicScreen(Screen):
             self.scrollableWidget.boxes[1].delete("end-1c linestart", TK.END)
             self.scrollableWidget.boxes[1].config(state=TK.DISABLED)
 
+    """
+        Method that takes care of making some slight changes to the file's tags
+    """
     def slightTagChanges(self, filename, newFilename):
         mp3 = EasyID3(filename)
         mp3['album'] = Screen.removeWordsFromWord(
@@ -1081,11 +1071,8 @@ class AlbumAndLyricsScreen(Screen):
         self.errorHandled.set(True)
 
     def nextScreen(self, event=None):
-        try:
-            if self.btn_tryAgain["state"] == "normal":
-                self.errorHandled.set(True)
-        except:
-            pass
+        if self.btn_tryAgain["state"] == TK.NORMAL:
+            self.errorHandled.set(True)
 
     # restricts entry to only accept digits
     def testVal(self, inStr):
@@ -1104,14 +1091,18 @@ class AlbumAndLyricsScreen(Screen):
     def exitOpenHandler(self):
         Screen.container.saveExceptions()
         Screen.window.quit()
-        os.system("taskkill /f /im  deemix-pyweb.exe")
+        # os.system("taskkill /f /im  deemix-pyweb.exe")
         if "GitHub" in Screen.container.baseDirectory:
-            subprocess.run(
-            ['python',
-             os.path.join(Screen.container.baseDirectory, "Handler_Music.py")])
+            subprocess.run([
+                'python',
+                os.path.join(Screen.container.baseDirectory,
+                             "Handler_Music.py")
+            ])
         else:
-            subprocess.run(
-            [os.path.join(Screen.container.baseDirectory, "Handler_Music","Handler_Music.exe")])
+            subprocess.run([
+                os.path.join(Screen.container.baseDirectory, "Handler_Music",
+                             "Handler_Music.exe")
+            ])
 
     def changeOutput(self, index, inYear):
         self.scrollableWidget.boxes[index].delete("end-1c linestart", TK.END)
@@ -1355,37 +1346,6 @@ class AlbumAndLyricsScreen(Screen):
             for div in soup.findAll('div', attrs={'class': 'lyrics'}):
                 self.currentLyrics += div.text.strip()
             if self.currentLyrics.strip() == "":
-                aux = []
-                for div in soup.findAll(
-                        'div',
-                        attrs={
-                            'class':
-                            lambda x: x and x.startswith("Lyrics__Container")
-                        }):
-                    for elem in div.contents:
-                        try:
-                            if str(elem) != "<br/>":
-                                aux.append(elem.text)
-                        except:
-                            aux.append(str(elem))
-                for index in range(len(aux)):
-                    if aux[index].startswith("[") and aux[index - 1] != "":
-                        aux.insert(index, "")
-                self.currentLyrics = "\n".join(aux).strip()
-                # for div in soup.findAll(
-                #         'div',
-                #         attrs={
-                #             'class':
-                #             lambda x: x and x.startswith("Lyrics__Container")
-                #         }):
-                #     linha = ''
-                #     for elem in div.recursiveChildGenerator():
-                #         if isinstance(elem, str):
-                #             linha += elem.strip()
-                #         elif elem.name == 'br':
-                #             linha += '\n'
-                #     self.currentLyrics += linha
-            if self.currentLyrics.strip() == "":
                 self.setLyricsCycle()
         else:
             index = self.titleContainsRomanNumeral()
@@ -1496,6 +1456,7 @@ class AlbumAndLyricsScreen(Screen):
                             self.key)] = self.value
                     self.exceptionRaised = False
             self.changeTag("success")
+            Screen.container.iTunesLibrary.AddFile(filename)
             for txt in self.scrollableWidget.boxes:
                 txt.insert(TK.END, "\n")
                 txt.see(TK.END)
@@ -1503,6 +1464,7 @@ class AlbumAndLyricsScreen(Screen):
             self.title.set(
                 str(self.numberOfFilesProcessed) + "/" +
                 str(self.totalNewFiles) + " Files Processed")
+            Screen.container.iTunesLibrary.AddFile(filename)
             Screen.window.update_idletasks()
             self.newFiles.remove(filename)
             Screen.window.after(10, self.lyricsAndYear)
@@ -1531,15 +1493,40 @@ if __name__ == "__main__":
     InitialScreen(TK.Frame())
     Screen.window.mainloop()
     # os.system("cls")
-    # url = "https://genius.com/albums/Travis-scott/astroworld"
-    # req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    # url ="https://www.genius.com/Wu-tang-clan-wu-tang-7th-chamber-lyrics"
+    # req = Request(url,
+    #                 headers={'User-Agent': 'Mozilla/5.0'})
     # webpage = urlopen(req).read()
+    # # Creating a BeautifulSoup object of the html page for easy extraction of data.
     # soup = BeautifulSoup(webpage, 'html.parser')
-    # yearTemp = ""
-    #         #Extract the year of the album
-    # for div in soup.findAll('div', attrs={'class': 'metadata_unit'}):
-    #     yearTemp += div.text.strip()
-    #     break
-    # year = yearTemp.split()
-    # year = int(year[len(year) - 1])
-    # print(year)
+    # aux = []
+    # for div in soup.findAll(
+    #         'div',
+    #         attrs={
+    #             'class':
+    #             lambda x: x and x.startswith("Lyrics__Container")
+    #         }):
+    #     for elem in div.contents:
+    #         try:
+    #             if str(elem) != "<br/>":
+    #                 aux.append(elem.text)
+    #             else:
+    #                 aux.append("")
+    #         except:
+    #             aux.append(str(elem))
+    #     aux.append("")
+    # for index in range(len(aux)):
+    #     if aux[index].startswith("[") and aux[index - 1] != "":
+    #         aux.insert(index, "")
+    # index = 0
+    # while index < len(aux):
+    #     try:
+    #         if aux[index] == "" and aux[index + 1] != "":
+    #             aux.pop(index)
+    #         elif aux[index] == "" and aux[index + 1] == "":
+    #             aux.pop(index)
+    #             index += 1
+    #     except:
+    #         pass
+    #     index += 1
+    # print("\n".join(aux).strip())
