@@ -1,18 +1,17 @@
+#!/usr/bin/env python3.8
 import os
 import sys
 # import threading
 from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3, PCNT
 import xml.etree.ElementTree as ET
 import win32com.client as win32com
-
+import subprocess
 # import pythoncom
-
-#TODO: try and implement threading support for iTunes management
-
-
 """
     Simple container object that represents a music file
 """
+
 
 class MusicFile:
     def __init__(self, filename, title, albumArtist, album, trackNumber,
@@ -100,6 +99,7 @@ class MusicFile:
     Simple container object that represents an album
 """
 
+
 class Album:
     def __init__(self, albumTitle, albumArtist, numberOfTracks, numberOfDiscs,
                  genre, year):
@@ -147,18 +147,27 @@ class Album:
 class ListsAndFiles:
     def __init__(self):
         # Variables
-        self.iTunes = win32com.gencache.EnsureDispatch(
-            "iTunes.Application")  #allows communication with iTunes
-        self.iTunesLibrary = self.iTunes.LibraryPlaylist  #the main iTunes Library, where all files are
-        # self.iTunes_id = pythoncom.CoMarshalInterThreadInterfaceInStream(pythoncom.IID_IDispatch, self.iTunes)
         self.baseDirectory = os.path.dirname(
             __file__)  #defines the directory in which the file is placed
         if "GitHub" not in self.baseDirectory:
             aux = self.baseDirectory.split(os.sep)
-            self.baseDirectory=os.path.join('C:',os.sep,*aux[1:len(aux)-1])
+            self.baseDirectory = os.path.join('C:', os.sep,
+                                              *aux[1:len(aux) - 1])
         self.recycle = os.path.join(
-            self.baseDirectory, 'Recycle.exe'
+            self.baseDirectory, "auxFiles", 'Recycle.exe'
         )  #the Recycle utility that recycles a file passed as "parameter"
+        while True:
+            try:
+                self.iTunes = win32com.gencache.EnsureDispatch(
+                    "iTunes.Application")  #allows communication with iTunes
+                break
+            except AttributeError:
+                subprocess.run([
+                    self.recycle,
+                    os.path.join("C:", os.sep, "Users", "ruben", "AppData",
+                                 "Local", "Temp", "gen_py", "3.8")
+                ]) #weird error, deleting this folder solves the problem with ensure dispatch
+        self.iTunesLibrary = self.iTunes.LibraryPlaylist  #the main iTunes Library, where all files are
         # self.thread = threading.Thread(target=self.thread_function,
         #                                daemon=True)
         # self.thread.start()
@@ -190,10 +199,8 @@ class ListsAndFiles:
         self.timeOfLastModifiedFile = -1  # the date of last modified file last time this program was run, useful to check if any file's properties have been changed
 
         # Create directory, if necessary
-        if not os.path.isdir(os.path.join(
-            self.baseDirectory, "auxFiles")):
-            os.mkdir(os.path.join(
-            self.baseDirectory, "auxFiles"))
+        if not os.path.isdir(os.path.join(self.baseDirectory, "auxFiles")):
+            os.mkdir(os.path.join(self.baseDirectory, "auxFiles"))
 
         # Create files, if necessary
         self.fileDetails = os.path.join(
@@ -210,14 +217,15 @@ class ListsAndFiles:
         else:
             self.getDirectories()
             try:
-                self.files = os.listdir(self.musicDestinyDirectory
-                                        )  #gets all files in musicDestinyDirectory
+                self.files = os.listdir(
+                    self.musicDestinyDirectory
+                )  #gets all files in musicDestinyDirectory
                 self.files = [
-                    os.path.join(self.musicDestinyDirectory, f) for f in self.files
-                    if f.endswith(".mp3")
+                    os.path.join(self.musicDestinyDirectory, f)
+                    for f in self.files if f.endswith(".mp3")
                 ]  #reduces to only the mp3's
             except:
-                self.files=[]
+                self.files = []
             self.numberOfFiles = len([
                 filename for filename in self.files
                 if filename.endswith(".mp3")
@@ -497,7 +505,7 @@ class ListsAndFiles:
         Method that returns the index of the music file with the param filename as their filename, or return -1 if there is none
     """
 
-    def indexOf(self, filename:str):
+    def indexOf(self, filename: str):
         for index in range(len(self.listMusicFile)):
             if self.listMusicFile[index].filename == filename:
                 return index
@@ -553,7 +561,6 @@ class ListsAndFiles:
 
     def reWriteFiles(self):
         self.saveNumFilesLastModified()
-        self.saveGenreColors()
         tree = ET.parse(self.fileMusicFiles)
         root = tree.getroot()
         root.clear()
@@ -603,7 +610,6 @@ class ListsAndFiles:
         discnumber = 0
         length = 0
         playCount = 0
-        # self.thread.join()
         for filename in self.files:
             if filename.endswith(".mp3") and os.path.getmtime(
                     filename) > self.timeOfLastModified:
@@ -651,12 +657,13 @@ class ListsAndFiles:
                     self.listMusicFile[index].playCount = playCount
             else:
                 break
+        screen.endOfCheckFiles()
 
     """
         Simple method that, as the name indicates, allows finding the index of an album by its name
     """
 
-    def findAlbumByName(self, name:str):
+    def findAlbumByName(self, name: str):
         for index in range(len(self.listAlbums)):
             if name == self.listAlbums[index].title:
                 return index
@@ -666,7 +673,7 @@ class ListsAndFiles:
         Method that allows to find the iTunes version of a track by its title and we pass the album to especify even further the track if there are multiple tracks with said title
     """
 
-    def findiTunesTrack(self, title:str, album:str):
+    def findiTunesTrack(self, title: str, album: str):
         tracks = self.iTunesLibrary.Search(title, 5)
         try:
             if len(tracks) == 1:
@@ -678,37 +685,45 @@ class ListsAndFiles:
             pass
 
     """
-        Method that allows updating the play count of file according to its play count on iTunes, should delete (?)
+        Method that allows updating the play count of file according to its play count on iTunes
     """
 
-    def updatePlayCounts(self):
+    #FIXME: Not updating the file's play count
+    def updatePlayCounts(self, screen):
         for track in self.listMusicFile:
-            iTunesPlayCount = self.findiTunesTrack(track.title,
-                                                   track.album).PlayedCount
-            if track.playCount < iTunesPlayCount:
-                track.playCount = iTunesPlayCount
-            self.iTunesLibrary.AddFile(
+            iTunesPlayCount = int(
+                self.findiTunesTrack(track.title, track.album).PlayedCount)
+            track.playCount = iTunesPlayCount
+            screen.addToOutput(track.albumArtist, track.album, track.title,
+                               track.playCount)
+            audio = ID3(
                 os.path.join(self.musicDestinyDirectory, track.filename))
+            audio.delall("PCNT")
+            audio.add(PCNT(encoding=3, text=str(track.playCount)))
+            audio.save()
+            # self.iTunesLibrary.AddFile(
+            #     os.path.join(self.musicDestinyDirectory, track.filename))
+        screen.btn_backScreen.config(state="normal")
 
     """
         Method that transforms "Rap/Hip Hop" into just "Rap" because it was messing up with the color coding of the genres
     """
 
-    def correctRapGenre(self, genre:str):
+    def correctRapGenre(self, genre: str):
         return "Rap" if "Rap" in genre else genre
 
     """
         Method that does the opposite of the above method, for visual purposes
     """
 
-    def inverseCorrectRapGenre(self, genre:str):
+    def inverseCorrectRapGenre(self, genre: str):
         return "Rap/Hip Hop" if "Rap" in genre else genre
 
     """
         Utility method that transforms the parameter time (in seconds) to a minutes:seconds format, for visual purposes
     """
 
-    def standardFormatTime(self, time:int):
+    def standardFormatTime(self, time: int):
         return str(int(time // 60)) + ":" + ("0" if time % 60 < 10 else
                                              "") + str(int(time % 60))
 
