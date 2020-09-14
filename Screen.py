@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.8
 import tkinter as TK
 from ListsAndFiles import ListsAndFiles
 
@@ -80,6 +81,9 @@ class Screen:
                         inRoundParenthesis = False
         return word.strip()
 
+    """
+        Helper method that sets the tags for the given tkinter text box, to color code the output according to the genre of the album/track
+    """
     @staticmethod
     def generateGenreTags(textBox:TK.Text):
         for genre in Screen.container.genresColors:
