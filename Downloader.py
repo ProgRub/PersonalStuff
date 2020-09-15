@@ -416,7 +416,7 @@ class SchoolScreen(Screen):
         self.tempoAtual = time.time()
         self.OneDrive = os.path.join('C:', os.path.sep, 'Users', 'ruben',
                                      'Onedrive - Universidade da Madeira',
-                                     'Ano_2', 'Semestre_2')
+                                     'Ano_3', 'Semestre_1')
         self.title = TK.StringVar()
         self.pathSelected = TK.StringVar()
         self.possibleDirs = []
@@ -427,7 +427,8 @@ class SchoolScreen(Screen):
         self.pathSelected.set(self.possibleDirs[0])
         self.possibleDirs.append("Delete File")
         self.possibleDirs.append("Skip File")
-        self.fileFound = False
+        self.fileFound = TK.BooleanVar()
+        self.fileFound.set(False)
 
         self.numberOfFiles = 0
         self.title.set(str(self.numberOfFiles) + " Files Found")
@@ -479,7 +480,7 @@ class SchoolScreen(Screen):
 
     def nextScreen(self, event=None):
         if self.btn_confirm["state"] == TK.NORMAL:
-            self.fileFound = True
+            self.fileFound.set(True)
 
     def addDirectories(self, directory):
         if directory.replace(self.OneDrive + os.sep, "").count(os.sep) >= 2:
@@ -528,7 +529,7 @@ class SchoolScreen(Screen):
                     self.ent_newFilename.config(state=TK.DISABLED)
                     self.dropdownMenu.config(state=TK.DISABLED)
                     self.btn_confirm.config(state=TK.DISABLED)
-                    self.fileFound = False
+                    self.fileFound.set(False)
                     oldFile = os.path.join(Screen.container.downloadsDirectory,
                                            filename)
                     newFile = os.path.join(self.OneDrive, self.pathSelected,
@@ -909,7 +910,7 @@ class AlbumAndLyricsScreen(Screen):
 
     def __init__(self, masterFramePreviousScreen: TK.Frame, newFiles: list):
         super().__init__(masterFramePreviousScreen)
-        Screen.window.state('zoomed')
+        Screen.window.state('zoomed') #maximizes the window
         Screen.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         #Tkinter Vars
@@ -993,7 +994,7 @@ class AlbumAndLyricsScreen(Screen):
                 self.frm_newAAT,
                 font=Screen.DEFAULT_FONT3,
                 textvariable=self.trackBeingReviewedDetails[category],
-                width=70)
+                width=70,state=TK.DISABLED)
             self.entriesTrack.append(entry)
             label.grid(row=g, column=0)
             entry.grid(row=g, column=1)
@@ -1055,12 +1056,13 @@ class AlbumAndLyricsScreen(Screen):
         self.btn_tryAgain.grid(row=5, column=1)
         self.btn_skipLyrics.grid(row=6, column=1)
 
-        #Widget Configuration
-        self.disableEntries()
         Screen.window.update_idletasks()
         self.lyricsAndYear()
-        Screen.window.update_idletasks()
 
+    """
+        Method called when user decides to skip a song, most likely Genius doesn't have the lyrics
+        Saves it in the list of songs to skip
+    """
     def skipLyrics(self):
         self.currentLyrics = "None"
         Screen.container.songsToSkip.append([
@@ -1070,6 +1072,9 @@ class AlbumAndLyricsScreen(Screen):
         ])
         self.errorHandled.set(True)
 
+    """
+        Method that doesn't advance to a different screen but takes care of notifying that user thinks he has handled the error
+    """
     def nextScreen(self, event=None):
         if self.btn_tryAgain["state"] == TK.NORMAL:
             self.errorHandled.set(True)
@@ -1080,6 +1085,9 @@ class AlbumAndLyricsScreen(Screen):
             return False
         return True
 
+    """
+        Method called when the user closes the window, maybe after an error or between files, saves the "exceptions" to the files
+    """
     def on_closing(self):
         self.errorHandled.set(True)
         Screen.container.saveExceptions()
@@ -1088,6 +1096,9 @@ class AlbumAndLyricsScreen(Screen):
     def goBackDownloadMore(self):
         MusicScreen(self.frm_master, False)
 
+    """
+        Method called when the Exit button is pressed, quits the window and opens the Handler
+    """
     def exitOpenHandler(self):
         Screen.container.saveExceptions()
         Screen.window.quit()
@@ -1104,9 +1115,11 @@ class AlbumAndLyricsScreen(Screen):
                              "Handler_Music.exe")
             ])
 
+    """
+        Method that changes the last line if an error ocurred and the user had to change something
+    """
     def changeOutput(self, index, inYear):
         self.scrollableWidget.boxes[index].delete("end-1c linestart", TK.END)
-        Screen.window.update_idletasks()
         if index == 0:
             toAdd = self.currentArtist.get()
         elif index == 1:
@@ -1123,12 +1136,18 @@ class AlbumAndLyricsScreen(Screen):
             self.changeTag("lyrics")
         Screen.window.update_idletasks()
 
+    """
+        Method that plays the windows "error" sound, and resets the thread, because these cannot be restarted, need to be a new instance
+    """
     def thread_function(self):
         self.exceptionRaised = True
         winsound.PlaySound("SystemQuestion", winsound.SND_ALIAS)
         self.errorSound = threading.Thread(target=self.thread_function,
                                            daemon=True)
 
+    """
+        Method that adds the output to the textboxes
+    """
     def addToOutput(self):
         i = 0
         for category in self.trackBeingReviewedDetails:
@@ -1140,25 +1159,30 @@ class AlbumAndLyricsScreen(Screen):
             i += 1
         Screen.window.update_idletasks()
 
+    """
+        Method that takes care of disabling the entries, after a user has confirmed he might have fixed the error
+    """
     def disableEntries(self):
         for entry in self.entriesTrack:
             entry.config(state=TK.DISABLED)
         self.btn_tryAgain.config(state=TK.DISABLED)
         self.btn_skipLyrics.config(state=TK.DISABLED)
 
+    """
+        Method that takes care of enabling the entries so the user can correct the attributes and continue
+    """
     def enableEntries(self, whichOnes):
-        if whichOnes == 0:
+        if whichOnes == 0: #error when getting year
             self.entriesTrack[1].config(state=TK.NORMAL)
-            self.entriesTrack[0].config(state=TK.NORMAL)
-            self.entriesTrack[2].config(state=TK.NORMAL)
-        elif whichOnes == 1:
-            self.entriesTrack[2].config(state=TK.NORMAL)
-            self.entriesTrack[0].config(state=TK.NORMAL)
+        elif whichOnes == 1: #error when getting lyrics
             self.btn_skipLyrics.config(state=TK.NORMAL)
-        elif whichOnes == 2:
-            self.entriesTrack[3].config(state=TK.NORMAL)
+        self.entriesTrack[0].config(state=TK.NORMAL)
+        self.entriesTrack[2].config(state=TK.NORMAL)
         self.btn_tryAgain.config(state=TK.NORMAL)
 
+    """
+        Method that changes the tag (the color) of the last line, simbolizes change in phases
+    """
     def changeTag(self, tag):
         for txt in self.scrollableWidget.boxes:
             txt.tag_add(tag, "end-1c linestart", TK.END)
@@ -1178,10 +1202,10 @@ class AlbumAndLyricsScreen(Screen):
         return "-".join(name.split()).capitalize()
 
     """
-        Determines the artist and title to be used in the search for lyrics and handles the most common changes
+        Determines the artist and title to be used in the search for lyrics and year, changing them if they are in the dictionary
     """
 
-    def ArtistAlbumAndTitle(self, artist, album, title, forYear):
+    def ArtistAlbumAndTitle(self,forYear):
         if forYear:
             self.currentYear.set(self.iTunesTrack.Year)
             for key in Screen.container.exceptionsReplacements:
@@ -1214,14 +1238,20 @@ class AlbumAndLyricsScreen(Screen):
                     self.changeOutput(2, False)
                     break
 
+    """
+        Method that returns the index in the title of the roman numeral, if there is one
+    """
     def titleContainsRomanNumeral(self):
         for index in range(len(self.romanNums)):
             if self.romanNums[index] in self.currentTitle.get():
                 return index
         return -1
 
+    """
+        Method that returns the BeautifulSoup of the html of the page, if it exists, otherwise returns None
+        If it's to get the year and we have already visited the page, we return "Skip" so we know we don't need to scrape the html again
+    """
     def checkIfWebpageExists(self, forAlbum):
-        skip = False
         if forAlbum:
             name = self.namingConventions(
                 self.currentArtist.get()) + "/" + self.namingConventions(
@@ -1230,15 +1260,15 @@ class AlbumAndLyricsScreen(Screen):
             if name in AlbumAndLyricsScreen.pagesVisited_year:
                 self.currentYear.set(
                     AlbumAndLyricsScreen.pagesVisited_year[name])
-                skip = True
+                self.currentUrl.set(url)
+                Screen.window.update_idletasks()
+                return "Skip"
         else:
             name = self.namingConventions(self.currentArtist.get() + " " +
                                           self.currentTitle.get())
             url = "https://genius.com/" + name + "-lyrics"
         self.currentUrl.set(url)
         Screen.window.update_idletasks()
-        if skip:
-            return "Skip"
         req = Request(self.currentUrl.get(),
                       headers={'User-Agent': 'Mozilla/5.0'})
         try:
@@ -1250,8 +1280,8 @@ class AlbumAndLyricsScreen(Screen):
             return None
 
     """
-        Gets the year of release of the file passed as parameter, writing it in the metaTag of the file, given it has the metaTags defined correctly
-        In case of not finding the page, it asks the user. If the user writes two empty lines, it skips, leaving the original year
+        Gets the year of release of the current file, writing it in the metaTag of the file, given it has the metaTags defined correctly
+        In case of not finding the page, it asks the user. If the user corrects it succesfully, we save it in the exceptionsReplacements dict
     """
 
     def getYearCycle(self):
@@ -1272,8 +1302,7 @@ class AlbumAndLyricsScreen(Screen):
                                               "")] = year
             return
         else:
-            if self.iTunesTrack.TrackCount < 5:
-                # print(self.currentArtist.get())  and self.iTunesTrack.Year > 1985
+            if self.iTunesTrack.TrackCount < 5: #for getting the year of singles, which don't have an albums page created on Genius
                 soup = self.checkIfWebpageExists(False)
                 if soup != None:
                     auxList = soup.findAll(
@@ -1302,12 +1331,13 @@ class AlbumAndLyricsScreen(Screen):
                                 year = int(aux[len(aux) - 1])
                                 self.currentYear.set(year)
                                 return
-            while True:
+            while True: #if the errorSound is started while it's still playing it throws an exception
                 try:
                     self.errorSound.start()
                     break
                 except:
                     pass
+            #In case of an error we pop up a google search to help the user
             if self.iTunesTrack.TrackCount < 5:
                 webbrowser.open("https://www.google.com.tr/search?q={}".format(
                     self.currentArtist.get().replace(" &", "").replace(
@@ -1321,7 +1351,7 @@ class AlbumAndLyricsScreen(Screen):
                             " &", "").replace(" ", "+") + "+site:Genius.com"))
             self.errorHandled.set(False)
             self.enableEntries(0)
-            self.btn_tryAgain.wait_variable(self.errorHandled)
+            self.btn_tryAgain.wait_variable(self.errorHandled) #waits for the user to confirm he has corrected it
             self.value = [
                 self.currentArtist.get(),
                 self.currentAlbum.get(),
@@ -1339,6 +1369,11 @@ class AlbumAndLyricsScreen(Screen):
         audio.delall("TDRC")
         audio.add(TDRC(encoding=3, text=str(self.currentYear.get())))
         audio.save()
+
+    """
+        Gets the lyrics of the current file, writing them in the metaTags of the file, given it has the metaTags defined correctly
+        In case of not finding the page, it asks the user to correct the attributes so we can search again
+    """
 
     def setLyricsCycle(self):
         soup = self.checkIfWebpageExists(False)
@@ -1364,7 +1399,7 @@ class AlbumAndLyricsScreen(Screen):
                     self.romanNums[index], str(index + 1)))
                 self.removePtOrPart = False
             else:
-                while True:
+                while True: #if the errorSound is started while it's still playing it throws an exception
                     try:
                         self.errorSound.start()
                         break
@@ -1372,12 +1407,13 @@ class AlbumAndLyricsScreen(Screen):
                         pass
                 self.errorHandled.set(False)
                 self.enableEntries(1)
+                #In case of an error we pop up a google search to help the user
                 webbrowser.open("https://www.google.com.tr/search?q={}".format(
                     self.currentArtist.get().replace(" &", "").replace(
                         " ", "+") + "+" + self.currentTitle.get().replace(
                             " &", "").replace(" ", "+") +
                     "+lyrics+site:Genius.com"))
-                self.btn_tryAgain.wait_variable(self.errorHandled)
+                self.btn_tryAgain.wait_variable(self.errorHandled) #waits for the user to confirm he has corrected it
                 self.value = [
                     self.currentArtist.get(),
                     self.currentAlbum.get(),
@@ -1386,14 +1422,8 @@ class AlbumAndLyricsScreen(Screen):
                 self.changeOutput(0, False)
                 self.changeOutput(2, False)
                 self.disableEntries()
-            if self.currentLyrics.strip() == "":
                 self.setLyricsCycle()
         return
-
-    """
-        Gets the lyrics of the file passed as parameter, writing them in the metaTags of the file, given it has the metaTags defined correctly
-        In case of not finding the page, it asks the user
-    """
 
     def setLyrics(self, filename):
         self.currentLyrics = ""
@@ -1404,6 +1434,9 @@ class AlbumAndLyricsScreen(Screen):
             audio.add(USLT(encoding=3, text=self.currentLyrics))
             audio.save()
 
+    """
+        Method that goes through all the files in self.newFiles and gets their correct release year (not the year they were remastered) and their lyrics, if we don't skip the file
+    """
     def lyricsAndYear(self):
         if self.newFiles != []:
             self.removePtOrPart = False
@@ -1424,7 +1457,7 @@ class AlbumAndLyricsScreen(Screen):
             self.currentTitle.set(title)
             self.key = [artist, album, title]
             self.addToOutput()
-            self.ArtistAlbumAndTitle(artist, album, title, True)
+            self.ArtistAlbumAndTitle(True)
             self.getYear(filename)
             while True:
                 try:
@@ -1443,7 +1476,7 @@ class AlbumAndLyricsScreen(Screen):
                     self.key)] = self.value
                 self.exceptionRaised = False
             self.changeTag("lyrics")
-            self.ArtistAlbumAndTitle(artist, album, title, False)
+            self.ArtistAlbumAndTitle(False)
             if [
                     self.currentArtist.get(),
                     self.currentAlbum.get(),
