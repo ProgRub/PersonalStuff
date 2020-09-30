@@ -173,7 +173,14 @@ class GrimeArtistsAndExceptionsScreen(Screen):
     def __init__(self, masterFramePreviousScreen: TK.Frame):
         super().__init__(masterFramePreviousScreen)
         #Tkinter Vars
-        self.widgetGroupsDict = {0: [], 1: [], 2: [], 3: [], 4: [], 5: []} #0 - label, 1 - stringVar, 2 - entry
+        self.widgetGroupsDict = {
+            0: [],
+            1: [],
+            2: [],
+            3: [],
+            4: [],
+            5: []
+        }  #0 - label, 1 - stringVar, 2 - entry
         Screen.container.getGrimeArtists()
         self.mode = 0
         #1 - Grime Artist
@@ -186,16 +193,16 @@ class GrimeArtistsAndExceptionsScreen(Screen):
             "Alter Grime Artists, Url Replacement Pairs or add new Exception")
         for key in self.widgetGroupsDict:
             label = TK.Label(self.frm_master,
-                                font=Screen.DEFAULT_FONT2,
-                                fg="white",
-                                bg=Screen.DEFAULT_BGCOLOR)
+                             font=Screen.DEFAULT_FONT2,
+                             fg="white",
+                             bg=Screen.DEFAULT_BGCOLOR)
             self.widgetGroupsDict[key].append(label)
             stringVar = TK.StringVar()
             self.widgetGroupsDict[key].append(stringVar)
             entry = TK.Entry(self.frm_master,
-                                textvariable=stringVar,
-                                font=Screen.DEFAULT_FONT3,
-                                width=50)
+                             textvariable=stringVar,
+                             font=Screen.DEFAULT_FONT3,
+                             width=50)
             self.widgetGroupsDict[key].append(entry)
         self.widgetGroupsDict[2][0].config(text="Old Title")
         self.widgetGroupsDict[3][0].config(text="New Artist")
@@ -284,8 +291,9 @@ class GrimeArtistsAndExceptionsScreen(Screen):
     """
         Method that doesn't really go to a different "Screen" but it's called when the user presses the confirm button (or hits enter) and takes care of adding what the user inputted to the correct colection
     """
+
     def nextScreen(self, event=None):
-        if self.btn_confirm["state"]==TK.NORMAL:
+        if self.btn_confirm["state"] == TK.NORMAL:
             if self.mode == 1:
                 artist = self.widgetGroupsDict[0][1].get().strip()
                 if artist != "":
@@ -311,11 +319,13 @@ class GrimeArtistsAndExceptionsScreen(Screen):
                         Screen.container.songsToSkip.append(
                             [oldArtist, oldAlbum, oldTitle])
                 else:
-                    Screen.container.exceptionsReplacements[(oldArtist, oldAlbum,
-                                                            oldTitle)] = [
-                                                                newArtist,
-                                                                newAlbum, newTitle
-                                                            ]
+                    Screen.container.exceptionsReplacements[(oldArtist,
+                                                             oldAlbum,
+                                                             oldTitle)] = [
+                                                                 newArtist,
+                                                                 newAlbum,
+                                                                 newTitle
+                                                             ]
             for key in self.widgetGroupsDict:
                 self.widgetGroupsDict[key][1].set("")
                 self.widgetGroupsDict[key][0].grid_forget()
@@ -323,7 +333,8 @@ class GrimeArtistsAndExceptionsScreen(Screen):
             self.scrollableWidget.boxes[0].delete(0, TK.END)
             self.lbl_title.config(
                 text=
-                "Alter Grime Artists, Url Replacement Pairs or add new Exception")
+                "Alter Grime Artists, Url Replacement Pairs or add new Exception"
+            )
             self.btn_grimeArtist.grid(row=2, column=1)
             self.btn_urlReplacementPair.grid(row=3, column=1)
             self.btn_exceptions.grid(row=4, column=1)
@@ -334,6 +345,7 @@ class GrimeArtistsAndExceptionsScreen(Screen):
     """
         Method that sets the screen so the user can add or remove a grime artist
     """
+
     def alterGrimeArtists(self):
         self.mode = 1
         self.lbl_title.config(text="Insert the name of the Artist")
@@ -353,6 +365,7 @@ class GrimeArtistsAndExceptionsScreen(Screen):
     """
         Method that sets the screen so the user can add or remove a replacement url pair
     """
+
     def alterReplacementPair(self):
         self.mode = 2
         self.lbl_title.config(
@@ -378,6 +391,7 @@ class GrimeArtistsAndExceptionsScreen(Screen):
     """
         Method that sets the screen so the user can add or remove an exception
     """
+
     def alterExceptions(self):
         self.mode = 3
         self.lbl_title.config(text="Insert the exception")
@@ -399,9 +413,9 @@ class GrimeArtistsAndExceptionsScreen(Screen):
         self.widgetGroupsDict[4][0].config(text="New Album")
         self.widgetGroupsDict[5][0].config(text="New Title")
         for key in self.widgetGroupsDict:
-            self.widgetGroupsDict[key][0].grid(row=key+1,column=1)
-            self.widgetGroupsDict[key][2].grid(row=key+1,column=2)
-        self.btn_confirm.grid(row=len(self.widgetGroupsDict)+1, column=2)
+            self.widgetGroupsDict[key][0].grid(row=key + 1, column=1)
+            self.widgetGroupsDict[key][2].grid(row=key + 1, column=2)
+        self.btn_confirm.grid(row=len(self.widgetGroupsDict) + 1, column=2)
         self.btn_confirm.config(state=TK.NORMAL)
         self.btn_grimeArtist.grid_forget()
         self.btn_urlReplacementPair.grid_forget()
@@ -697,15 +711,16 @@ class MusicScreen(Screen):
     """
         Method that stops the cycle first and then, if called again (by button click or Enter), advances to the next Screen
     """
+
     def nextScreen(self, event=None):
         if self.checkMusicCondition:
             self.checkMusicCondition = False
             self.scrollableWidget.boxes[0].config(state=TK.NORMAL)
             self.scrollableWidget.boxes[0].delete("end-1c linestart", TK.END)
             self.scrollableWidget.boxes[0].config(state=TK.DISABLED)
-            self.moveOutOfBuffer()
             self.btn_nextScreen.config(text="Get Album Year and Lyrics",
                                        state=TK.DISABLED)
+            self.moveOutOfBuffer()
         else:
             if self.canAdvance:
                 AlbumAndLyricsScreen(self.frm_master, self.newFiles)
@@ -713,6 +728,7 @@ class MusicScreen(Screen):
     """
         Method that checks, while self.checkMusicCondition is true, for new files and adds them to the output and buffer
     """
+
     def checkMusic(self):
         for filename in os.listdir(Screen.container.musicOriginDirectory):
             if filename.endswith(".mp3") and filename not in self.buffer:
@@ -748,6 +764,7 @@ class MusicScreen(Screen):
     """
         Method that takes care of moving the downloaded files to the correct directory and renames them if necessary
     """
+
     def moveOutOfBuffer(self):
         if self.buffer != []:
             old = self.buffer[0]
@@ -861,6 +878,7 @@ class MusicScreen(Screen):
     """
         Method that takes care of making some slight changes to the file's tags
     """
+
     def slightTagChanges(self, filename, newFilename):
         mp3 = EasyID3(filename)
         mp3['album'] = Screen.removeWordsFromWord(
@@ -910,7 +928,7 @@ class AlbumAndLyricsScreen(Screen):
 
     def __init__(self, masterFramePreviousScreen: TK.Frame, newFiles: list):
         super().__init__(masterFramePreviousScreen)
-        Screen.window.state('zoomed') #maximizes the window
+        Screen.window.state('zoomed')  #maximizes the window
         Screen.window.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         #Tkinter Vars
@@ -954,7 +972,7 @@ class AlbumAndLyricsScreen(Screen):
         }
         colors = ["yellow", "dark green", "green2"]
         text = ["Getting Album Year", "Getting Track Lyrics", "File Done"]
-        self.iTunesTrack = None
+        self.trackBeingReviewedTrackCount = 0
 
         #Widget Creation
         self.lbl_title.config(textvariable=self.title)
@@ -994,7 +1012,8 @@ class AlbumAndLyricsScreen(Screen):
                 self.frm_newAAT,
                 font=Screen.DEFAULT_FONT3,
                 textvariable=self.trackBeingReviewedDetails[category],
-                width=70,state=TK.DISABLED)
+                width=70,
+                state=TK.DISABLED)
             self.entriesTrack.append(entry)
             label.grid(row=g, column=0)
             entry.grid(row=g, column=1)
@@ -1063,6 +1082,7 @@ class AlbumAndLyricsScreen(Screen):
         Method called when user decides to skip a song, most likely Genius doesn't have the lyrics
         Saves it in the list of songs to skip
     """
+
     def skipLyrics(self):
         self.currentLyrics = "None"
         Screen.container.songsToSkip.append([
@@ -1075,6 +1095,7 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that doesn't advance to a different screen but takes care of notifying that user thinks he has handled the error
     """
+
     def nextScreen(self, event=None):
         if self.btn_tryAgain["state"] == TK.NORMAL:
             self.errorHandled.set(True)
@@ -1088,36 +1109,41 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method called when the user closes the window, maybe after an error or between files, saves the "exceptions" to the files
     """
+
     def on_closing(self):
         self.errorHandled.set(True)
         Screen.container.saveExceptions()
         Screen.window.destroy()
 
     def goBackDownloadMore(self):
+        Screen.window.state('normal')
         MusicScreen(self.frm_master, False)
 
     """
         Method called when the Exit button is pressed, quits the window and opens the Handler
     """
+
     def exitOpenHandler(self):
         Screen.container.saveExceptions()
         Screen.window.quit()
         # os.system("taskkill /f /im  deemix-pyweb.exe")
         if "GitHub" in Screen.container.baseDirectory:
-            subprocess.run([
+            threading.Thread(target=subprocess.run([
                 'python',
                 os.path.join(Screen.container.baseDirectory,
                              "Handler_Music.py")
-            ])
+            ]),daemon=False).start()
         else:
-            subprocess.run([
+            threading.Thread(target=subprocess.run([
                 os.path.join(Screen.container.baseDirectory, "Handler_Music",
                              "Handler_Music.exe")
-            ])
+            ]),daemon=False).start()
+
 
     """
         Method that changes the last line if an error ocurred and the user had to change something
     """
+
     def changeOutput(self, index, inYear):
         self.scrollableWidget.boxes[index].delete("end-1c linestart", TK.END)
         if index == 0:
@@ -1139,6 +1165,7 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that plays the windows "error" sound, and resets the thread, because these cannot be restarted, need to be a new instance
     """
+
     def thread_function(self):
         self.exceptionRaised = True
         winsound.PlaySound("SystemQuestion", winsound.SND_ALIAS)
@@ -1148,6 +1175,7 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that adds the output to the textboxes
     """
+
     def addToOutput(self):
         i = 0
         for category in self.trackBeingReviewedDetails:
@@ -1162,6 +1190,7 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that takes care of disabling the entries, after a user has confirmed he might have fixed the error
     """
+
     def disableEntries(self):
         for entry in self.entriesTrack:
             entry.config(state=TK.DISABLED)
@@ -1171,10 +1200,11 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that takes care of enabling the entries so the user can correct the attributes and continue
     """
+
     def enableEntries(self, whichOnes):
-        if whichOnes == 0: #error when getting year
+        if whichOnes == 0:  #error when getting year
             self.entriesTrack[1].config(state=TK.NORMAL)
-        elif whichOnes == 1: #error when getting lyrics
+        elif whichOnes == 1:  #error when getting lyrics
             self.btn_skipLyrics.config(state=TK.NORMAL)
         self.entriesTrack[0].config(state=TK.NORMAL)
         self.entriesTrack[2].config(state=TK.NORMAL)
@@ -1183,6 +1213,7 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that changes the tag (the color) of the last line, simbolizes change in phases
     """
+
     def changeTag(self, tag):
         for txt in self.scrollableWidget.boxes:
             txt.tag_add(tag, "end-1c linestart", TK.END)
@@ -1205,9 +1236,8 @@ class AlbumAndLyricsScreen(Screen):
         Determines the artist and title to be used in the search for lyrics and year, changing them if they are in the dictionary
     """
 
-    def ArtistAlbumAndTitle(self,forYear):
+    def ArtistAlbumAndTitle(self, forYear):
         if forYear:
-            self.currentYear.set(self.iTunesTrack.Year)
             for key in Screen.container.exceptionsReplacements:
                 if self.key[0] == key[0] and self.key[1] == key[1] and key[
                         2] == None:
@@ -1218,7 +1248,7 @@ class AlbumAndLyricsScreen(Screen):
                     self.changeOutput(0, True)
                     self.changeOutput(1, True)
                     break
-        if not forYear or self.iTunesTrack.TrackCount < 5:  #and self.iTunesTrack.Year > 1985
+        if not forYear or self.trackBeingReviewedTrackCount < 5:
             for key in Screen.container.exceptionsReplacements:
                 if self.key[0] == key[0] and self.key[1] == key[1] and key[
                         2] == None:
@@ -1241,6 +1271,7 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that returns the index in the title of the roman numeral, if there is one
     """
+
     def titleContainsRomanNumeral(self):
         for index in range(len(self.romanNums)):
             if self.romanNums[index] in self.currentTitle.get():
@@ -1251,6 +1282,7 @@ class AlbumAndLyricsScreen(Screen):
         Method that returns the BeautifulSoup of the html of the page, if it exists, otherwise returns None
         If it's to get the year and we have already visited the page, we return "Skip" so we know we don't need to scrape the html again
     """
+
     def checkIfWebpageExists(self, forAlbum):
         if forAlbum:
             name = self.namingConventions(
@@ -1302,7 +1334,7 @@ class AlbumAndLyricsScreen(Screen):
                                               "")] = year
             return
         else:
-            if self.iTunesTrack.TrackCount < 5: #for getting the year of singles, which don't have an albums page created on Genius
+            if self.trackBeingReviewedTrackCount < 5:  #for getting the year of singles, which don't have an albums page created on Genius
                 soup = self.checkIfWebpageExists(False)
                 if soup != None:
                     auxList = soup.findAll(
@@ -1331,14 +1363,14 @@ class AlbumAndLyricsScreen(Screen):
                                 year = int(aux[len(aux) - 1])
                                 self.currentYear.set(year)
                                 return
-            while True: #if the errorSound is started while it's still playing it throws an exception
+            while True:  #if the errorSound is started while it's still playing it throws an exception
                 try:
                     self.errorSound.start()
                     break
                 except:
                     pass
             #In case of an error we pop up a google search to help the user
-            if self.iTunesTrack.TrackCount < 5:
+            if self.trackBeingReviewedTrackCount < 5:
                 webbrowser.open("https://www.google.com.tr/search?q={}".format(
                     self.currentArtist.get().replace(" &", "").replace(
                         " ", "+") + "+" + self.currentTitle.get().replace(
@@ -1351,7 +1383,9 @@ class AlbumAndLyricsScreen(Screen):
                             " &", "").replace(" ", "+") + "+site:Genius.com"))
             self.errorHandled.set(False)
             self.enableEntries(0)
-            self.btn_tryAgain.wait_variable(self.errorHandled) #waits for the user to confirm he has corrected it
+            self.btn_tryAgain.wait_variable(
+                self.errorHandled
+            )  #waits for the user to confirm he has corrected it
             self.value = [
                 self.currentArtist.get(),
                 self.currentAlbum.get(),
@@ -1399,7 +1433,7 @@ class AlbumAndLyricsScreen(Screen):
                     self.romanNums[index], str(index + 1)))
                 self.removePtOrPart = False
             else:
-                while True: #if the errorSound is started while it's still playing it throws an exception
+                while True:  #if the errorSound is started while it's still playing it throws an exception
                     try:
                         self.errorSound.start()
                         break
@@ -1413,7 +1447,9 @@ class AlbumAndLyricsScreen(Screen):
                         " ", "+") + "+" + self.currentTitle.get().replace(
                             " &", "").replace(" ", "+") +
                     "+lyrics+site:Genius.com"))
-                self.btn_tryAgain.wait_variable(self.errorHandled) #waits for the user to confirm he has corrected it
+                self.btn_tryAgain.wait_variable(
+                    self.errorHandled
+                )  #waits for the user to confirm he has corrected it
                 self.value = [
                     self.currentArtist.get(),
                     self.currentAlbum.get(),
@@ -1437,17 +1473,19 @@ class AlbumAndLyricsScreen(Screen):
     """
         Method that goes through all the files in self.newFiles and gets their correct release year (not the year they were remastered) and their lyrics, if we don't skip the file
     """
+
     def lyricsAndYear(self):
         if self.newFiles != []:
             self.removePtOrPart = False
             filename = self.newFiles[0]
-            opStatus = Screen.container.iTunesLibrary.AddFile(filename)
-            while opStatus.InProgress:
-                pass
-            self.iTunesTrack = opStatus.Tracks.Item(1)
-            artist = EasyID3(filename)['albumartist'][0]
-            title = self.iTunesTrack.Name
-            album = self.iTunesTrack.Album
+            id3 = EasyID3(filename)
+            artist = id3['albumartist'][0]
+            title = id3['title'][0]
+            album = id3['album'][0]
+            self.currentYear.set(int(id3["date"][0]))
+            aux = id3["tracknumber"][0]
+            self.trackBeingReviewedTrackCount = int(aux[aux.find("/") + 1:])
+            id3.save()
             title = Screen.removeWordsFromWord([
                 "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track",
                 "Vocal Mix", "Explicit", "explicit", "Extended"
@@ -1459,14 +1497,6 @@ class AlbumAndLyricsScreen(Screen):
             self.addToOutput()
             self.ArtistAlbumAndTitle(True)
             self.getYear(filename)
-            while True:
-                try:
-                    self.iTunesTrack.Year = self.currentYear.get()
-                    break
-                except:
-                    pass
-            if self.iTunesTrack.Year < 1985:
-                self.iTunesTrack.VolumeAdjustment = 50
             inYear = False
             if self.exceptionRaised and self.key != self.value:
                 if self.key[2] == self.value[2]:
@@ -1489,7 +1519,12 @@ class AlbumAndLyricsScreen(Screen):
                             self.key)] = self.value
                     self.exceptionRaised = False
             self.changeTag("success")
-            Screen.container.iTunesLibrary.AddFile(filename)
+            opStatus = Screen.container.iTunesLibrary.AddFile(filename)
+            while opStatus.InProgress:
+                pass
+            iTunesTrack = opStatus.Tracks.Item(1)
+            if self.currentYear.get() < 1985:
+                iTunesTrack.VolumeAdjustment = 50
             for txt in self.scrollableWidget.boxes:
                 txt.insert(TK.END, "\n")
                 txt.see(TK.END)

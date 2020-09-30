@@ -337,6 +337,7 @@ class SearchLibraryScreen(Screen):
             Screen.container.findiTunesTrack(musicFile.title,
                                              musicFile.album).Delete()
             Screen.container.listMusicFile.remove(musicFile)
+            Screen.container.files.remove(os.path.join(Screen.container.musicDestinyDirectory,musicFile.filename))
             subprocess.run([
                 Screen.container.recycle,
                 os.path.join(Screen.container.musicDestinyDirectory, filename)

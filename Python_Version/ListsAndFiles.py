@@ -7,6 +7,7 @@ from mutagen.id3 import ID3, PCNT
 import xml.etree.ElementTree as ET
 import win32com.client as win32com
 import subprocess
+import shutil
 # import pythoncom
 """
     Simple container object that represents a music file
@@ -149,24 +150,22 @@ class ListsAndFiles:
         # Variables
         self.baseDirectory = os.path.dirname(
             __file__)  #defines the directory in which the file is placed
-        if "GitHub" not in self.baseDirectory:
-            aux = self.baseDirectory.split(os.sep)
-            self.baseDirectory = os.path.join('C:', os.sep,
-                                              *aux[1:len(aux) - 1])
+        aux = self.baseDirectory.split(os.sep)
+        self.baseDirectory = os.path.join('C:', os.sep,
+                                            *aux[1:len(aux) - 1])
         self.recycle = os.path.join(
             self.baseDirectory, "auxFiles", 'Recycle.exe'
         )  #the Recycle utility that recycles a file passed as "parameter"
-        while True:
-            try:
-                self.iTunes = win32com.gencache.EnsureDispatch(
-                    "iTunes.Application")  #allows communication with iTunes
-                break
-            except AttributeError:
-                subprocess.run([
-                    self.recycle,
-                    os.path.join("C:", os.sep, "Users", "ruben", "AppData",
-                                 "Local", "Temp", "gen_py", "3.8")
-                ]) #weird error, deleting this folder solves the problem with ensure dispatch
+        try:
+            self.iTunes = win32com.gencache.EnsureDispatch(
+                "iTunes.Application")  #allows communication with iTunes
+        except AttributeError:
+            shutil.rmtree(
+                os.path.join("C:", os.sep, "Users", "ruben", "AppData",
+                             "Local", "Temp", "gen_py","3.8")
+            )  #weird error, deleting this folder solves the problem with ensure dispatch
+            self.iTunes = win32com.gencache.EnsureDispatch(
+                "iTunes.Application")  #allows communication with iTunes
         self.iTunesLibrary = self.iTunes.LibraryPlaylist  #the main iTunes Library, where all files are
         # self.thread = threading.Thread(target=self.thread_function,
         #                                daemon=True)
@@ -217,13 +216,11 @@ class ListsAndFiles:
         else:
             self.getDirectories()
             try:
-                self.files = os.listdir(
-                    self.musicDestinyDirectory
-                )  #gets all files in musicDestinyDirectory
                 self.files = [
                     os.path.join(self.musicDestinyDirectory, f)
-                    for f in self.files if f.endswith(".mp3")
-                ]  #reduces to only the mp3's
+                    for f in os.listdir(self.musicDestinyDirectory)
+                    if f.endswith(".mp3")
+                ]  #gets all mp3 files in musicDestinyDirectory
             except:
                 self.files = []
             self.numberOfFiles = len([
@@ -285,6 +282,8 @@ class ListsAndFiles:
             self.timeOfLastModifiedFile = 0
 
     def saveNumFilesLastModified(self):
+        self.timeOfLastModified = self.getLastModified()
+        self.numberOfFiles = len(self.files)
         tree = ET.parse(self.fileDetails)
         root = tree.getroot()
         try:
@@ -674,7 +673,11 @@ class ListsAndFiles:
     """
 
     def findiTunesTrack(self, title: str, album: str):
-        tracks = self.iTunesLibrary.Search(title, 5)
+        try:
+            tracks = self.iTunesLibrary.Search(title, 5)
+        except:
+            self.iTunesLibrary = self.iTunes.LibraryPlaylist  #the main iTunes Library, where all files are
+            tracks = self.iTunesLibrary.Search(title, 5)
         try:
             if len(tracks) == 1:
                 return tracks.Item(1)
