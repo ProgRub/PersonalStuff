@@ -1497,7 +1497,6 @@ class AlbumAndLyricsScreen(Screen):
             self.addToOutput()
             self.ArtistAlbumAndTitle(True)
             self.getYear(filename)
-            inYear = False
             if self.exceptionRaised and self.key != self.value:
                 if self.key[2] == self.value[2]:
                     self.key[2] = None
