@@ -243,7 +243,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.BackColor = System.Drawing.Color.Transparent;
             this.Controls.Add(this.labelTBTitle);
             this.Controls.Add(this.labelTBAlbum);
             this.Controls.Add(this.labelTBArtist);

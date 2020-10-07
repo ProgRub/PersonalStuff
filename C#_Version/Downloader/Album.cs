@@ -8,18 +8,18 @@ namespace Downloader
 {
     public class Album
     {
-        private string Title { get; set; }
-        private string Artist { get; set; }
-        private int NumberOfTracks { get; set; }
-        private int NumberOfDiscs { get; set; }
-        private string Genre { get; set; }
-        private int Year { get; set; }
+        public string Title { get; set; }
+        public string Artist { get; set; }
+        public int NumberOfTracks { get; set; }
+        public int NumberOfDiscs { get; set; }
+        public string Genre { get; set; }
+        public int Year { get; set; }
 
-        private List<List<MusicFile>> TracksByDiscs;
+        public List<List<MusicFile>> TracksByDiscs;
 
-        private int Length { get; set; }
+        public int Length { get; set; }
 
-        private float AveragePlayCount { get; set; }
+        public float AveragePlayCount { get; set; }
 
         public Album(string title, string artist, int numberOfTracks, int numberOfDiscs, string genre, int year)
         {
@@ -54,7 +54,7 @@ namespace Downloader
                     break;
                 }
             }
-            this.Length += track.Duration;
+            this.Length += track.Length;
             this.AveragePlayCount += track.PlayCount;
         }
     }

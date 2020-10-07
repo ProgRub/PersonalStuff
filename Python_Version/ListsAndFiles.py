@@ -743,6 +743,7 @@ class ListsAndFiles:
                 self.listAlbums.append(
                     Album(track.album, track.albumArtist, track.numberOfTracks,
                           track.numberOfDiscs, track.genre, track.year))
+                indexOfAlbum=len(self.listAlbums)-1
                 if self.correctRapGenre(track.genre) not in self.genresColors:
                     self.genresColors[self.correctRapGenre(
                         track.genre)] = "white"

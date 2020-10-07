@@ -68,20 +68,18 @@ namespace Downloader
 
         private void buttonDownloadMusic_Click(object sender, EventArgs e)
         {
-            this.Window.LAFContainer.SaveDirectories();
             this.Hide();
             MusicScreen aux = new MusicScreen();
             aux.Dock = DockStyle.Fill;
             this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
-
         }
 
         private void buttonYLModified_Click(object sender, EventArgs e)
         {
-            this.Window.LAFContainer.SaveDirectories();
             this.Hide();
-            YearLyricsScreen aux = new YearLyricsScreen(this.Window.LAFContainer.Files.Where(x => File.GetLastWriteTime(x).ToOADate() > this.Window.LAFContainer.GetLastModifiedTime()).ToList());
+            long lastModifiedTime = this.Window.LAFContainer.GetLastModifiedTime();
+            YearLyricsScreen aux = new YearLyricsScreen(Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x =>x.EndsWith(".mp3")&& File.GetLastWriteTime(x).ToFileTime() > (lastModifiedTime-5*60)).ToList(),false);
             aux.Dock = DockStyle.Fill;
             this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
@@ -89,9 +87,8 @@ namespace Downloader
 
         private void buttonYLAll_Click(object sender, EventArgs e)
         {
-            this.Window.LAFContainer.SaveDirectories();
             this.Hide();
-            YearLyricsScreen aux = new YearLyricsScreen(this.Window.LAFContainer.Files);
+            YearLyricsScreen aux = new YearLyricsScreen(Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3")).ToList(), false);
             aux.Dock = DockStyle.Fill;
             this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
@@ -99,9 +96,17 @@ namespace Downloader
 
         private void buttonOptions_Click(object sender, EventArgs e)
         {
-            this.Window.LAFContainer.SaveDirectories();
             this.Hide();
             OptionsScreen aux = new OptionsScreen();
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
+        }
+
+        private void buttonDownloadSchool_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            SchoolScreen aux = new SchoolScreen();
             aux.Dock = DockStyle.Fill;
             this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;

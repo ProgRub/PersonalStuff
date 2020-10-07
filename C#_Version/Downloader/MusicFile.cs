@@ -15,15 +15,15 @@ namespace Downloader
         public string AlbumArtist { get; set; }
         public string Album { get; set; }
         public int TrackNumber { get; set; }
-        public int NumberOfTracks { get;  }
+        public int NumberOfTracks { get; set; }
         public int DiscNumber { get; set; }
-        public int NumberOfDiscs { get;  }
+        public int NumberOfDiscs { get; set; }
         public string Genre { get; set; }
         public int Year { get; set; }
-        public int Duration { get; set; }
+        public int Length { get; set; }
         public int PlayCount { get; set; }
 
-        public MusicFile(string filename, string title, string contributingArtists, string albumArtist, string album, int trackNumber, int numberOfTracks, int discNumber, int numberOfDiscs, string genre, int year, int duration)
+        public MusicFile(string filename, string title, string contributingArtists, string albumArtist, string album, int trackNumber, int numberOfTracks, int discNumber, int numberOfDiscs, string genre, int year, int length,int playCount)
         {
             this.Filename = filename;
             this.Title = title;
@@ -36,8 +36,8 @@ namespace Downloader
             this.NumberOfDiscs = numberOfDiscs;
             this.Genre = genre;
             this.Year = year;
-            this.Duration = duration;
-            this.PlayCount = 0;
+            this.Length = length;
+            this.PlayCount = playCount;
         }
     }
 }

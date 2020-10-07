@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace Downloader
 {
@@ -34,6 +35,7 @@ namespace Downloader
         private void OptionsScreen_Load(object sender, EventArgs e)
         {
             this.Window = this.Parent as DownloaderForm;
+            this.listBoxToDelete.BackColor = this.Window.BackColor;
         }
         private void buttonGrimeArtistConfirm_Click(object sender, EventArgs e)
         {
@@ -113,7 +115,7 @@ namespace Downloader
                             string toReplace = auxToReplace.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
                             string replacement = auxReplacement.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
                             this.Window.LAFContainer.UrlReplacements[toReplace] = replacement;
-                            this.listBoxToDelete.Items.Add("\"" + toReplace + "\"\t--->\t\"" + replacement + "\"");
+                            this.listBoxToDelete.Items.Add("\"" + toReplace + "\" ---> \"" + replacement + "\"");
                         }
                         break;
                     default:
@@ -250,6 +252,10 @@ namespace Downloader
                         {
                             if (this.listBoxToDelete.GetSelected(index))
                             {
+                                string[] auxList = this.listBoxToDelete.Items[index].ToString().Split(new string[] { " ---> " }, StringSplitOptions.None);
+                                string auxToReplace = auxList[0];
+                                string toReplace = auxToReplace.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
+                                this.Window.LAFContainer.UrlReplacements.Remove(toReplace);
                                 this.listBoxToDelete.Items.RemoveAt(index);
                                 index--;
                             }
@@ -283,7 +289,7 @@ namespace Downloader
                 case 3:
                     foreach (var old in this.Window.LAFContainer.UrlReplacements.Keys)
                     {
-                        this.listBoxToDelete.Items.Add("\"" + old + "\"\t--->\t\"" + this.Window.LAFContainer.UrlReplacements[old] + "\"");
+                        this.listBoxToDelete.Items.Add("\"" + old + "\" ---> \"" + this.Window.LAFContainer.UrlReplacements[old] + "\"");
                     }
                     break;
                 default:

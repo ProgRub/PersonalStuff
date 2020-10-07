@@ -29,8 +29,9 @@ namespace Downloader
         private uint TrackCount;
         private BackgroundWorker worker;
         private string CurrentArtist, CurrentAlbum, CurrentTitle, CurrentYear;
+        private bool AddFileToList;
 
-        public YearLyricsScreen(List<string> newFiles)
+        public YearLyricsScreen(List<string> newFiles, bool addFileToList)
         {
             InitializeComponent();
             this.NewFiles = newFiles;
@@ -45,6 +46,7 @@ namespace Downloader
             this.worker.WorkerReportsProgress = true;
             this.ErrorHandled = true;
             this.ProgressWorkerDone = false;
+            this.AddFileToList = addFileToList;
         }
 
         private void ChangeUI(object sender, ProgressChangedEventArgs e)
@@ -136,7 +138,7 @@ namespace Downloader
                 this.CurrentAlbum = this.textBoxAlbum.Text;
                 this.CurrentTitle = this.textBoxTitle.Text;
                 this.Value = new List<string>() { this.CurrentArtist, this.CurrentAlbum, this.CurrentTitle };
-                //this.DisableComponents();
+                this.DisableComponents();
                 this.worker.ReportProgress(10);
                 while (!this.ProgressWorkerDone) { }
                 if (!this.buttonSkipSong.Enabled)
@@ -168,12 +170,12 @@ namespace Downloader
         private void YearLyricsScreen_Load(object sender, EventArgs e)
         {
             this.Window = this.Parent as DownloaderForm;
+            this.richTextBoxArtist.BackColor = this.Window.BackColor;
+            this.richTextBoxAlbum.BackColor = this.Window.BackColor;
+            this.richTextBoxTitle.BackColor = this.Window.BackColor;
             this.Window.WindowState = FormWindowState.Maximized;
-            //Task.Delay(100);
             this.worker.RunWorkerAsync();
-            //this.GetLyricsAndYear();
-            //this.Visible = false;
-            //this.Visible = true;
+            this.Window.Controls.OfType<MusicScreen>().ToList()[0].Dispose();
         }
 
 
@@ -182,9 +184,9 @@ namespace Downloader
             this.richTextBoxArtist.AppendText(this.CurrentArtist);
             this.richTextBoxAlbum.AppendText(this.CurrentAlbum);
             this.richTextBoxTitle.AppendText(this.CurrentTitle);
-            this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);
-            this.richTextBoxAlbum.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);
-            this.richTextBoxTitle.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);
+            this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
+            this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxAlbum.Lines[this.NumberFilesProcessed].Length);
+            this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxTitle.Lines[this.NumberFilesProcessed].Length);
             this.richTextBoxArtist.SelectionColor = Color.Yellow;
             this.richTextBoxAlbum.SelectionColor = Color.Yellow;
             this.richTextBoxTitle.SelectionColor = Color.Yellow;
@@ -226,18 +228,18 @@ namespace Downloader
         {
             if (!fileProcessed)
             {
-                this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);// this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxAlbum.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);//this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxTitle.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);//this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
+                this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
+                this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxAlbum.Lines[this.NumberFilesProcessed].Length);
+                this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxTitle.Lines[this.NumberFilesProcessed].Length);
                 this.richTextBoxArtist.SelectionColor = Color.DarkGreen;
                 this.richTextBoxAlbum.SelectionColor = Color.DarkGreen;
                 this.richTextBoxTitle.SelectionColor = Color.DarkGreen;
             }
             else
             {
-                this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);//this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxAlbum.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);//this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxTitle.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), 100);//this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
+                this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
+                this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxAlbum.Lines[this.NumberFilesProcessed].Length);
+                this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxTitle.Lines[this.NumberFilesProcessed].Length);
                 this.richTextBoxArtist.SelectionColor = Color.Lime;
                 this.richTextBoxAlbum.SelectionColor = Color.Lime;
                 this.richTextBoxTitle.SelectionColor = Color.Lime;
@@ -563,7 +565,7 @@ namespace Downloader
                     }
                     try
                     {
-                        this.Window.LAFContainer.ExceptionsReplacements[this.Key]= this.Value;
+                        this.Window.LAFContainer.ExceptionsReplacements[this.Key] = this.Value;
                     }
                     catch (ArgumentException)
                     {
@@ -617,7 +619,10 @@ namespace Downloader
                 this.worker.ReportProgress(15);
                 while (!this.ProgressWorkerDone) { }
                 this.Window.LAFContainer.iTunesLibrary.AddFile(this.Filename);
-                this.Window.LAFContainer.AddMusicFile(this.Filename);
+                if (this.AddFileToList)
+                {
+                    this.Window.LAFContainer.AddMusicFile(this.Filename);
+                }
             }
         }
     }

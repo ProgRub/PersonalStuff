@@ -146,6 +146,8 @@ namespace Downloader
         private void MusicScreen_Load(object sender, EventArgs e)
         {
             this.Window = this.Parent as DownloaderForm;
+            this.TextBoxFilesFound.BackColor = this.Window.BackColor;
+            this.TextBoxFilesMoved.BackColor = this.Window.BackColor;
             Process deemix = new Process();
             deemix.StartInfo.WorkingDirectory = Path.Combine(this.Window.LAFContainer.CurrentDirectory, "auxFiles", "deemix");
             deemix.StartInfo.FileName = "start.bat";
@@ -154,6 +156,7 @@ namespace Downloader
             this.TimerCheckMusic.Tick += new EventHandler(CheckMusic);
             this.TimerCheckMusic.Interval = 15;
             this.TimerCheckMusic.Start();
+            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
         }
 
         private void buttonEndCycleAdvance_Click(object sender, EventArgs e)
@@ -169,7 +172,7 @@ namespace Downloader
             else
             {
                 this.Hide();
-                YearLyricsScreen aux = new YearLyricsScreen(this.NewFiles);
+                YearLyricsScreen aux = new YearLyricsScreen(this.NewFiles,true);
                 aux.Dock = DockStyle.Fill;
                 this.Window.Controls.Add(aux);
                 this.Window.ActiveControl = aux;
