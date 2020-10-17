@@ -93,7 +93,6 @@ namespace Downloader
             this.dropdownDirectories.Name = "dropdownDirectories";
             this.dropdownDirectories.Size = new System.Drawing.Size(380, 21);
             this.dropdownDirectories.TabIndex = 13;
-            this.dropdownDirectories.DropDownClosed += new System.EventHandler(this.dropdownDirectories_DropDownClosed);
             // 
             // textBoxFilename
             // 
@@ -117,6 +116,7 @@ namespace Downloader
             this.Name = "SchoolScreen";
             this.Size = new System.Drawing.Size(1106, 586);
             this.Load += new System.EventHandler(this.SchoolScreen_Load);
+            this.Enter += new System.EventHandler(this.SchoolScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 

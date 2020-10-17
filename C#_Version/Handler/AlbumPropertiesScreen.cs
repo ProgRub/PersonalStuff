@@ -24,7 +24,7 @@ namespace Handler
         private void AlbumPropertiesScreen_Load(object sender, EventArgs e)
         {
             this.Window = this.Parent as HandlerForm;
-            int index = 0;
+            int index = 1;
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(this.Window.LAFContainer.GenerateAlbums);
             foreach (string genre in this.Window.LAFContainer.GenresColors.Keys)
@@ -33,10 +33,10 @@ namespace Handler
                 checkBox.AutoSize = true;
                 checkBox.Font = new Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
                 checkBox.ForeColor = this.Window.LAFContainer.GenresColors[genre];
-                checkBox.Location = new Point(83, 232 + index * 30);
+                checkBox.Location = new Point(83, 232 + index * 25);
                 checkBox.Name = "checkBox" + genre;
                 checkBox.Size = new Size(93, 21);
-                checkBox.TabIndex = 5 + index;
+                checkBox.TabIndex = 4+ index;
                 checkBox.Text = genre;
                 checkBox.UseVisualStyleBackColor = true;
                 index++;

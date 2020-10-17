@@ -34,11 +34,13 @@ namespace Downloader
             this.dropdownDirectories.Items.Add("Skip File");
             this.dropdownDirectories.Items.Add("Delete File");
             this.NumberFiles = 0;
-            //System.Diagnostics.Process.Start("https://moodle.cee.uma.pt/login/index.php");
-            //System.Diagnostics.Process.Start("https://infoalunos.uma.pt");
         }
 
         private void SchoolScreen_Load(object sender, EventArgs e)
+        {
+        }
+
+        private void SchoolScreen_Enter(object sender, EventArgs e)
         {
             this.Window = this.Parent as DownloaderForm;
             this.TextBoxFilesFound.BackColor = this.Window.BackColor;
@@ -47,14 +49,20 @@ namespace Downloader
             this.TimerCheckDownloads.Tick += new EventHandler(CheckDownloads);
             this.TimerCheckDownloads.Interval = 15;
             this.TimerCheckDownloads.Start();
-            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
+            //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
+            //System.Diagnostics.Process.Start("https://moodle.cee.uma.pt/login/index.php");
+            //System.Diagnostics.Process.Start("https://infoalunos.uma.pt");
         }
+
 
         private void buttonMoveFile_Click(object sender, EventArgs e)
         {
+            this.ChosenDirectory = this.dropdownDirectories.SelectedItem.ToString();
             if (this.ChosenDirectory == "Delete File")
             {
                 FileSystem.DeleteFile(this.CurrentFile, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                this.TextBoxFilesMoved.AppendText(this.CurrentFile +" deleted" + Environment.NewLine);
+                this.TextBoxFilesFound.AppendText(Environment.NewLine);
             }
             else if (this.ChosenDirectory != "Skip File")
             {
@@ -88,11 +96,6 @@ namespace Downloader
             this.TimerCheckDownloads.Start();
         }
 
-        private void dropdownDirectories_DropDownClosed(object sender, EventArgs e)
-        {
-            this.ChosenDirectory = this.dropdownDirectories.SelectedItem.ToString();
-        }
-
         private void AddDirectories(string directory)
         {
             if (directory.Replace(this.OneDrive + Path.DirectorySeparatorChar, "").Count(x => x == Path.DirectorySeparatorChar) >= 2)
@@ -114,7 +117,7 @@ namespace Downloader
                 {
                     this.CurrentFile = filename;
                     this.TextBoxFilesFound.AppendText(Path.GetFileName(filename));
-                    this.textBoxFilename.Text = Path.GetFileName(filename);
+                    this.textBoxFilename.Text = Path.GetFileName(filename).Replace(" ", "_") ;
                     this.TimerCheckDownloads.Stop();
                     break;
                 }

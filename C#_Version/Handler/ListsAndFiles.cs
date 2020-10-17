@@ -54,124 +54,130 @@ namespace Handler
             this.GetAllFromFiles();
             this.iTunes = new iTunesApp();
             this.iTunesLibrary = this.iTunes.LibraryPlaylist;
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(this.CheckMusicFilesAndUpdatePlayCounts);
+            worker.RunWorkerAsync();
+            //BackgroundWorker updatePC = new BackgroundWorker();
+            //updatePC.DoWork += new DoWorkEventHandler(this.UpdatePlayCounts);
+            //updatePC.RunWorkerAsync();
         }
 
-        public string RemoveWordsFromWord(List<string> setOfWords, string wordPar)
-        {
-            string word = wordPar;
-            if (word.Contains("(") || word.Contains("["))
-            {
-                for (int index = 0; index < setOfWords.Count; index++)
-                {
-                    bool inRoundParenthesis = true;
-                    string wordToRemove = setOfWords[index];
-                    int startParenthesisPosition = -1;
-                    int endParenthesisPosition = -1;
-                    while (word.Contains(wordToRemove))
-                    {
-                        if (inRoundParenthesis)
-                        {
-                            startParenthesisPosition = word.IndexOf("(");
-                            endParenthesisPosition = word.IndexOf(")");
-                        }
-                        if (!inRoundParenthesis || startParenthesisPosition == -1)
-                        {
-                            startParenthesisPosition = word.IndexOf("[");
-                            endParenthesisPosition = word.IndexOf("]");
-                        }
-                        Console.WriteLine(word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1));
-                        if (word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1).Contains(wordToRemove))
-                        {
-                            word = this.RemoveWordsFromWord(setOfWords, word.Remove(startParenthesisPosition - 1, endParenthesisPosition - startParenthesisPosition + 2));
-                        }
-                        else
-                        {
-                            if (!inRoundParenthesis)
-                            {
-                                if (word.Contains("("))
-                                {
-                                    word = word.Replace(word.Substring(word.IndexOf(")") + 1), this.RemoveWordsFromWord(setOfWords, word.Substring(word.IndexOf(")") + 1)));
-                                }
-                                if (word.Contains("["))
-                                {
-                                    word = word.Replace(word.Substring(word.IndexOf("]") + 1), this.RemoveWordsFromWord(setOfWords, word.Substring(word.IndexOf("]") + 1)));
-                                }
-                            }
-                            inRoundParenthesis = false;
-                        }
-                    }
-                }
-            }
-            return word.Trim();
-        }
+        //public string RemoveWordsFromWord(List<string> setOfWords, string wordPar)
+        //{
+        //    string word = wordPar;
+        //    if (word.Contains("(") || word.Contains("["))
+        //    {
+        //        for (int index = 0; index < setOfWords.Count; index++)
+        //        {
+        //            bool inRoundParenthesis = true;
+        //            string wordToRemove = setOfWords[index];
+        //            int startParenthesisPosition = -1;
+        //            int endParenthesisPosition = -1;
+        //            while (word.Contains(wordToRemove))
+        //            {
+        //                if (inRoundParenthesis)
+        //                {
+        //                    startParenthesisPosition = word.IndexOf("(");
+        //                    endParenthesisPosition = word.IndexOf(")");
+        //                }
+        //                if (!inRoundParenthesis || startParenthesisPosition == -1)
+        //                {
+        //                    startParenthesisPosition = word.IndexOf("[");
+        //                    endParenthesisPosition = word.IndexOf("]");
+        //                }
+        //                Console.WriteLine(word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1));
+        //                if (word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1).Contains(wordToRemove))
+        //                {
+        //                    word = this.RemoveWordsFromWord(setOfWords, word.Remove(startParenthesisPosition - 1, endParenthesisPosition - startParenthesisPosition + 2));
+        //                }
+        //                else
+        //                {
+        //                    if (!inRoundParenthesis)
+        //                    {
+        //                        if (word.Contains("("))
+        //                        {
+        //                            word = word.Replace(word.Substring(word.IndexOf(")") + 1), this.RemoveWordsFromWord(setOfWords, word.Substring(word.IndexOf(")") + 1)));
+        //                        }
+        //                        if (word.Contains("["))
+        //                        {
+        //                            word = word.Replace(word.Substring(word.IndexOf("]") + 1), this.RemoveWordsFromWord(setOfWords, word.Substring(word.IndexOf("]") + 1)));
+        //                        }
+        //                    }
+        //                    inRoundParenthesis = false;
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return word.Trim();
+        //}
 
-        public void TagChanges(string filename)
-        {
-            using (var mp3 = TagLib.File.Create(filename))
-            {
-                mp3.Tag.Album = this.RemoveWordsFromWord(new List<string>() { "Remaster", "Anniversary", "Deluxe", "Expanded" }, mp3.Tag.Album);
-                mp3.Tag.Title = this.RemoveWordsFromWord(new List<string>() { "Remaster", "Album Version", "Stereo", "Hidden Track", "Explicit",
-            "explicit" }, mp3.Tag.Title);
-                mp3.Tag.Title = mp3.Tag.Title.Replace("f*ck", "fuck").Replace(
-                "f***",
-                "fuck").Replace("f**k", "fuck").Replace("sh*t", "shit").Replace(
-                    "s**t", "shit").Replace("sh**", "shit").Replace(
-                        "ni**as", "niggas").Replace("F*ck", "Fuck").Replace(
-                            "F**k", "Fuck").Replace("F***", "Fuck").Replace(
-                                "Sh*t", "Shit").Replace("S**t", "Shit").Replace(
-                                    "Sh**", "Shit").Replace("Ni**as", "Niggas");
-                if (mp3.Tag.AlbumArtists[0].Contains("King Gizzard"))
-                {
-                    mp3.Tag.Performers[0] = mp3.Tag.Performers[0].Replace("And", "&");
-                    mp3.Tag.AlbumArtists[0] = mp3.Tag.AlbumArtists[0].Replace("And", "&");
-                }
-                else if (mp3.Tag.AlbumArtists[0].Contains("&") && mp3.Tag.Album != "Without Warning" && !mp3.Tag.AlbumArtists[0].Contains(" Mayall "))
-                {
-                    mp3.Tag.AlbumArtists[0] = mp3.Tag.AlbumArtists[0].Split(new string[] { " & " }, StringSplitOptions.None)[0];
-                }
-                else if (mp3.Tag.Album == "Without Warning")
-                {
-                    mp3.Tag.AlbumArtists[0] = "21 Savage, Offset & Metro Boomin";
-                }
-                if (mp3.Tag.AlbumArtists.Length > 1)
-                {
-                    mp3.Tag.AlbumArtists = new string[] { mp3.Tag.AlbumArtists[0] };
-                }
-                else if (mp3.Tag.AlbumArtists[0].Contains("/"))
-                {
-                    mp3.Tag.AlbumArtists[0] = mp3.Tag.AlbumArtists[0].Substring(0, mp3.Tag.AlbumArtists[0].IndexOf("/"));
-                }
-                if (mp3.Tag.Performers.Length > 1)
-                {
-                    mp3.Tag.Performers = new string[] { string.Join(", ", mp3.Tag.Performers) };
-                }
-                else if (mp3.Tag.Performers[0].Contains("/"))
-                {
-                    mp3.Tag.Performers[0] = mp3.Tag.Performers[0].Substring(0, mp3.Tag.Performers[0].IndexOf("/"));
-                }
-                if (this.GrimeArtists.Contains(mp3.Tag.AlbumArtists[0]))
-                {
-                    mp3.Tag.Genres[0] = "Grime";
-                }
-                else if (mp3.Tag.Genres[0].Contains("Electro"))
-                {
-                    mp3.Tag.Genres[0] = "Electro";
-                }
-                else if (mp3.Tag.Genres[0].Contains("Rock"))
-                {
-                    mp3.Tag.Genres[0] = "Rock";
-                }
-                else if (mp3.Tag.Genres[0].Contains("Rap"))
-                {
-                    mp3.Tag.Genres = new string[] { "Hip Hop" };
-                }
-                else if (mp3.Tag.Genres[0].Contains("Alternativa"))
-                {
-                    mp3.Tag.Genres[0] = "Alternative";
-                }
-                mp3.Save();
-            }
-        }
+        //public void TagChanges(string filename)
+        //{
+        //    using (var mp3 = TagLib.File.Create(filename))
+        //    {
+        //        mp3.Tag.Album = this.RemoveWordsFromWord(new List<string>() { "Remaster", "Anniversary", "Deluxe", "Expanded" }, mp3.Tag.Album);
+        //        mp3.Tag.Title = this.RemoveWordsFromWord(new List<string>() { "Remaster", "Album Version", "Stereo", "Hidden Track", "Explicit",
+        //    "explicit" }, mp3.Tag.Title);
+        //        mp3.Tag.Title = mp3.Tag.Title.Replace("f*ck", "fuck").Replace(
+        //        "f***",
+        //        "fuck").Replace("f**k", "fuck").Replace("sh*t", "shit").Replace(
+        //            "s**t", "shit").Replace("sh**", "shit").Replace(
+        //                "ni**as", "niggas").Replace("F*ck", "Fuck").Replace(
+        //                    "F**k", "Fuck").Replace("F***", "Fuck").Replace(
+        //                        "Sh*t", "Shit").Replace("S**t", "Shit").Replace(
+        //                            "Sh**", "Shit").Replace("Ni**as", "Niggas");
+        //        if (mp3.Tag.AlbumArtists[0].Contains("King Gizzard"))
+        //        {
+        //            mp3.Tag.Performers[0] = mp3.Tag.Performers[0].Replace("And", "&");
+        //            mp3.Tag.AlbumArtists[0] = mp3.Tag.AlbumArtists[0].Replace("And", "&");
+        //        }
+        //        else if (mp3.Tag.AlbumArtists[0].Contains("&") && mp3.Tag.Album != "Without Warning" && !mp3.Tag.AlbumArtists[0].Contains(" Mayall "))
+        //        {
+        //            mp3.Tag.AlbumArtists[0] = mp3.Tag.AlbumArtists[0].Split(new string[] { " & " }, StringSplitOptions.None)[0];
+        //        }
+        //        else if (mp3.Tag.Album == "Without Warning")
+        //        {
+        //            mp3.Tag.AlbumArtists[0] = "21 Savage, Offset & Metro Boomin";
+        //        }
+        //        if (mp3.Tag.AlbumArtists.Length > 1)
+        //        {
+        //            mp3.Tag.AlbumArtists = new string[] { mp3.Tag.AlbumArtists[0] };
+        //        }
+        //        else if (mp3.Tag.AlbumArtists[0].Contains("/"))
+        //        {
+        //            mp3.Tag.AlbumArtists[0] = mp3.Tag.AlbumArtists[0].Substring(0, mp3.Tag.AlbumArtists[0].IndexOf("/"));
+        //        }
+        //        if (mp3.Tag.Performers.Length > 1)
+        //        {
+        //            mp3.Tag.Performers = new string[] { string.Join(", ", mp3.Tag.Performers) };
+        //        }
+        //        else if (mp3.Tag.Performers[0].Contains("/"))
+        //        {
+        //            mp3.Tag.Performers[0] = mp3.Tag.Performers[0].Substring(0, mp3.Tag.Performers[0].IndexOf("/"));
+        //        }
+        //        if (this.GrimeArtists.Contains(mp3.Tag.AlbumArtists[0]))
+        //        {
+        //            mp3.Tag.Genres[0] = "Grime";
+        //        }
+        //        else if (mp3.Tag.Genres[0].Contains("Electro"))
+        //        {
+        //            mp3.Tag.Genres[0] = "Electro";
+        //        }
+        //        else if (mp3.Tag.Genres[0].Contains("Rock"))
+        //        {
+        //            mp3.Tag.Genres[0] = "Rock";
+        //        }
+        //        else if (mp3.Tag.Genres[0].Contains("Rap"))
+        //        {
+        //            mp3.Tag.Genres = new string[] { "Hip Hop" };
+        //        }
+        //        else if (mp3.Tag.Genres[0].Contains("Alternativa"))
+        //        {
+        //            mp3.Tag.Genres[0] = "Alternative";
+        //        }
+        //        mp3.Save();
+        //    }
+        //}
 
         public long GetLastModifiedTime()
         {
@@ -189,10 +195,24 @@ namespace Handler
 
         public void AddMusicFile(string filename)
         {
-            using (var mp3 = TagLib.File.Create(filename))
+            if (this.MusicFiles.All(x => x.Filename != Path.GetFileName(filename)))
             {
-                this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, string.Join("*", mp3.Tag.Performers), mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Length,0));
-                mp3.Save();
+                using (var mp3 = TagLib.File.Create(filename))
+                {
+                    this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, string.Join("*", mp3.Tag.Performers), mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Properties.Duration.TotalSeconds, 0));
+                    while (true)
+                    {
+                        try
+                        {
+                            mp3.Save();
+                            break;
+                        }
+                        catch (IOException)
+                        {
+                            Console.WriteLine("HERE");
+                        }
+                    }
+                }
             }
         }
 
@@ -342,7 +362,7 @@ namespace Handler
             this.SaveNumberFilesLastModified();
             this.SaveGenreColors();
             this.SaveWorkoutDatabase();
-            this.SaveGrimeArtists(); 
+            this.SaveGrimeArtists();
             this.SaveExceptions();
             this.SaveMusicFiles();
         }
@@ -506,7 +526,7 @@ namespace Handler
         }
         #endregion
 
-        private int IndexOfMusicFile(string filename)
+        public int IndexOfMusicFile(string filename)
         {
             for (int index = 0; index < this.MusicFiles.Count; index++)
             {
@@ -518,16 +538,16 @@ namespace Handler
             return -1;
         }
 
-        private void CheckMusicFiles()
+        private void CheckMusicFilesAndUpdatePlayCounts(object sender, DoWorkEventArgs e)
         {
             var files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
             files = files.OrderBy(x => File.GetLastWriteTime(x).ToFileTime()).ToList();
             long lastModifiedTime = this.GetLastModifiedTime();
-            foreach (string  filename in files)
+            foreach (string filename in files)
             {
                 if (File.GetLastWriteTime(filename).ToFileTime() > lastModifiedTime)
                 {
-                    using(var mp3 = TagLib.File.Create(filename))
+                    using (var mp3 = TagLib.File.Create(filename))
                     {
                         int index = this.IndexOfMusicFile(Path.GetFileName(filename));
                         if (index == -1)
@@ -543,7 +563,22 @@ namespace Handler
                 }
                 else { break; }
             }
-            
+            if (files.Count > this.MusicFiles.Count)
+            {
+                var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
+                foreach (string filename in files)
+                {
+                    if (!auxList.Contains(Path.GetFileName(filename)))
+                    {
+                        using (var mp3 = TagLib.File.Create(filename))
+                        {
+                            this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Length, 0));
+                            mp3.Save();
+                        }
+                    }
+                }
+            }
+            this.UpdatePlayCounts();
         }
 
         public int IndexOfAlbumByName(string albumName)
@@ -588,6 +623,31 @@ namespace Handler
                     totalTracks += disc.Count;
                 }
                 album.AveragePlayCount = album.AveragePlayCount / totalTracks;
+            }
+        }
+
+        public IITTrack GetITunesTrack(string title, string album)
+        {
+            var tracks = this.iTunesLibrary.Search(title, ITPlaylistSearchField.ITPlaylistSearchFieldSongNames);
+            for (int index = 1; index <= tracks.Count; index++)
+            {
+                if (tracks[index].Album == album)
+                {
+                    return tracks[index];
+                }
+            }
+            return null;
+        }
+
+        private void UpdatePlayCounts()
+        {
+            //int index = 0;
+            foreach (MusicFile musicFile in this.MusicFiles)
+            {
+                var track = this.GetITunesTrack(musicFile.Title, musicFile.Album);
+                musicFile.PlayCount = track.PlayedCount;
+                //index++;
+                //Console.WriteLine(index);
             }
         }
     }

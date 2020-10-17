@@ -34,6 +34,10 @@ namespace Downloader
 
         private void OptionsScreen_Load(object sender, EventArgs e)
         {
+        }
+
+        private void OptionsScreen_Enter(object sender, EventArgs e)
+        {
             this.Window = this.Parent as DownloaderForm;
             this.listBoxToDelete.BackColor = this.Window.BackColor;
         }

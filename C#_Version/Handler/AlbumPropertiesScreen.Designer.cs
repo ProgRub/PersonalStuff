@@ -236,7 +236,7 @@
             this.Controls.Add(this.textBoxLeewayAlbum);
             this.Controls.Add(this.textBoxTimeAlbum);
             this.Name = "AlbumPropertiesScreen";
-            this.Size = new System.Drawing.Size(1087, 567);
+            this.Size = new System.Drawing.Size(704, 660);
             this.Load += new System.EventHandler(this.AlbumPropertiesScreen_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

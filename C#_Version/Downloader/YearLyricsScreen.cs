@@ -4,14 +4,10 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using iTunesLib;
-using System.Security.Policy;
 using HtmlAgilityPack;
 using System.Media;
-using System.Threading;
 
 namespace Downloader
 {
@@ -31,24 +27,22 @@ namespace Downloader
         private string CurrentArtist, CurrentAlbum, CurrentTitle, CurrentYear;
         private bool AddFileToList;
 
-        public YearLyricsScreen(List<string> newFiles, bool addFileToList)
+        public YearLyricsScreen()
         {
             InitializeComponent();
-            this.NewFiles = newFiles;
             this.PagesVisited_Year = new Dictionary<string, int>();
             this.NumberFilesProcessed = 0;
-            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
             this.ExceptionRaised = false;
             this.Filename = "";
-            this.worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(this.GetLyricsAndYear);
-            worker.ProgressChanged += new ProgressChangedEventHandler(this.ChangeUI);
-            this.worker.WorkerReportsProgress = true;
             this.ErrorHandled = true;
             this.ProgressWorkerDone = false;
-            this.AddFileToList = addFileToList;
         }
 
+        public void setAttributes(List<string> newFiles, bool addFileToList)
+        {
+            this.NewFiles = newFiles;
+            this.AddFileToList = addFileToList;
+        }
         private void ChangeUI(object sender, ProgressChangedEventArgs e)
         {
             this.ProgressWorkerDone = false;
@@ -124,6 +118,17 @@ namespace Downloader
                     this.richTextBoxAlbum.AppendText(Environment.NewLine);
                     this.richTextBoxTitle.AppendText(Environment.NewLine);
                     break;
+                case 17:
+                    this.textBoxArtist.Visible = false;
+                    this.textBoxTitle.Visible = false;
+                    this.textBoxYear.Visible = false;
+                    this.textBoxAlbum.Visible = false;
+                    this.labelArtist.Visible = false;
+                    this.labelAlbum.Visible = false;
+                    this.labelTitle.Visible = false;
+                    this.labelYear.Visible = false;
+                    this.labelUrlBeingChecked.Text = "\tAll Done!";
+                    break;
                 default:
                     break;
             }
@@ -169,13 +174,22 @@ namespace Downloader
 
         private void YearLyricsScreen_Load(object sender, EventArgs e)
         {
+        }
+
+        private void YearLyricsScreen_Enter(object sender, EventArgs e)
+        {
             this.Window = this.Parent as DownloaderForm;
             this.richTextBoxArtist.BackColor = this.Window.BackColor;
             this.richTextBoxAlbum.BackColor = this.Window.BackColor;
             this.richTextBoxTitle.BackColor = this.Window.BackColor;
+            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
             this.Window.WindowState = FormWindowState.Maximized;
+            this.worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(this.GetLyricsAndYear);
+            worker.ProgressChanged += new ProgressChangedEventHandler(this.ChangeUI);
+            this.worker.WorkerReportsProgress = true;
             this.worker.RunWorkerAsync();
-            this.Window.Controls.OfType<MusicScreen>().ToList()[0].Dispose();
+            //this.Window.Controls.OfType<MusicScreen>().ToList()[0].Dispose();
         }
 
 
@@ -368,6 +382,7 @@ namespace Downloader
             }
             return htmlDoc;
         }
+
         private void SetYearInFile()
         {
             using (var mp3 = TagLib.File.Create(this.Filename))
@@ -476,7 +491,10 @@ namespace Downloader
                         }
                         this.ErrorHandled = false;
                         //this.EnableComponents(true);
-                        break;
+                        while (!this.ErrorHandled)
+                        {
+                            Task.Delay(1000);
+                        }
                     }
                 }
 
@@ -519,7 +537,10 @@ namespace Downloader
                     this.ErrorHandled = false;
                     this.worker.ReportProgress(12);
                     while (!this.ProgressWorkerDone) { }
-                    break;
+                    while (!this.ErrorHandled)
+                    {
+                        Task.Delay(1000);
+                    }
                 }
             }
         }
@@ -549,10 +570,6 @@ namespace Downloader
                 while (!this.ProgressWorkerDone) { }
                 this.ChangeArtistAlbumTitle(true);
                 this.GetYear();
-                while (!this.ErrorHandled)
-                {
-                    Task.Delay(1000);
-                }
                 this.ErrorHandled = false;
                 //this.ChangeTextColor(false);
                 this.worker.ReportProgress(13);
@@ -586,10 +603,6 @@ namespace Downloader
                 if (!skipSong)
                 {
                     this.GetLyrics();
-                    while (!this.ErrorHandled)
-                    {
-                        Task.Delay(1000);
-                    }
                     if (this.ExceptionRaised)
                     {
                         if (this.CurrentLyrics != "None")
@@ -609,13 +622,9 @@ namespace Downloader
                 {
                     addedTrack.VolumeAdjustment = 50;
                 }
-                //this.richTextBoxArtist.AppendText(Environment.NewLine);
-                //this.richTextBoxAlbum.AppendText(Environment.NewLine);
-                //this.richTextBoxTitle.AppendText(Environment.NewLine);
                 this.worker.ReportProgress(16);
                 while (!this.ProgressWorkerDone) { }
                 this.NumberFilesProcessed++;
-                //this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
                 this.worker.ReportProgress(15);
                 while (!this.ProgressWorkerDone) { }
                 this.Window.LAFContainer.iTunesLibrary.AddFile(this.Filename);
@@ -624,6 +633,7 @@ namespace Downloader
                     this.Window.LAFContainer.AddMusicFile(this.Filename);
                 }
             }
+            this.worker.ReportProgress(17);
         }
     }
 

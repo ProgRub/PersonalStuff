@@ -252,6 +252,7 @@
             this.Name = "OptionsScreen";
             this.Size = new System.Drawing.Size(1426, 406);
             this.Load += new System.EventHandler(this.OptionsScreen_Load);
+            this.Enter += new System.EventHandler(this.OptionsScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 

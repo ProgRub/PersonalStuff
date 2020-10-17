@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
@@ -17,6 +18,49 @@ namespace Handler
         private List<string> AlbumGenres;
         private List<Album> PossibleAlbums, PossibleHalfAlbums;
         private int Over, Under;
+        private int PreviousColumnPA, PreviousColumnPHA;
+        private bool ReversePA, ReversePHA;
+
+        private void listViewPossibleAlbums_DoubleClick(object sender, EventArgs e)
+        {
+            //Console.WriteLine(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text);
+            Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text)];
+            this.Hide();
+            TracklistScreen aux = new TracklistScreen(albumSelected);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
+        }
+
+        private void listViewPossibleAlbums_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            this.ReversePA = !this.ReversePA & this.PreviousColumnPA == e.Column;
+            this.listViewPossibleAlbums.ListViewItemSorter = new ListViewItemComparer(e.Column, this.ReversePA);
+            this.PreviousColumnPA = e.Column;
+        }
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
+            this.Window.Controls.OfType<AlbumPropertiesScreen>().ToList()[0].Visible = true;
+            this.Window.ActiveControl = this.Window.Controls.OfType<AlbumPropertiesScreen>().ToList()[0];
+        }
+
+        private void listViewPossibleHalfAlbums_DoubleClick(object sender, EventArgs e)
+        {
+            Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleHalfAlbums.SelectedItems[0].SubItems[1].Text)];
+            this.Hide();
+            TracklistScreen aux = new TracklistScreen(albumSelected);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
+        }
+
+        private void listViewPossibleHalfAlbums_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            this.ReversePHA = !this.ReversePHA & this.PreviousColumnPHA == e.Column;
+            this.listViewPossibleHalfAlbums.ListViewItemSorter = new ListViewItemComparer(e.Column, this.ReversePHA);
+            this.PreviousColumnPHA = e.Column;
+        }
 
         public ChooseAlbumScreen(int albumTime, int albumLeeway, List<string> genresPicked, int leewayMode)
         {
@@ -24,8 +68,7 @@ namespace Handler
             this.AlbumTime = albumTime;
             this.AlbumLeeway = albumLeeway;
             this.AlbumGenres = genresPicked;
-            this.listBoxPossibleAlbums.DrawMode = DrawMode.OwnerDrawFixed;
-            this.listBoxPossibleHalfAlbums.DrawMode = DrawMode.OwnerDrawFixed;
+            this.PreviousColumnPA = this.PreviousColumnPHA = 2;
             switch (leewayMode)
             {
                 case 0:
@@ -42,7 +85,7 @@ namespace Handler
                 default:
                     break;
             }
-            this.labelPossibleAlbums.Text = string.Format("Albums whose length varies between {0} minutes and {1} minutes",this.AlbumTime/60-(this.AlbumLeeway / 60 )* this.Under, this.AlbumTime / 60 + (this.AlbumLeeway / 60) * this.Over);
+            this.labelPossibleAlbums.Text = string.Format("Albums whose length varies between {0} minutes and {1} minutes", this.AlbumTime / 60 - (this.AlbumLeeway / 60) * this.Under, this.AlbumTime / 60 + (this.AlbumLeeway / 60) * this.Over);
             this.labelPossibleHalfAlbums.Text = string.Format("Albums where half of their length varies between {0} minutes and {1} minutes", this.AlbumTime / 60 - (this.AlbumLeeway / 60) * this.Under, this.AlbumTime / 60 + (this.AlbumLeeway / 60) * this.Over);
             this.PossibleAlbums = new List<Album>();
             this.PossibleHalfAlbums = new List<Album>();
@@ -52,15 +95,25 @@ namespace Handler
         {
             this.Window = this.Parent as HandlerForm;
             this.GetAlbums();
-            this.PossibleAlbums=this.PossibleAlbums.OrderByDescending(album => album.Length).ToList();
+            this.PossibleAlbums = this.PossibleAlbums.OrderByDescending(album => album.Length).ToList();
             this.PossibleHalfAlbums = this.PossibleHalfAlbums.OrderByDescending(album => album.Length).ToList();
             foreach (Album album in this.PossibleAlbums)
             {
-                this.listBoxPossibleAlbums.Items.Add(album.Artist + " - " + album.Title+"\t\t\t"+this.Window.LAFContainer.StandardFormatTime(album.Length));
+                var item = new ListViewItem(album.Artist);
+                item.ForeColor = this.Window.LAFContainer.GenresColors[album.Genre];
+                item.SubItems.Add(album.Title);
+                item.SubItems.Add(this.Window.LAFContainer.StandardFormatTime(album.Length));
+                item.SubItems.Add(album.AveragePlayCount.ToString());
+                this.listViewPossibleAlbums.Items.Add(item);
             }
             foreach (Album album in this.PossibleHalfAlbums)
             {
-                this.listBoxPossibleHalfAlbums.Items.Add(album.Artist + " - " + album.Title + "\t\t\t" + this.Window.LAFContainer.StandardFormatTime(album.Length));
+                var item = new ListViewItem(album.Artist);
+                item.ForeColor = this.Window.LAFContainer.GenresColors[album.Genre];
+                item.SubItems.Add(album.Title);
+                item.SubItems.Add(this.Window.LAFContainer.StandardFormatTime(album.Length));
+                item.SubItems.Add(album.AveragePlayCount.ToString());
+                this.listViewPossibleHalfAlbums.Items.Add(item);
             }
             //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
         }
@@ -79,7 +132,7 @@ namespace Handler
                     {
                         underTime = this.AlbumTime - this.AlbumLeeway * this.Under;
                         overTime = this.AlbumTime + this.AlbumLeeway * this.Under;
-                        if(albumLength>=underTime && albumLength <= overTime)
+                        if (albumLength >= underTime && albumLength <= overTime)
                         {
                             this.PossibleAlbums.Add(album);
                             break;
@@ -94,33 +147,51 @@ namespace Handler
                 }
             }
         }
-        private void listBoxPossibleAlbums_DrawItem(object sender, DrawItemEventArgs e)
-        {
-            var item = listBoxPossibleAlbums.Items[e.Index];
-            //Console.WriteLine(item);
+    }
 
-            if (item != null)
-            {
-                e.Graphics.DrawString(
-                    item.ToString(),
-                    e.Font,
-                    new SolidBrush(this.Window.LAFContainer.GenresColors[this.PossibleAlbums[e.Index].Genre]),
-                    e.Bounds);
-            }
+    // Implements the manual sorting of items by columns.
+    class ListViewItemComparer : IComparer
+    {
+        private int col;
+        private int reverse;
+        public ListViewItemComparer()
+        {
+            col = 0;
         }
-        private void listBoxPossibleHalfAlbums_DrawItem(object sender, DrawItemEventArgs e)
+        public ListViewItemComparer(int column, bool reverse)
         {
-            var item = listBoxPossibleHalfAlbums.Items[e.Index];
-            //Console.WriteLine(item);
-
-            if (item != null)
+            col = column;
+            this.reverse = reverse ? -1 : 1;
+        }
+        public int Compare(object x, object y)
+        {
+            if (this.col == 2)
             {
-                e.Graphics.DrawString(
-                    item.ToString(),
-                    e.Font,
-                    new SolidBrush(this.Window.LAFContainer.GenresColors[this.PossibleHalfAlbums[e.Index].Genre]),
-                    e.Bounds);
+                string[] timeX = ((ListViewItem)x).SubItems[col].Text.Split(':');
+                string[] timeY = ((ListViewItem)y).SubItems[col].Text.Split(':');
+                if ((Int32.Parse(timeX[0]) * 60 + Int32.Parse(timeX[1])) == (Int32.Parse(timeY[0]) * 60 + Int32.Parse(timeY[1])))
+                {
+                    return 0;
+                }
+                else if ((Int32.Parse(timeX[0]) * 60 + Int32.Parse(timeX[1])) < (Int32.Parse(timeY[0]) * 60 + Int32.Parse(timeY[1])))
+                {
+                    return 1 * reverse;
+                }
+                return -1 * reverse;
             }
+            else if (this.col == 3)
+            {
+                if (float.Parse(((ListViewItem)x).SubItems[col].Text) == float.Parse(((ListViewItem)y).SubItems[col].Text))
+                {
+                    return 0;
+                }
+                else if (float.Parse(((ListViewItem)x).SubItems[col].Text) < float.Parse(((ListViewItem)y).SubItems[col].Text))
+                {
+                    return -1 * reverse;
+                }
+                return 1 * reverse;
+            }
+            return String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text) * reverse;
         }
     }
 }

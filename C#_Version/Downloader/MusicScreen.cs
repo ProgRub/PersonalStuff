@@ -17,7 +17,6 @@ namespace Downloader
     {
         public DownloaderForm Window { get; set; }
         private int NumberFilesFound;
-        private int NumberFilesMoved;
         private List<string> FileBuffer;
         private bool CanAdvance;
         private List<string> NewFiles;
@@ -27,7 +26,6 @@ namespace Downloader
         {
             InitializeComponent();
             this.NumberFilesFound = 0;
-            this.NumberFilesMoved = 0;
             this.FileBuffer = new List<string>();
             this.CanAdvance = false;
             this.NewFiles = new List<string>();
@@ -60,7 +58,6 @@ namespace Downloader
                 try
                 {
                     File.Move(oldFilename, Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
-                    this.NumberFilesMoved++;
                     this.TextBoxFilesMoved.AppendText(Path.GetFileName(newFilename) + Environment.NewLine);
                     this.NewFiles.Add(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
                 }
@@ -110,7 +107,6 @@ namespace Downloader
                         try
                         {
                             File.Move(oldFilename, Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
-                            this.NumberFilesMoved++;
                             this.TextBoxFilesMoved.AppendText(Path.GetFileName(newFilename) + Environment.NewLine);
                             this.NewFiles.Add(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
                         }
@@ -130,7 +126,6 @@ namespace Downloader
                             else
                             {
                                 File.Move(oldFilename, Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
-                                this.NumberFilesMoved++;
                                 this.TextBoxFilesMoved.AppendText(Path.GetFileName(newFilename) + Environment.NewLine);
                                 this.NewFiles.Add(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
                             }
@@ -145,6 +140,10 @@ namespace Downloader
 
         private void MusicScreen_Load(object sender, EventArgs e)
         {
+        }
+
+        private void MusicScreen_Enter(object sender, EventArgs e)
+        {
             this.Window = this.Parent as DownloaderForm;
             this.TextBoxFilesFound.BackColor = this.Window.BackColor;
             this.TextBoxFilesMoved.BackColor = this.Window.BackColor;
@@ -156,7 +155,7 @@ namespace Downloader
             this.TimerCheckMusic.Tick += new EventHandler(CheckMusic);
             this.TimerCheckMusic.Interval = 15;
             this.TimerCheckMusic.Start();
-            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
+            //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
         }
 
         private void buttonEndCycleAdvance_Click(object sender, EventArgs e)
@@ -172,9 +171,9 @@ namespace Downloader
             else
             {
                 this.Hide();
-                YearLyricsScreen aux = new YearLyricsScreen(this.NewFiles,true);
-                aux.Dock = DockStyle.Fill;
-                this.Window.Controls.Add(aux);
+                YearLyricsScreen aux = this.Window.Controls.OfType<YearLyricsScreen>().ToList()[0];
+                aux.Visible = true;
+                aux.setAttributes(this.NewFiles, true);
                 this.Window.ActiveControl = aux;
             }
         }

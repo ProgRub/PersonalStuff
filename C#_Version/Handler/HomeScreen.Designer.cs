@@ -35,8 +35,6 @@
             this.buttonChooseAlbum = new System.Windows.Forms.Button();
             this.buttonSearchLibrary = new System.Windows.Forms.Button();
             this.buttonGenresColors = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label3
@@ -96,6 +94,7 @@
             this.buttonSearchLibrary.TabIndex = 19;
             this.buttonSearchLibrary.Text = "Search Library";
             this.buttonSearchLibrary.UseVisualStyleBackColor = true;
+            this.buttonSearchLibrary.Click += new System.EventHandler(this.buttonSearchLibrary_Click);
             // 
             // buttonGenresColors
             // 
@@ -107,32 +106,12 @@
             this.buttonGenresColors.UseVisualStyleBackColor = true;
             this.buttonGenresColors.Click += new System.EventHandler(this.buttonGenresColors_Click);
             // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(211, 186);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(205, 23);
-            this.button4.TabIndex = 21;
-            this.button4.Text = "button4";
-            this.button4.UseVisualStyleBackColor = true;
-            // 
-            // button5
-            // 
-            this.button5.Location = new System.Drawing.Point(211, 226);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(205, 23);
-            this.button5.TabIndex = 22;
-            this.button5.Text = "button5";
-            this.button5.UseVisualStyleBackColor = true;
-            // 
             // HomeScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Transparent;
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
             this.Controls.Add(this.buttonGenresColors);
             this.Controls.Add(this.buttonSearchLibrary);
             this.Controls.Add(this.buttonChooseAlbum);
@@ -141,8 +120,8 @@
             this.Controls.Add(this.textBoxMusicDestinyDir);
             this.Controls.Add(this.helpLabelFileDialog3);
             this.Name = "HomeScreen";
-            this.Size = new System.Drawing.Size(615, 258);
-            this.Load += new System.EventHandler(this.HomeScreen_Load);
+            this.Size = new System.Drawing.Size(615, 185);
+            this.Enter += new System.EventHandler(this.HomeScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -157,7 +136,5 @@
         private System.Windows.Forms.Button buttonChooseAlbum;
         private System.Windows.Forms.Button buttonSearchLibrary;
         private System.Windows.Forms.Button buttonGenresColors;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
     }
 }
