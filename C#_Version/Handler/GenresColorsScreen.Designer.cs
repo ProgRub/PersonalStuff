@@ -29,7 +29,21 @@
         private void InitializeComponent()
         {
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.buttonBack = new System.Windows.Forms.Button();
             this.SuspendLayout();
+            // 
+            // buttonBack
+            // 
+            this.buttonBack.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonBack.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.buttonBack.Location = new System.Drawing.Point(10, 10);
+            this.buttonBack.Name = "buttonBack";
+            this.buttonBack.Size = new System.Drawing.Size(93, 21);
+            this.buttonBack.TabIndex = 0;
+            this.buttonBack.Text = "Back";
+            this.buttonBack.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.buttonBack.UseVisualStyleBackColor = true;
+            this.buttonBack.Click += new System.EventHandler(this.buttonBack_Click);
             // 
             // GenresColorsScreen
             // 
@@ -37,9 +51,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.buttonBack);
             this.Name = "GenresColorsScreen";
             this.Size = new System.Drawing.Size(871, 440);
-            this.Load += new System.EventHandler(this.GenresColorsScreen_Load);
             this.ResumeLayout(false);
 
         }
@@ -47,5 +61,6 @@
         #endregion
 
         private System.Windows.Forms.ColorDialog colorDialog1;
+        private System.Windows.Forms.Button buttonBack;
     }
 }

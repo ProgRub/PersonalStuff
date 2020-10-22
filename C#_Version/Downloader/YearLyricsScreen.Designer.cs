@@ -264,8 +264,6 @@
             this.Controls.Add(this.richTextBoxArtist);
             this.Name = "YearLyricsScreen";
             this.Size = new System.Drawing.Size(1579, 826);
-            this.Load += new System.EventHandler(this.YearLyricsScreen_Load);
-            this.Enter += new System.EventHandler(this.YearLyricsScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 

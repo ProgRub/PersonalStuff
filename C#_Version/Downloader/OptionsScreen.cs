@@ -17,9 +17,10 @@ namespace Downloader
         private List<List<Control>> ComponentsByLine;
         private bool NeedsConfirm;
         private int Mode;
-        public OptionsScreen()
+        public OptionsScreen(DownloaderForm window)
         {
             InitializeComponent();
+            this.Window = window;
             this.ComponentsByLine = new List<List<Control>>();
             this.ComponentsByLine.Add(new List<Control>() { this.label1, this.textBox1 });
             this.ComponentsByLine.Add(new List<Control>() { this.label2, this.textBox2 });
@@ -28,19 +29,10 @@ namespace Downloader
             this.ComponentsByLine.Add(new List<Control>() { this.label5, this.textBox5 });
             this.ComponentsByLine.Add(new List<Control>() { this.label6, this.textBox6 });
             this.NeedsConfirm = false;
+            this.listBoxToDelete.BackColor = this.Window.BackColor;
             //this.listBoxToDelete.Items.Add("Test");
         }
         #region Event Handlers
-
-        private void OptionsScreen_Load(object sender, EventArgs e)
-        {
-        }
-
-        private void OptionsScreen_Enter(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as DownloaderForm;
-            this.listBoxToDelete.BackColor = this.Window.BackColor;
-        }
         private void buttonGrimeArtistConfirm_Click(object sender, EventArgs e)
         {
             if (!this.NeedsConfirm)
@@ -72,6 +64,7 @@ namespace Downloader
                             this.Window.LAFContainer.GrimeArtists.Add(grimeArtist);
                             this.listBoxToDelete.Items.Add(grimeArtist);
                         }
+                        this.Window.LAFContainer.SaveGrimeArtists();
                         break;
                     case 1:
                         string artist = this.textBox1.Text.Trim();
@@ -95,6 +88,7 @@ namespace Downloader
                                 this.listBoxToDelete.Items.Add(string.Join(" | ", list));
                             }
                         }
+                        this.Window.LAFContainer.SaveExceptions();
                         break;
                     case 2:
                         string oldArtist = this.textBox1.Text.Trim();
@@ -110,6 +104,7 @@ namespace Downloader
                             this.Window.LAFContainer.ExceptionsReplacements[oldList] = newList;
                             this.listBoxToDelete.Items.Add(string.Join(" | ", oldList) + " ---> " + string.Join(" | ", newList));// oldList[0] + " | " + oldList[1] + " | " + oldList[2] + newList[0] + " | " + newList[1] + " | " + newList[2]
                         }
+                        this.Window.LAFContainer.SaveExceptions();
                         break;
                     case 3:
                         string auxToReplace = this.textBox1.Text.Trim();
@@ -121,6 +116,7 @@ namespace Downloader
                             this.Window.LAFContainer.UrlReplacements[toReplace] = replacement;
                             this.listBoxToDelete.Items.Add("\"" + toReplace + "\" ---> \"" + replacement + "\"");
                         }
+                        this.Window.LAFContainer.SaveExceptions();
                         break;
                     default:
                         break;
@@ -299,6 +295,13 @@ namespace Downloader
                 default:
                     break;
             }
+        }
+
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
+            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
+            this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
         }
     }
 }

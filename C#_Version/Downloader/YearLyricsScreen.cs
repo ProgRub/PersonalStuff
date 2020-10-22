@@ -27,21 +27,28 @@ namespace Downloader
         private string CurrentArtist, CurrentAlbum, CurrentTitle, CurrentYear;
         private bool AddFileToList;
 
-        public YearLyricsScreen()
+        public YearLyricsScreen(DownloaderForm window, List<string> newFiles, bool addFileToList)
         {
             InitializeComponent();
+            this.Window = window;
             this.PagesVisited_Year = new Dictionary<string, int>();
             this.NumberFilesProcessed = 0;
             this.ExceptionRaised = false;
             this.Filename = "";
             this.ErrorHandled = true;
             this.ProgressWorkerDone = false;
-        }
-
-        public void setAttributes(List<string> newFiles, bool addFileToList)
-        {
             this.NewFiles = newFiles;
             this.AddFileToList = addFileToList;
+            this.richTextBoxArtist.BackColor = this.Window.BackColor;
+            this.richTextBoxAlbum.BackColor = this.Window.BackColor;
+            this.richTextBoxTitle.BackColor = this.Window.BackColor;
+            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
+            this.Window.WindowState = FormWindowState.Maximized;
+            this.worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(this.GetLyricsAndYear);
+            worker.ProgressChanged += new ProgressChangedEventHandler(this.ChangeUI);
+            this.worker.WorkerReportsProgress = true;
+            this.worker.RunWorkerAsync();
         }
         private void ChangeUI(object sender, ProgressChangedEventArgs e)
         {
@@ -127,7 +134,10 @@ namespace Downloader
                     this.labelAlbum.Visible = false;
                     this.labelTitle.Visible = false;
                     this.labelYear.Visible = false;
-                    this.labelUrlBeingChecked.Text = "\tAll Done!";
+                    this.labelUrlBeingChecked.Visible = false;
+                    this.buttonSkipSong.Visible = false;
+                    this.buttonTryAgain.Visible = false;
+                    this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed. All Done!";
                     break;
                 default:
                     break;
@@ -170,26 +180,6 @@ namespace Downloader
                 this.Window.LAFContainer.SongsToSkip.Add(new List<string>() { this.textBoxArtist.Text, this.textBoxAlbum.Text, this.textBoxTitle.Text });
                 this.ErrorHandled = true;
             }
-        }
-
-        private void YearLyricsScreen_Load(object sender, EventArgs e)
-        {
-        }
-
-        private void YearLyricsScreen_Enter(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as DownloaderForm;
-            this.richTextBoxArtist.BackColor = this.Window.BackColor;
-            this.richTextBoxAlbum.BackColor = this.Window.BackColor;
-            this.richTextBoxTitle.BackColor = this.Window.BackColor;
-            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
-            this.Window.WindowState = FormWindowState.Maximized;
-            this.worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(this.GetLyricsAndYear);
-            worker.ProgressChanged += new ProgressChangedEventHandler(this.ChangeUI);
-            this.worker.WorkerReportsProgress = true;
-            this.worker.RunWorkerAsync();
-            //this.Window.Controls.OfType<MusicScreen>().ToList()[0].Dispose();
         }
 
 
@@ -633,6 +623,8 @@ namespace Downloader
                     this.Window.LAFContainer.AddMusicFile(this.Filename);
                 }
             }
+            this.Window.LAFContainer.SaveNumberFilesLastModified();
+            this.Window.LAFContainer.SaveMusicFiles();
             this.worker.ReportProgress(17);
         }
     }

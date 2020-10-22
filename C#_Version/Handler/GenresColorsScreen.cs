@@ -14,16 +14,12 @@ namespace Handler
     {
         private HandlerForm Window;
         private Dictionary<string, List<Control>> GenreControls;
-        public GenresColorsScreen()
+        public GenresColorsScreen(HandlerForm window)
         {
             InitializeComponent();
+            this.Window = window;
             this.GenreControls = new Dictionary<string, List<Control>>();
-        }
-
-        private void GenresColorsScreen_Load(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as HandlerForm;
-            int index = 0;
+            int index = 1;
             foreach (string genre in this.Window.LAFContainer.GenresColors.Keys)
             {
                 Button button = new Button();
@@ -63,11 +59,15 @@ namespace Handler
                 this.Window.LAFContainer.GenresColors[((Button)sender).Text] = this.colorDialog1.Color;
                 this.GenreControls[((Button)sender).Text][0].ForeColor = this.colorDialog1.Color;
                 this.GenreControls[((Button)sender).Text][1].ForeColor = this.colorDialog1.Color;
-                //Color color = Color.FromArgb(this.colorDialog1.Color.ToArgb());
-                //Console.WriteLine(color);
             }
-            //Console.WriteLine(dialogResult);
-            //Console.WriteLine(((Button)sender).Text);
+        }
+
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            this.Window.LAFContainer.SaveGenreColors();
+            this.Dispose();
+            this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
+            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
         }
     }
 }

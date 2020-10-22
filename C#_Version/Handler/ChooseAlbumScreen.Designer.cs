@@ -169,7 +169,6 @@
             this.Controls.Add(this.labelPossibleAlbums);
             this.Name = "ChooseAlbumScreen";
             this.Size = new System.Drawing.Size(1318, 998);
-            this.Load += new System.EventHandler(this.ChooseAlbumScreen_Load);
             this.ResumeLayout(false);
 
         }

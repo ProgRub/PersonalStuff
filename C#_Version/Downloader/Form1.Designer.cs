@@ -77,7 +77,6 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DownloaderForm";
             this.Text = "Downloader";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Downloader_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 

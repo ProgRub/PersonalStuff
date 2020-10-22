@@ -15,14 +15,10 @@ namespace Handler
     public partial class SearchLibraryScreen : UserControl
     {
         private HandlerForm Window;
-        public SearchLibraryScreen()
+        public SearchLibraryScreen(HandlerForm window)
         {
             InitializeComponent();
-        }
-
-        private void SearchLibraryScreen_Enter(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as HandlerForm;
+            this.Window = window;
             this.listBoxResults.Items.AddRange(this.Window.LAFContainer.MusicFiles.Select(x => x.Filename).ToArray());
         }
 
@@ -192,10 +188,24 @@ namespace Handler
         }
 
         private void buttonBack_Click(object sender, EventArgs e)
-        {            
+        {
+            this.Window.LAFContainer.SaveNumberFilesLastModified();
+            this.Window.LAFContainer.SaveMusicFiles();
             this.Dispose();
             this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
             this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
+        }
+
+        private void buttonTrackDetails_Click(object sender, EventArgs e)
+        {
+            if (this.listBoxResults.SelectedItems.Count > 0)
+            {
+                this.Hide();
+                TrackDetailsScreen aux = new TrackDetailsScreen(this.Window,this.Window.LAFContainer.MusicFiles.Where(x => this.listBoxResults.SelectedItems.Contains(x.Filename)).ToList());
+                aux.Dock = DockStyle.Fill;
+                this.Window.Controls.Add(aux);
+                this.Window.ActiveControl = aux;
+            }
         }
     }
 }

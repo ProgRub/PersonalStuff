@@ -51,7 +51,7 @@
             // 
             this.helpLabelFileDialog1.AutoSize = true;
             this.helpLabelFileDialog1.ForeColor = System.Drawing.Color.White;
-            this.helpLabelFileDialog1.Location = new System.Drawing.Point(255, 55);
+            this.helpLabelFileDialog1.Location = new System.Drawing.Point(127, 1);
             this.helpLabelFileDialog1.Name = "helpLabelFileDialog1";
             this.helpLabelFileDialog1.Size = new System.Drawing.Size(48, 13);
             this.helpLabelFileDialog1.TabIndex = 0;
@@ -61,7 +61,7 @@
             // 
             this.helpLabelFileDialog2.AutoSize = true;
             this.helpLabelFileDialog2.ForeColor = System.Drawing.Color.White;
-            this.helpLabelFileDialog2.Location = new System.Drawing.Point(255, 94);
+            this.helpLabelFileDialog2.Location = new System.Drawing.Point(127, 40);
             this.helpLabelFileDialog2.Name = "helpLabelFileDialog2";
             this.helpLabelFileDialog2.Size = new System.Drawing.Size(48, 13);
             this.helpLabelFileDialog2.TabIndex = 1;
@@ -71,7 +71,7 @@
             // 
             this.helpLabelFileDialog3.AutoSize = true;
             this.helpLabelFileDialog3.ForeColor = System.Drawing.Color.White;
-            this.helpLabelFileDialog3.Location = new System.Drawing.Point(255, 133);
+            this.helpLabelFileDialog3.Location = new System.Drawing.Point(127, 79);
             this.helpLabelFileDialog3.Name = "helpLabelFileDialog3";
             this.helpLabelFileDialog3.Size = new System.Drawing.Size(48, 13);
             this.helpLabelFileDialog3.TabIndex = 2;
@@ -80,7 +80,7 @@
             // textBoxDownloadsDir
             // 
             this.textBoxDownloadsDir.Enabled = false;
-            this.textBoxDownloadsDir.Location = new System.Drawing.Point(258, 71);
+            this.textBoxDownloadsDir.Location = new System.Drawing.Point(130, 17);
             this.textBoxDownloadsDir.Name = "textBoxDownloadsDir";
             this.textBoxDownloadsDir.Size = new System.Drawing.Size(426, 20);
             this.textBoxDownloadsDir.TabIndex = 3;
@@ -88,7 +88,7 @@
             // textBoxMusicOriginDir
             // 
             this.textBoxMusicOriginDir.Enabled = false;
-            this.textBoxMusicOriginDir.Location = new System.Drawing.Point(258, 110);
+            this.textBoxMusicOriginDir.Location = new System.Drawing.Point(130, 56);
             this.textBoxMusicOriginDir.Name = "textBoxMusicOriginDir";
             this.textBoxMusicOriginDir.Size = new System.Drawing.Size(426, 20);
             this.textBoxMusicOriginDir.TabIndex = 4;
@@ -96,14 +96,14 @@
             // textBoxMusicDestinyDir
             // 
             this.textBoxMusicDestinyDir.Enabled = false;
-            this.textBoxMusicDestinyDir.Location = new System.Drawing.Point(258, 149);
+            this.textBoxMusicDestinyDir.Location = new System.Drawing.Point(130, 95);
             this.textBoxMusicDestinyDir.Name = "textBoxMusicDestinyDir";
             this.textBoxMusicDestinyDir.Size = new System.Drawing.Size(426, 20);
             this.textBoxMusicDestinyDir.TabIndex = 5;
             // 
             // buttonChooseDownloadsFolder
             // 
-            this.buttonChooseDownloadsFolder.Location = new System.Drawing.Point(690, 69);
+            this.buttonChooseDownloadsFolder.Location = new System.Drawing.Point(562, 15);
             this.buttonChooseDownloadsFolder.Name = "buttonChooseDownloadsFolder";
             this.buttonChooseDownloadsFolder.Size = new System.Drawing.Size(75, 23);
             this.buttonChooseDownloadsFolder.TabIndex = 6;
@@ -113,7 +113,7 @@
             // 
             // buttonChooseMusicOriginFolder
             // 
-            this.buttonChooseMusicOriginFolder.Location = new System.Drawing.Point(690, 110);
+            this.buttonChooseMusicOriginFolder.Location = new System.Drawing.Point(562, 56);
             this.buttonChooseMusicOriginFolder.Name = "buttonChooseMusicOriginFolder";
             this.buttonChooseMusicOriginFolder.Size = new System.Drawing.Size(75, 23);
             this.buttonChooseMusicOriginFolder.TabIndex = 8;
@@ -123,7 +123,7 @@
             // 
             // buttonChooseMusicDestinyFolder
             // 
-            this.buttonChooseMusicDestinyFolder.Location = new System.Drawing.Point(690, 149);
+            this.buttonChooseMusicDestinyFolder.Location = new System.Drawing.Point(562, 95);
             this.buttonChooseMusicDestinyFolder.Name = "buttonChooseMusicDestinyFolder";
             this.buttonChooseMusicDestinyFolder.Size = new System.Drawing.Size(75, 23);
             this.buttonChooseMusicDestinyFolder.TabIndex = 10;
@@ -135,7 +135,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(190, 74);
+            this.label1.Location = new System.Drawing.Point(62, 20);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(60, 13);
             this.label1.TabIndex = 11;
@@ -145,7 +145,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(130, 115);
+            this.label2.Location = new System.Drawing.Point(2, 61);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(120, 13);
             this.label2.TabIndex = 12;
@@ -155,7 +155,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(163, 152);
+            this.label3.Location = new System.Drawing.Point(35, 98);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(87, 13);
             this.label3.TabIndex = 13;
@@ -163,7 +163,7 @@
             // 
             // buttonDownloadSchool
             // 
-            this.buttonDownloadSchool.Location = new System.Drawing.Point(396, 204);
+            this.buttonDownloadSchool.Location = new System.Drawing.Point(268, 150);
             this.buttonDownloadSchool.Name = "buttonDownloadSchool";
             this.buttonDownloadSchool.Size = new System.Drawing.Size(177, 23);
             this.buttonDownloadSchool.TabIndex = 14;
@@ -173,7 +173,7 @@
             // 
             // buttonDownloadMusic
             // 
-            this.buttonDownloadMusic.Location = new System.Drawing.Point(396, 233);
+            this.buttonDownloadMusic.Location = new System.Drawing.Point(268, 179);
             this.buttonDownloadMusic.Name = "buttonDownloadMusic";
             this.buttonDownloadMusic.Size = new System.Drawing.Size(177, 23);
             this.buttonDownloadMusic.TabIndex = 15;
@@ -183,7 +183,7 @@
             // 
             // buttonYLModified
             // 
-            this.buttonYLModified.Location = new System.Drawing.Point(396, 262);
+            this.buttonYLModified.Location = new System.Drawing.Point(268, 208);
             this.buttonYLModified.Name = "buttonYLModified";
             this.buttonYLModified.Size = new System.Drawing.Size(177, 23);
             this.buttonYLModified.TabIndex = 16;
@@ -193,7 +193,7 @@
             // 
             // buttonYLAll
             // 
-            this.buttonYLAll.Location = new System.Drawing.Point(396, 291);
+            this.buttonYLAll.Location = new System.Drawing.Point(268, 237);
             this.buttonYLAll.Name = "buttonYLAll";
             this.buttonYLAll.Size = new System.Drawing.Size(177, 23);
             this.buttonYLAll.TabIndex = 17;
@@ -203,7 +203,7 @@
             // 
             // buttonOptions
             // 
-            this.buttonOptions.Location = new System.Drawing.Point(396, 320);
+            this.buttonOptions.Location = new System.Drawing.Point(268, 266);
             this.buttonOptions.Name = "buttonOptions";
             this.buttonOptions.Size = new System.Drawing.Size(177, 23);
             this.buttonOptions.TabIndex = 18;
@@ -216,6 +216,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.Transparent;
             this.Controls.Add(this.buttonOptions);
             this.Controls.Add(this.buttonYLAll);
@@ -235,7 +236,7 @@
             this.Controls.Add(this.helpLabelFileDialog2);
             this.Controls.Add(this.helpLabelFileDialog1);
             this.Name = "HomeScreen";
-            this.Size = new System.Drawing.Size(994, 424);
+            this.Size = new System.Drawing.Size(640, 292);
             this.Enter += new System.EventHandler(this.HomeScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();

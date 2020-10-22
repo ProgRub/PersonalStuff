@@ -200,6 +200,7 @@
             this.buttonTrackDetails.TabIndex = 14;
             this.buttonTrackDetails.Text = "Track Details";
             this.buttonTrackDetails.UseVisualStyleBackColor = true;
+            this.buttonTrackDetails.Click += new System.EventHandler(this.buttonTrackDetails_Click);
             // 
             // SearchLibraryScreen
             // 
@@ -224,7 +225,6 @@
             this.Controls.Add(this.labelAlbumArtist);
             this.Name = "SearchLibraryScreen";
             this.Size = new System.Drawing.Size(1251, 447);
-            this.Enter += new System.EventHandler(this.SearchLibraryScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 

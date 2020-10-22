@@ -15,15 +15,11 @@ namespace Handler
     {
         private HandlerForm Window;
         private Album Album;
-        public TracklistScreen(Album album)
+        public TracklistScreen(HandlerForm window,Album album)
         {
             InitializeComponent();
+            this.Window = window;
             this.Album = album;
-        }
-
-        private void TracklistScreen_Load(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as HandlerForm;
             this.labelAlbum.Text = this.labelAlbum.Text + this.Album.Title;
             this.labelLength.Text = this.labelLength.Text + this.Window.LAFContainer.StandardFormatTime(this.Album.Length);
             bool imageGot = false;
@@ -47,7 +43,7 @@ namespace Handler
                 maxPreviousDisc = disc.Count;
             }
             this.textBoxTrackList.Text = this.textBoxTrackList.Text.Trim();
-            this.textBoxTrackList.Size = new Size(this.textBoxTrackList.Size.Width, TextRenderer.MeasureText(this.textBoxTrackList.Text, this.textBoxTrackList.Font).Height);
+            this.textBoxTrackList.Height = this.textBoxTrackList.Font.Height * numberTracks+3+(this.textBoxTrackList.Height - this.textBoxTrackList.ClientSize.Height);
             this.labelLength.Location = new Point(this.textBoxTrackList.Location.X, this.textBoxTrackList.Location.Y + this.textBoxTrackList.Size.Height);
         }
 

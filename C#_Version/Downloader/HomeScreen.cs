@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Runtime.CompilerServices;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.IO;
 
@@ -17,33 +16,11 @@ namespace Downloader
     {
         public DownloaderForm Window { get; set; }
         public CommonOpenFileDialog folderDialog { get; set; }
-        private BackgroundWorker Worker;
         public HomeScreen()
         {
             InitializeComponent();
             this.folderDialog = new CommonOpenFileDialog();
             this.folderDialog.IsFolderPicker = true;
-
-        }
-
-        private void LoadNextScreens(object sender, DoWorkEventArgs e)
-        {
-            MusicScreen aux = new MusicScreen();
-            aux.Dock = DockStyle.Fill;
-            aux.Visible = false;
-            this.Window.Invoke((MethodInvoker)delegate { this.Window.Controls.Add(aux); });
-            YearLyricsScreen aux2 = new YearLyricsScreen();
-            aux2.Dock = DockStyle.Fill;
-            aux2.Visible = false;
-            this.Window.Invoke((MethodInvoker)delegate { this.Window.Controls.Add(aux2); });
-            SchoolScreen aux3 = new SchoolScreen();
-            aux3.Dock = DockStyle.Fill;
-            aux3.Visible = false;
-            this.Window.Invoke((MethodInvoker)delegate { this.Window.Controls.Add(aux3); });
-            OptionsScreen aux4 = new OptionsScreen();
-            aux4.Dock = DockStyle.Fill;
-            aux4.Visible = false;
-            this.Window.Invoke((MethodInvoker)delegate { this.Window.Controls.Add(aux4); });
         }
 
         private void HomeScreen_Enter(object sender, EventArgs e)
@@ -52,9 +29,6 @@ namespace Downloader
             this.textBoxDownloadsDir.Text = this.Window.LAFContainer.DownloadsDirectory;
             this.textBoxMusicOriginDir.Text = this.Window.LAFContainer.MusicOriginDirectory;
             this.textBoxMusicDestinyDir.Text = this.Window.LAFContainer.MusicDestinyDirectory;
-            this.Worker = new BackgroundWorker();
-            this.Worker.DoWork += new DoWorkEventHandler(this.LoadNextScreens);
-            this.Worker.RunWorkerAsync();
 
         }
 
@@ -93,60 +67,54 @@ namespace Downloader
 
         private void buttonDownloadMusic_Click(object sender, EventArgs e)
         {
-            if (!this.Worker.IsBusy)
-            {
-                this.Hide();
-                var aux = this.Window.Controls.OfType<MusicScreen>().ToList()[0];
-                aux.Visible = true;
-                this.Window.ActiveControl =aux;
-            }
+            this.Window.LAFContainer.SaveDirectories();
+            this.Hide();
+            MusicScreen aux = new MusicScreen(this.Window);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
         }
 
         private void buttonYLModified_Click(object sender, EventArgs e)
         {
-            if (!this.Worker.IsBusy)
-            {
-                this.Hide();
-                long lastModifiedTime = this.Window.LAFContainer.GetLastModifiedTime();
-                YearLyricsScreen aux = this.Window.Controls.OfType<YearLyricsScreen>().ToList()[0];
-                aux.setAttributes(Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3") && File.GetLastWriteTime(x).ToFileTime() > (lastModifiedTime - 5 * 60)).ToList(), false);
-                aux.Visible = true;
-                this.Window.ActiveControl = aux;
-            }
+            this.Window.LAFContainer.SaveDirectories();
+            this.Hide();
+            long lastModifiedTime = this.Window.LAFContainer.GetLastModifiedTime();
+            YearLyricsScreen aux = new YearLyricsScreen(this.Window,Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3") && File.GetLastWriteTime(x).ToFileTime() > (lastModifiedTime - 5 * 60)).ToList(), false);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
         }
 
         private void buttonYLAll_Click(object sender, EventArgs e)
         {
-            if (!this.Worker.IsBusy)
-            {
-                this.Hide();
-                YearLyricsScreen aux = this.Window.Controls.OfType<YearLyricsScreen>().ToList()[0];
-                aux.setAttributes(Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3")).ToList(), false);
-                aux.Visible = true;
-                this.Window.ActiveControl = aux;
-            }
+            this.Window.LAFContainer.SaveDirectories();
+            this.Hide();
+            long lastModifiedTime = this.Window.LAFContainer.GetLastModifiedTime();
+            YearLyricsScreen aux = new YearLyricsScreen(this.Window,Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3")).ToList(), false);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
         }
 
         private void buttonOptions_Click(object sender, EventArgs e)
         {
-            if (!this.Worker.IsBusy)
-            {
-                this.Hide();
-                var aux = this.Window.Controls.OfType<OptionsScreen>().ToList()[0];
-                aux.Visible = true;
-                this.Window.ActiveControl = aux;
-            }
+            this.Window.LAFContainer.SaveDirectories();
+            this.Hide();
+            OptionsScreen aux = new OptionsScreen(this.Window);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
         }
 
         private void buttonDownloadSchool_Click(object sender, EventArgs e)
         {
-            if (!this.Worker.IsBusy)
-            {
-                this.Hide();
-                var aux = this.Window.Controls.OfType<SchoolScreen>().ToList()[0];
-                aux.Visible = true;
-                this.Window.ActiveControl = aux;
-            }
+            this.Window.LAFContainer.SaveDirectories();
+            this.Hide();
+            SchoolScreen aux = new SchoolScreen(this.Window);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
         }
     }
 }

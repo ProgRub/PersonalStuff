@@ -96,8 +96,6 @@ namespace Downloader
             this.Controls.Add(this.labelFilesFound);
             this.Name = "MusicScreen";
             this.Size = new System.Drawing.Size(1103, 525);
-            this.Load += new System.EventHandler(this.MusicScreen_Load);
-            this.Enter += new System.EventHandler(this.MusicScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -21,50 +21,10 @@ namespace Handler
         private int PreviousColumnPA, PreviousColumnPHA;
         private bool ReversePA, ReversePHA;
 
-        private void listViewPossibleAlbums_DoubleClick(object sender, EventArgs e)
-        {
-            //Console.WriteLine(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text);
-            Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text)];
-            this.Hide();
-            TracklistScreen aux = new TracklistScreen(albumSelected);
-            aux.Dock = DockStyle.Fill;
-            this.Window.Controls.Add(aux);
-            this.Window.ActiveControl = aux;
-        }
-
-        private void listViewPossibleAlbums_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
-            this.ReversePA = !this.ReversePA & this.PreviousColumnPA == e.Column;
-            this.listViewPossibleAlbums.ListViewItemSorter = new ListViewItemComparer(e.Column, this.ReversePA);
-            this.PreviousColumnPA = e.Column;
-        }
-        private void buttonBack_Click(object sender, EventArgs e)
-        {
-            this.Dispose();
-            this.Window.Controls.OfType<AlbumPropertiesScreen>().ToList()[0].Visible = true;
-            this.Window.ActiveControl = this.Window.Controls.OfType<AlbumPropertiesScreen>().ToList()[0];
-        }
-
-        private void listViewPossibleHalfAlbums_DoubleClick(object sender, EventArgs e)
-        {
-            Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleHalfAlbums.SelectedItems[0].SubItems[1].Text)];
-            this.Hide();
-            TracklistScreen aux = new TracklistScreen(albumSelected);
-            aux.Dock = DockStyle.Fill;
-            this.Window.Controls.Add(aux);
-            this.Window.ActiveControl = aux;
-        }
-
-        private void listViewPossibleHalfAlbums_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
-            this.ReversePHA = !this.ReversePHA & this.PreviousColumnPHA == e.Column;
-            this.listViewPossibleHalfAlbums.ListViewItemSorter = new ListViewItemComparer(e.Column, this.ReversePHA);
-            this.PreviousColumnPHA = e.Column;
-        }
-
-        public ChooseAlbumScreen(int albumTime, int albumLeeway, List<string> genresPicked, int leewayMode)
+        public ChooseAlbumScreen(HandlerForm window,int albumTime, int albumLeeway, List<string> genresPicked, int leewayMode)
         {
             InitializeComponent();
+            this.Window = window;
             this.AlbumTime = albumTime;
             this.AlbumLeeway = albumLeeway;
             this.AlbumGenres = genresPicked;
@@ -89,11 +49,6 @@ namespace Handler
             this.labelPossibleHalfAlbums.Text = string.Format("Albums where half of their length varies between {0} minutes and {1} minutes", this.AlbumTime / 60 - (this.AlbumLeeway / 60) * this.Under, this.AlbumTime / 60 + (this.AlbumLeeway / 60) * this.Over);
             this.PossibleAlbums = new List<Album>();
             this.PossibleHalfAlbums = new List<Album>();
-        }
-
-        private void ChooseAlbumScreen_Load(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as HandlerForm;
             this.GetAlbums();
             this.PossibleAlbums = this.PossibleAlbums.OrderByDescending(album => album.Length).ToList();
             this.PossibleHalfAlbums = this.PossibleHalfAlbums.OrderByDescending(album => album.Length).ToList();
@@ -115,7 +70,47 @@ namespace Handler
                 item.SubItems.Add(album.AveragePlayCount.ToString());
                 this.listViewPossibleHalfAlbums.Items.Add(item);
             }
-            //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
+        }
+
+        private void listViewPossibleAlbums_DoubleClick(object sender, EventArgs e)
+        {
+            //Console.WriteLine(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text);
+            Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text)];
+            this.Hide();
+            TracklistScreen aux = new TracklistScreen(this.Window,albumSelected);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
+        }
+
+        private void listViewPossibleAlbums_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            this.ReversePA = !this.ReversePA & this.PreviousColumnPA == e.Column;
+            this.listViewPossibleAlbums.ListViewItemSorter = new ListViewItemComparer(e.Column, this.ReversePA);
+            this.PreviousColumnPA = e.Column;
+        }
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
+            this.Window.Controls.OfType<AlbumPropertiesScreen>().ToList()[0].Visible = true;
+            this.Window.ActiveControl = this.Window.Controls.OfType<AlbumPropertiesScreen>().ToList()[0];
+        }
+
+        private void listViewPossibleHalfAlbums_DoubleClick(object sender, EventArgs e)
+        {
+            Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleHalfAlbums.SelectedItems[0].SubItems[1].Text)];
+            this.Hide();
+            TracklistScreen aux = new TracklistScreen(this.Window, albumSelected);
+            aux.Dock = DockStyle.Fill;
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
+        }
+
+        private void listViewPossibleHalfAlbums_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            this.ReversePHA = !this.ReversePHA & this.PreviousColumnPHA == e.Column;
+            this.listViewPossibleHalfAlbums.ListViewItemSorter = new ListViewItemComparer(e.Column, this.ReversePHA);
+            this.PreviousColumnPHA = e.Column;
         }
 
         private void GetAlbums()

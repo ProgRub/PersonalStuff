@@ -30,3 +30,4 @@ C:\Users\ruben\Documents\GitHub\PersonalStuff\C#_Version\Handler\obj\Debug\Handl
 C:\Users\ruben\Documents\GitHub\PersonalStuff\C#_Version\Handler\obj\Debug\Handler.csproj.CopyComplete
 C:\Users\ruben\Documents\GitHub\PersonalStuff\C#_Version\Handler\obj\Debug\Handler.exe
 C:\Users\ruben\Documents\GitHub\PersonalStuff\C#_Version\Handler\obj\Debug\Handler.pdb
+C:\Users\ruben\Documents\GitHub\PersonalStuff\C#_Version\Handler\obj\Debug\Handler.RegisterWorkoutScreen.resources

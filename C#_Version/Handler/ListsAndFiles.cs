@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using iTunesLib;
@@ -193,29 +193,6 @@ namespace Handler
             }
         }
 
-        public void AddMusicFile(string filename)
-        {
-            if (this.MusicFiles.All(x => x.Filename != Path.GetFileName(filename)))
-            {
-                using (var mp3 = TagLib.File.Create(filename))
-                {
-                    this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, string.Join("*", mp3.Tag.Performers), mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Properties.Duration.TotalSeconds, 0));
-                    while (true)
-                    {
-                        try
-                        {
-                            mp3.Save();
-                            break;
-                        }
-                        catch (IOException)
-                        {
-                            Console.WriteLine("HERE");
-                        }
-                    }
-                }
-            }
-        }
-
         #region Methods that get from files
         private void GetAllFromFiles()
         {
@@ -356,26 +333,6 @@ namespace Handler
 
 
         #region Methods that save to files
-        public void SaveAllToFiles()
-        {
-            this.SaveDirectories();
-            this.SaveNumberFilesLastModified();
-            this.SaveGenreColors();
-            this.SaveWorkoutDatabase();
-            this.SaveGrimeArtists();
-            this.SaveExceptions();
-            this.SaveMusicFiles();
-        }
-        public void SaveAllToFiles(object sender, DoWorkEventArgs e)
-        {
-            this.SaveDirectories();
-            this.SaveNumberFilesLastModified();
-            this.SaveGenreColors();
-            this.SaveWorkoutDatabase();
-            this.SaveGrimeArtists();
-            this.SaveExceptions();
-            this.SaveMusicFiles();
-        }
 
         public void SaveDirectories()
         {
@@ -538,6 +495,28 @@ namespace Handler
             return -1;
         }
 
+        public void AddMusicFile(string filename)
+        {
+            if (this.MusicFiles.All(x => x.Filename != Path.GetFileName(filename)))
+            {
+                using (var mp3 = TagLib.File.Create(filename))
+                {
+                    this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
+                    while (true)
+                    {
+                        try
+                        {
+                            mp3.Save();
+                            break;
+                        }
+                        catch (IOException)
+                        {
+                            Console.WriteLine("HERE");
+                        }
+                    }
+                }
+            }
+        }
         private void CheckMusicFilesAndUpdatePlayCounts(object sender, DoWorkEventArgs e)
         {
             var files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
@@ -552,17 +531,18 @@ namespace Handler
                         int index = this.IndexOfMusicFile(Path.GetFileName(filename));
                         if (index == -1)
                         {
-                            this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Length, 0));
+                            this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
                         }
                         else
                         {
-                            this.MusicFiles[index] = new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Length, 0);
+                            this.MusicFiles[index] = new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Properties.Duration.TotalSeconds, 0);
                         }
                         mp3.Save();
                     }
                 }
                 else { break; }
             }
+
             if (files.Count > this.MusicFiles.Count)
             {
                 var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
@@ -572,13 +552,39 @@ namespace Handler
                     {
                         using (var mp3 = TagLib.File.Create(filename))
                         {
-                            this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Length, 0));
-                            mp3.Save();
+                            try
+                            {
+                                this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
+                                mp3.Save();
+                            }
+                            catch (Exception)
+                            {
+                            }
                         }
                     }
                 }
             }
-            this.UpdatePlayCounts();
+            int numThreads = 15;
+            int filesPerThread = this.MusicFiles.Count / numThreads;
+            Thread[] threads = new Thread[numThreads];
+            for (int i = 0; i < numThreads; i++)
+            {
+                threads[i] = new Thread(new ParameterizedThreadStart(UpdatePlayCounts));
+                threads[i].Start(i);
+            }
+            int actual = filesPerThread * numThreads;
+            for (int index = actual; index < this.MusicFiles.Count; ++index)
+            {
+                var track = this.GetITunesTrack(this.MusicFiles[index].Title, this.MusicFiles[index].Album);
+                if (track != null)
+                {
+                    this.MusicFiles[index].PlayCount = track.PlayedCount;
+                }
+            }
+            for (int i = 0; i < numThreads; ++i)
+            {
+                threads[i].Join();
+            }
         }
 
         public int IndexOfAlbumByName(string albumName)
@@ -629,26 +635,34 @@ namespace Handler
         public IITTrack GetITunesTrack(string title, string album)
         {
             var tracks = this.iTunesLibrary.Search(title, ITPlaylistSearchField.ITPlaylistSearchFieldSongNames);
-            for (int index = 1; index <= tracks.Count; index++)
+            if (tracks != null)
             {
-                if (tracks[index].Album == album)
+                for (int index = 1; index <= tracks.Count; index++)
                 {
-                    return tracks[index];
+                    if (tracks[index].Album == album)
+                    {
+                        return tracks[index];
+                    }
                 }
             }
             return null;
         }
 
-        private void UpdatePlayCounts()
+        private void UpdatePlayCounts(object arg)
         {
-            //int index = 0;
-            foreach (MusicFile musicFile in this.MusicFiles)
+            //Console.WriteLine("Thread #" + arg + " has begun...");
+            int start = (int)arg * (this.MusicFiles.Count / 15);
+            int end = ((int)arg + 1) * (this.MusicFiles.Count / 15);
+            for (int index = start; index < end; index++)
             {
-                var track = this.GetITunesTrack(musicFile.Title, musicFile.Album);
-                musicFile.PlayCount = track.PlayedCount;
-                //index++;
                 //Console.WriteLine(index);
+                var track = this.GetITunesTrack(this.MusicFiles[index].Title, this.MusicFiles[index].Album);
+                if (track != null)
+                {
+                    this.MusicFiles[index].PlayCount = track.PlayedCount;
+                }
             }
+            //Console.WriteLine("Thread #" + arg + " has ended");
         }
     }
 }

@@ -19,9 +19,10 @@ namespace Downloader
         private string OneDrive, CurrentFile, ChosenDirectory;
         private List<string> PossibleDirectories, CheckedFiles;
         private Timer TimerCheckDownloads;
-        public SchoolScreen()
+        public SchoolScreen(DownloaderForm window)
         {
             InitializeComponent();
+            this.Window = window;
             this.OneDrive = Path.Combine(new string[] { "C:", Path.DirectorySeparatorChar.ToString(), "Users", "ruben", "Onedrive - Universidade da Madeira", "Ano_3", "Semestre_1" });
             this.PossibleDirectories = new List<string>();
             this.CheckedFiles = new List<string>();
@@ -34,26 +35,13 @@ namespace Downloader
             this.dropdownDirectories.Items.Add("Skip File");
             this.dropdownDirectories.Items.Add("Delete File");
             this.NumberFiles = 0;
-        }
-
-        private void SchoolScreen_Load(object sender, EventArgs e)
-        {
-        }
-
-        private void SchoolScreen_Enter(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as DownloaderForm;
             this.TextBoxFilesFound.BackColor = this.Window.BackColor;
             this.TextBoxFilesMoved.BackColor = this.Window.BackColor;
             this.TimerCheckDownloads = new Timer();
             this.TimerCheckDownloads.Tick += new EventHandler(CheckDownloads);
             this.TimerCheckDownloads.Interval = 15;
             this.TimerCheckDownloads.Start();
-            //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
-            //System.Diagnostics.Process.Start("https://moodle.cee.uma.pt/login/index.php");
-            //System.Diagnostics.Process.Start("https://infoalunos.uma.pt");
         }
-
 
         private void buttonMoveFile_Click(object sender, EventArgs e)
         {

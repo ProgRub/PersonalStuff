@@ -19,13 +19,5 @@ namespace Downloader
             InitializeComponent();
             this.LAFContainer = new ListsAndFiles();
         }
-
-        private void Downloader_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            //BackgroundWorker worker = new BackgroundWorker();
-            //worker.DoWork += new DoWorkEventHandler(this.LAFContainer.SaveAllToFiles);
-            //worker.RunWorkerAsync();
-            this.LAFContainer.SaveAllToFiles();
-        }
     }
 }

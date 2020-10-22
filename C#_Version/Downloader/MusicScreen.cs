@@ -22,14 +22,25 @@ namespace Downloader
         private List<string> NewFiles;
         private Timer TimerCheckMusic;
 
-        public MusicScreen()
+        public MusicScreen(DownloaderForm window)
         {
             InitializeComponent();
+            this.Window = window;
             this.NumberFilesFound = 0;
             this.FileBuffer = new List<string>();
             this.CanAdvance = false;
             this.NewFiles = new List<string>();
             this.labelFilesFound.Text = "0 Files Found";
+            this.TextBoxFilesFound.BackColor = this.Window.BackColor;
+            this.TextBoxFilesMoved.BackColor = this.Window.BackColor;
+            Process deemix = new Process();
+            deemix.StartInfo.WorkingDirectory = Path.Combine(this.Window.LAFContainer.CurrentDirectory, "auxFiles", "deemix");
+            deemix.StartInfo.FileName = "start.bat";
+            deemix.Start();
+            this.TimerCheckMusic = new Timer();
+            this.TimerCheckMusic.Tick += new EventHandler(CheckMusic);
+            this.TimerCheckMusic.Interval = 15;
+            this.TimerCheckMusic.Start();
         }
         private void CheckMusic(object sender, EventArgs e)
         {
@@ -138,26 +149,6 @@ namespace Downloader
             this.buttonEndCycleAdvance.Enabled = true;
         }
 
-        private void MusicScreen_Load(object sender, EventArgs e)
-        {
-        }
-
-        private void MusicScreen_Enter(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as DownloaderForm;
-            this.TextBoxFilesFound.BackColor = this.Window.BackColor;
-            this.TextBoxFilesMoved.BackColor = this.Window.BackColor;
-            Process deemix = new Process();
-            deemix.StartInfo.WorkingDirectory = Path.Combine(this.Window.LAFContainer.CurrentDirectory, "auxFiles", "deemix");
-            deemix.StartInfo.FileName = "start.bat";
-            deemix.Start();
-            this.TimerCheckMusic = new Timer();
-            this.TimerCheckMusic.Tick += new EventHandler(CheckMusic);
-            this.TimerCheckMusic.Interval = 15;
-            this.TimerCheckMusic.Start();
-            //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
-        }
-
         private void buttonEndCycleAdvance_Click(object sender, EventArgs e)
         {
             if (!this.CanAdvance)
@@ -171,9 +162,9 @@ namespace Downloader
             else
             {
                 this.Hide();
-                YearLyricsScreen aux = this.Window.Controls.OfType<YearLyricsScreen>().ToList()[0];
-                aux.Visible = true;
-                aux.setAttributes(this.NewFiles, true);
+                YearLyricsScreen aux = new YearLyricsScreen(this.Window,this.NewFiles, true);
+                aux.Dock = DockStyle.Fill;
+                this.Window.Controls.Add(aux);
                 this.Window.ActiveControl = aux;
             }
         }

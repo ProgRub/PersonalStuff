@@ -46,6 +46,7 @@
             this.buttonURLReplacement = new System.Windows.Forms.Button();
             this.listBoxToDelete = new System.Windows.Forms.ListBox();
             this.buttonSongToSkip = new System.Windows.Forms.Button();
+            this.buttonBack = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // labelTitle
@@ -225,12 +226,23 @@
             this.buttonSongToSkip.UseVisualStyleBackColor = true;
             this.buttonSongToSkip.Click += new System.EventHandler(this.buttonSongToSkip_Click);
             // 
+            // buttonBack
+            // 
+            this.buttonBack.Location = new System.Drawing.Point(0, 3);
+            this.buttonBack.Name = "buttonBack";
+            this.buttonBack.Size = new System.Drawing.Size(138, 23);
+            this.buttonBack.TabIndex = 18;
+            this.buttonBack.Text = "Back";
+            this.buttonBack.UseVisualStyleBackColor = true;
+            this.buttonBack.Click += new System.EventHandler(this.buttonBack_Click);
+            // 
             // OptionsScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.buttonBack);
             this.Controls.Add(this.buttonSongToSkip);
             this.Controls.Add(this.listBoxToDelete);
             this.Controls.Add(this.buttonURLReplacement);
@@ -251,8 +263,6 @@
             this.Controls.Add(this.labelTitle);
             this.Name = "OptionsScreen";
             this.Size = new System.Drawing.Size(1426, 406);
-            this.Load += new System.EventHandler(this.OptionsScreen_Load);
-            this.Enter += new System.EventHandler(this.OptionsScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -278,5 +288,6 @@
         private System.Windows.Forms.Button buttonURLReplacement;
         private System.Windows.Forms.ListBox listBoxToDelete;
         private System.Windows.Forms.Button buttonSongToSkip;
+        private System.Windows.Forms.Button buttonBack;
     }
 }

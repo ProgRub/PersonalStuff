@@ -35,6 +35,7 @@
             this.buttonChooseAlbum = new System.Windows.Forms.Button();
             this.buttonSearchLibrary = new System.Windows.Forms.Button();
             this.buttonGenresColors = new System.Windows.Forms.Button();
+            this.buttonRegisterWorkout = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label3
@@ -106,12 +107,23 @@
             this.buttonGenresColors.UseVisualStyleBackColor = true;
             this.buttonGenresColors.Click += new System.EventHandler(this.buttonGenresColors_Click);
             // 
+            // buttonRegisterWorkout
+            // 
+            this.buttonRegisterWorkout.Location = new System.Drawing.Point(211, 188);
+            this.buttonRegisterWorkout.Name = "buttonRegisterWorkout";
+            this.buttonRegisterWorkout.Size = new System.Drawing.Size(205, 23);
+            this.buttonRegisterWorkout.TabIndex = 21;
+            this.buttonRegisterWorkout.Text = "Register Workout";
+            this.buttonRegisterWorkout.UseVisualStyleBackColor = true;
+            this.buttonRegisterWorkout.Click += new System.EventHandler(this.buttonRegisterWorkout_Click);
+            // 
             // HomeScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.buttonRegisterWorkout);
             this.Controls.Add(this.buttonGenresColors);
             this.Controls.Add(this.buttonSearchLibrary);
             this.Controls.Add(this.buttonChooseAlbum);
@@ -120,7 +132,7 @@
             this.Controls.Add(this.textBoxMusicDestinyDir);
             this.Controls.Add(this.helpLabelFileDialog3);
             this.Name = "HomeScreen";
-            this.Size = new System.Drawing.Size(615, 185);
+            this.Size = new System.Drawing.Size(615, 229);
             this.Enter += new System.EventHandler(this.HomeScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -136,5 +148,6 @@
         private System.Windows.Forms.Button buttonChooseAlbum;
         private System.Windows.Forms.Button buttonSearchLibrary;
         private System.Windows.Forms.Button buttonGenresColors;
+        private System.Windows.Forms.Button buttonRegisterWorkout;
     }
 }

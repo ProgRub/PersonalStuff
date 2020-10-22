@@ -58,6 +58,7 @@
             this.labelAlbum.TabIndex = 1;
             this.labelAlbum.Text = "This is the Tracklist of ";
             this.labelAlbum.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.labelAlbum.UseMnemonic = false;
             // 
             // pictureBox1
             // 
@@ -104,7 +105,6 @@
             this.Controls.Add(this.textBoxTrackList);
             this.Name = "TracklistScreen";
             this.Size = new System.Drawing.Size(958, 382);
-            this.Load += new System.EventHandler(this.TracklistScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -115,8 +115,6 @@ namespace Downloader
             this.Controls.Add(this.labelFilesFound);
             this.Name = "SchoolScreen";
             this.Size = new System.Drawing.Size(1106, 586);
-            this.Load += new System.EventHandler(this.SchoolScreen_Load);
-            this.Enter += new System.EventHandler(this.SchoolScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
 

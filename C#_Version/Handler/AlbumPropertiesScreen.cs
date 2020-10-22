@@ -14,16 +14,12 @@ namespace Handler
     {
         private HandlerForm Window;
         private List<CheckBox> GenresCheckBoxes;
-        public AlbumPropertiesScreen()
+        public AlbumPropertiesScreen(HandlerForm window)
         {
             InitializeComponent();
+            this.Window = window;
             this.GenresCheckBoxes = new List<CheckBox>();
             this.radioButtonBoth.Checked = true;
-        }
-
-        private void AlbumPropertiesScreen_Load(object sender, EventArgs e)
-        {
-            this.Window = this.Parent as HandlerForm;
             int index = 1;
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(this.Window.LAFContainer.GenerateAlbums);
@@ -36,8 +32,9 @@ namespace Handler
                 checkBox.Location = new Point(83, 232 + index * 25);
                 checkBox.Name = "checkBox" + genre;
                 checkBox.Size = new Size(93, 21);
-                checkBox.TabIndex = 4+ index;
+                checkBox.TabIndex = 4 + index;
                 checkBox.Text = genre;
+                checkBox.UseMnemonic = false;
                 checkBox.UseVisualStyleBackColor = true;
                 index++;
                 this.Controls.Add(checkBox);
@@ -144,7 +141,7 @@ namespace Handler
                         genresPicked.Add(checkBox.Text);
                     }
                 }
-                ChooseAlbumScreen aux = new ChooseAlbumScreen(albumTime*60,albumLeeway*60,genresPicked, leewayMode);
+                ChooseAlbumScreen aux = new ChooseAlbumScreen(this.Window,albumTime*60,albumLeeway*60,genresPicked, leewayMode);
                 aux.Dock = DockStyle.Fill;
                 this.Window.Controls.Add(aux);
                 this.Window.ActiveControl = aux;
