@@ -30,7 +30,6 @@ namespace Downloader
             this.ComponentsByLine.Add(new List<Control>() { this.label6, this.textBox6 });
             this.NeedsConfirm = false;
             this.listBoxToDelete.BackColor = this.Window.BackColor;
-            //this.listBoxToDelete.Items.Add("Test");
         }
         #region Event Handlers
         private void buttonGrimeArtistConfirm_Click(object sender, EventArgs e)
@@ -102,7 +101,7 @@ namespace Downloader
                             var oldList = new List<string>() { oldArtist, oldAlbum, oldTitle };
                             var newList = new List<string>() { newArtist, newAlbum, newTitle };
                             this.Window.LAFContainer.ExceptionsReplacements[oldList] = newList;
-                            this.listBoxToDelete.Items.Add(string.Join(" | ", oldList) + " ---> " + string.Join(" | ", newList));// oldList[0] + " | " + oldList[1] + " | " + oldList[2] + newList[0] + " | " + newList[1] + " | " + newList[2]
+                            this.listBoxToDelete.Items.Add(string.Join(" | ", oldList) + " ---> " + string.Join(" | ", newList));
                         }
                         this.Window.LAFContainer.SaveExceptions();
                         break;
@@ -205,6 +204,7 @@ namespace Downloader
                                 index--;
                             }
                         }
+                        this.Window.LAFContainer.SaveGrimeArtists();
                         break;
                     case 1:
                         for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
@@ -226,6 +226,7 @@ namespace Downloader
                                 index--;
                             }
                         }
+                        this.Window.LAFContainer.SaveExceptions();
                         break;
                     case 2:
                         for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
@@ -246,6 +247,7 @@ namespace Downloader
                                 index--;
                             }
                         }
+                        this.Window.LAFContainer.SaveExceptions();
                         break;
                     case 3:
                         for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
@@ -260,6 +262,7 @@ namespace Downloader
                                 index--;
                             }
                         }
+                        this.Window.LAFContainer.SaveExceptions();
                         break;
                     default:
                         break;
@@ -283,7 +286,7 @@ namespace Downloader
                 case 2:
                     foreach (var old in this.Window.LAFContainer.ExceptionsReplacements.Keys)
                     {
-                        this.listBoxToDelete.Items.Add(string.Join(" | ", old) + " ---> " + string.Join(" | ", this.Window.LAFContainer.ExceptionsReplacements[old]));//old[0] + " | " + old[1] + " | " + old[2] + this.Window.LAFContainer.ExceptionsReplacements[old][0] + " | " + this.Window.LAFContainer.ExceptionsReplacements[old][1] + " | " + this.Window.LAFContainer.ExceptionsReplacements[old][2]
+                        this.listBoxToDelete.Items.Add(string.Join(" | ", old) + " ---> " + string.Join(" | ", this.Window.LAFContainer.ExceptionsReplacements[old]));
                     }
                     break;
                 case 3:

@@ -19,6 +19,12 @@ namespace Handler
         {
             InitializeComponent();
             this.Window = window;
+            this.textBoxAlbum.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.Album).ToArray());
+            this.textBoxAlbumArtist.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.AlbumArtist).ToArray());
+            this.textBoxContributingArtist.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.ContributingArtists).ToArray());
+            this.textBoxGenre.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.GenresColors.Keys.ToArray());
+            this.textBoxTitle.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.Title).ToArray());
+            this.textBoxYear.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.Year.ToString()).ToArray());
             this.listBoxResults.Items.AddRange(this.Window.LAFContainer.MusicFiles.Select(x => x.Filename).ToArray());
         }
 

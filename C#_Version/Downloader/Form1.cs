@@ -19,5 +19,11 @@ namespace Downloader
             InitializeComponent();
             this.LAFContainer = new ListsAndFiles();
         }
+
+        private void DownloaderForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(this.LAFContainer.iTunes);
+            System.GC.Collect();
+        }
     }
 }

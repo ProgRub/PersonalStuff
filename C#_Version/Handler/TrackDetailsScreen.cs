@@ -31,6 +31,7 @@ namespace Handler
             this.textBoxDiscNumber.Text = this.Tracks[0].DiscNumber.ToString();
             this.textBoxYear.Text = this.Tracks[0].Year.ToString();
             this.textBoxGenre.Text = this.Tracks[0].Genre;
+            this.textBoxGenre.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.GenresColors.Keys.ToArray());
             this.textBoxPlayCount.Text = this.Tracks[0].PlayCount.ToString();
             foreach (MusicFile musicFile in this.Tracks.Skip(1))
             {
@@ -70,16 +71,16 @@ namespace Handler
                 {
                     this.textBoxPlayCount.Text = "";
                 }
-                this.PreviousValues.Add(this.textBoxAlbumArtist.Text);
-                this.PreviousValues.Add(this.textBoxContributingArtist.Text);
-                this.PreviousValues.Add(this.textBoxAlbum.Text);
-                this.PreviousValues.Add(this.textBoxTitle.Text);
-                this.PreviousValues.Add(this.textBoxTrackNumber.Text);
-                this.PreviousValues.Add(this.textBoxDiscNumber.Text);
-                this.PreviousValues.Add(this.textBoxYear.Text);
-                this.PreviousValues.Add(this.textBoxGenre.Text);
-                this.PreviousValues.Add(this.textBoxPlayCount.Text);
             }
+            this.PreviousValues.Add(this.textBoxAlbumArtist.Text);
+            this.PreviousValues.Add(this.textBoxContributingArtist.Text);
+            this.PreviousValues.Add(this.textBoxAlbum.Text);
+            this.PreviousValues.Add(this.textBoxTitle.Text);
+            this.PreviousValues.Add(this.textBoxTrackNumber.Text);
+            this.PreviousValues.Add(this.textBoxDiscNumber.Text);
+            this.PreviousValues.Add(this.textBoxYear.Text);
+            this.PreviousValues.Add(this.textBoxGenre.Text);
+            this.PreviousValues.Add(this.textBoxPlayCount.Text);
         }
 
         private void buttonBack_Click(object sender, EventArgs e)
@@ -88,25 +89,31 @@ namespace Handler
             {
                 using (var mp3 = TagLib.File.Create(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, musicFile.Filename)))
                 {
+                    Console.WriteLine("HERE");
+                    IITFileOrCDTrack iTunesTrack = (IITFileOrCDTrack)this.Window.LAFContainer.GetITunesTrack(musicFile.Title,musicFile.Album);
                     if (this.PreviousValues[0] != this.textBoxAlbumArtist.Text)
                     {
                         mp3.Tag.AlbumArtists = new string[] { this.textBoxAlbumArtist.Text };
                         musicFile.AlbumArtist = this.textBoxAlbumArtist.Text;
+                        iTunesTrack.AlbumArtist = musicFile.AlbumArtist;
                     }
                     if (this.PreviousValues[1] != this.textBoxContributingArtist.Text)
                     {
                         mp3.Tag.Performers = new string[] { this.textBoxContributingArtist.Text };
                         musicFile.ContributingArtists = this.textBoxContributingArtist.Text;
+                        iTunesTrack.Artist = musicFile.ContributingArtists;
                     }
                     if (this.PreviousValues[2] != this.textBoxAlbum.Text)
                     {
                         mp3.Tag.Album = this.textBoxAlbum.Text;
                         musicFile.Album = this.textBoxAlbum.Text;
+                        iTunesTrack.Album = musicFile.Album;
                     }
                     if (this.PreviousValues[3] != this.textBoxTitle.Text)
                     {
                         mp3.Tag.Title = this.textBoxTitle.Text;
                         musicFile.Title = this.textBoxTitle.Text;
+                        iTunesTrack.Name = musicFile.Title;
                     }
                     if (this.PreviousValues[4] != this.textBoxTrackNumber.Text)
                     {
@@ -126,6 +133,7 @@ namespace Handler
                             mp3.Tag.Track =amount;
                         }
                         musicFile.TrackNumber = (int)mp3.Tag.Track;
+                        iTunesTrack.TrackNumber = musicFile.TrackNumber;
                     }
                     if (this.PreviousValues[5] != this.textBoxDiscNumber.Text)
                     {
@@ -145,6 +153,7 @@ namespace Handler
                             mp3.Tag.Disc = amount;
                         }
                         musicFile.DiscNumber = (int)mp3.Tag.Disc;
+                        iTunesTrack.DiscNumber = musicFile.DiscNumber;
                     }
                     if (this.PreviousValues[6] != this.textBoxYear.Text)
                     {
@@ -164,17 +173,19 @@ namespace Handler
                             mp3.Tag.Year = amount;
                         }
                         musicFile.Year = (int)mp3.Tag.Year;
+                        iTunesTrack.Year = musicFile.Year;
                     }
                     if (this.PreviousValues[7] != this.textBoxGenre.Text)
                     {
                         mp3.Tag.Genres = new string[] { this.textBoxGenre.Text };
+                        musicFile.Genre = mp3.Tag.Genres[0];
+                        iTunesTrack.Genre = musicFile.Genre;
                     }
                     if (this.PreviousValues[8] != this.textBoxPlayCount.Text)
                     {
                         bool plus = this.textBoxYear.Text.StartsWith("+");
                         bool minus = this.textBoxYear.Text.StartsWith("-");
                         int amount = !plus & !minus ? Int32.Parse(this.textBoxYear.Text) : Int32.Parse(this.textBoxYear.Text.Substring(1));
-                        IITTrack iTunesTrack = this.Window.LAFContainer.GetITunesTrack(this.PreviousValues[3], this.PreviousValues[2]);
                         if (plus)
                         {
                             iTunesTrack.PlayedCount += amount;
@@ -193,6 +204,9 @@ namespace Handler
                     this.Window.LAFContainer.iTunesLibrary.AddFile(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, musicFile.Filename));
                 }
             }
+            this.Dispose();
+            this.Window.ActiveControl = this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0];
+            this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0].Visible = true;
         }
     }
 }

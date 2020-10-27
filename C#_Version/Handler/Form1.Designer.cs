@@ -77,6 +77,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "HandlerForm";
             this.Text = "Handler";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.HandlerForm_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 

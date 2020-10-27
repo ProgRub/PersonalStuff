@@ -10,6 +10,7 @@ using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using iTunesLib;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Handler
 {
@@ -542,7 +543,6 @@ namespace Handler
                 }
                 else { break; }
             }
-
             if (files.Count > this.MusicFiles.Count)
             {
                 var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
@@ -561,6 +561,17 @@ namespace Handler
                             {
                             }
                         }
+                    }
+                }
+            }
+            else if(files.Count < this.MusicFiles.Count)
+            {
+                var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
+                foreach (string filename in auxList)
+                {
+                    if (!files.Contains(filename))
+                    {
+                        FileSystem.DeleteFile(filename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                     }
                 }
             }

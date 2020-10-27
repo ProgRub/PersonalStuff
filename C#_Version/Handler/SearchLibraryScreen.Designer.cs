@@ -58,6 +58,8 @@
             // 
             // textBoxAlbumArtist
             // 
+            this.textBoxAlbumArtist.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxAlbumArtist.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxAlbumArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxAlbumArtist.Location = new System.Drawing.Point(135, 30);
             this.textBoxAlbumArtist.Name = "textBoxAlbumArtist";
@@ -67,6 +69,8 @@
             // 
             // textBoxContributingArtist
             // 
+            this.textBoxContributingArtist.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxContributingArtist.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxContributingArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxContributingArtist.Location = new System.Drawing.Point(135, 59);
             this.textBoxContributingArtist.Name = "textBoxContributingArtist";
@@ -87,6 +91,8 @@
             // 
             // textBoxAlbum
             // 
+            this.textBoxAlbum.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxAlbum.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxAlbum.Location = new System.Drawing.Point(135, 88);
             this.textBoxAlbum.Name = "textBoxAlbum";
@@ -107,6 +113,8 @@
             // 
             // textBoxTitle
             // 
+            this.textBoxTitle.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxTitle.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxTitle.Location = new System.Drawing.Point(135, 117);
             this.textBoxTitle.Name = "textBoxTitle";
@@ -127,6 +135,8 @@
             // 
             // textBoxYear
             // 
+            this.textBoxYear.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxYear.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxYear.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxYear.Location = new System.Drawing.Point(135, 146);
             this.textBoxYear.Name = "textBoxYear";
@@ -147,6 +157,8 @@
             // 
             // textBoxGenre
             // 
+            this.textBoxGenre.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxGenre.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxGenre.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxGenre.Location = new System.Drawing.Point(135, 175);
             this.textBoxGenre.Name = "textBoxGenre";
