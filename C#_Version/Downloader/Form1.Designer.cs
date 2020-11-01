@@ -37,7 +37,7 @@
             // 
             this.homeScreen1.AutoSize = true;
             this.homeScreen1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.homeScreen1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.homeScreen1.BackColor = System.Drawing.Color.Transparent;
             this.homeScreen1.Dock = System.Windows.Forms.DockStyle.Fill;
             commonOpenFileDialog1.AddToMostRecentlyUsedList = true;
             commonOpenFileDialog1.AllowNonFileSystemItems = false;
@@ -61,6 +61,7 @@
             commonOpenFileDialog1.ShowPlacesList = true;
             commonOpenFileDialog1.Title = null;
             this.homeScreen1.folderDialog = commonOpenFileDialog1;
+            this.homeScreen1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.homeScreen1.Location = new System.Drawing.Point(0, 0);
             this.homeScreen1.Name = "homeScreen1";
             this.homeScreen1.Size = new System.Drawing.Size(975, 391);
@@ -73,13 +74,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
             this.ClientSize = new System.Drawing.Size(975, 391);
             this.Controls.Add(this.homeScreen1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DownloaderForm";
             this.Text = "Downloader";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DownloaderForm_FormClosed);
+            this.Load += new System.EventHandler(this.DownloaderForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

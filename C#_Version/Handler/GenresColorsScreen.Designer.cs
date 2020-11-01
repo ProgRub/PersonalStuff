@@ -34,11 +34,19 @@
             // 
             // buttonBack
             // 
+            this.buttonBack.AutoSize = true;
+            this.buttonBack.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonBack.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonBack.FlatAppearance.BorderSize = 0;
+            this.buttonBack.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonBack.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonBack.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonBack.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
             this.buttonBack.Location = new System.Drawing.Point(10, 10);
             this.buttonBack.Name = "buttonBack";
-            this.buttonBack.Size = new System.Drawing.Size(93, 21);
+            this.buttonBack.Size = new System.Drawing.Size(44, 25);
             this.buttonBack.TabIndex = 0;
             this.buttonBack.Text = "Back";
             this.buttonBack.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -55,6 +63,7 @@
             this.Name = "GenresColorsScreen";
             this.Size = new System.Drawing.Size(871, 440);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 

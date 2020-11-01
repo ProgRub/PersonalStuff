@@ -23,6 +23,7 @@ namespace Downloader
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.AcceptButton = this.buttonMoveFile;
             this.OneDrive = Path.Combine(new string[] { "C:", Path.DirectorySeparatorChar.ToString(), "Users", "ruben", "Onedrive - Universidade da Madeira", "Ano_3", "Semestre_1" });
             this.PossibleDirectories = new List<string>();
             this.CheckedFiles = new List<string>();
@@ -35,8 +36,6 @@ namespace Downloader
             this.dropdownDirectories.Items.Add("Skip File");
             this.dropdownDirectories.Items.Add("Delete File");
             this.NumberFiles = 0;
-            this.TextBoxFilesFound.BackColor = this.Window.BackColor;
-            this.TextBoxFilesMoved.BackColor = this.Window.BackColor;
             this.TimerCheckDownloads = new Timer();
             this.TimerCheckDownloads.Tick += new EventHandler(CheckDownloads);
             this.TimerCheckDownloads.Interval = 15;

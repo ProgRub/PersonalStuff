@@ -18,6 +18,7 @@ namespace Handler
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.AcceptButton = this.buttonConfirm;
             this.GenresCheckBoxes = new List<CheckBox>();
             this.radioButtonBoth.Checked = true;
             int index = 1;
@@ -36,6 +37,7 @@ namespace Handler
                 checkBox.Text = genre;
                 checkBox.UseMnemonic = false;
                 checkBox.UseVisualStyleBackColor = true;
+                checkBox.MouseClick += new MouseEventHandler(this.checkBox_MouseClick);
                 index++;
                 this.Controls.Add(checkBox);
                 this.GenresCheckBoxes.Add(checkBox);
@@ -45,12 +47,18 @@ namespace Handler
             //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
         }
 
-        private void checkBoxAllGenres_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxAllGenres_MouseClick(object sender, MouseEventArgs e)
         {
+            Console.WriteLine(this.checkBoxAllGenres.Checked);
             for (int index = 0; index < this.GenresCheckBoxes.Count; index++)
             {
                 this.GenresCheckBoxes[index].Checked = this.checkBoxAllGenres.Checked;
             }
+        }
+
+        private void checkBox_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.checkBoxAllGenres.Checked = this.GenresCheckBoxes.All(checkBox => checkBox.Checked);
         }
 
         private void buttonAllAlbums_Click(object sender, EventArgs e)
@@ -58,6 +66,7 @@ namespace Handler
             this.textBoxTimeAlbum.Text = "240";
             this.textBoxLeewayAlbum.Text = "240";
             this.checkBoxAllGenres.Checked = true;
+            this.GenresCheckBoxes.ForEach(checkBox => checkBox.Checked = true);
         }
 
         private void buttonAlbumForCar_Click(object sender, EventArgs e)
@@ -72,6 +81,7 @@ namespace Handler
             this.buttonAlbumForWorkout.Visible = false;
             this.dropdownWorkouts.Visible = true;
             this.buttonConfirmWorkout.Visible = true;
+            this.Window.AcceptButton = this.buttonConfirmWorkout;
         }
 
         private void buttonConfirmWorkout_Click(object sender, EventArgs e)
@@ -94,6 +104,7 @@ namespace Handler
             this.buttonAlbumForWorkout.Visible = true;
             this.dropdownWorkouts.Visible = false;
             this.buttonConfirmWorkout.Visible = false;
+            this.Window.AcceptButton = this.buttonConfirm;
         }
 
         private void buttonConfirm_Click(object sender, EventArgs e)
@@ -141,7 +152,7 @@ namespace Handler
                         genresPicked.Add(checkBox.Text);
                     }
                 }
-                ChooseAlbumScreen aux = new ChooseAlbumScreen(this.Window,albumTime*60,albumLeeway*60,genresPicked, leewayMode);
+                ChooseAlbumScreen aux = new ChooseAlbumScreen(this.Window, albumTime * 60, albumLeeway * 60, genresPicked, leewayMode);
                 aux.Dock = DockStyle.Fill;
                 this.Window.Controls.Add(aux);
                 this.Window.ActiveControl = aux;
@@ -155,9 +166,9 @@ namespace Handler
                 this.textBoxTimeAlbum.ForeColor = Color.Black;
                 this.textBoxTimeAlbum.Text = "";
             }
-            if (this.textBoxLeewayAlbum.Text== "Missing the Leeway!")
+            if (this.textBoxLeewayAlbum.Text == "Missing the Leeway!")
             {
-                this.textBoxLeewayAlbum.ForeColor = Color.Black; 
+                this.textBoxLeewayAlbum.ForeColor = Color.Black;
                 this.textBoxLeewayAlbum.Text = "";
             }
         }

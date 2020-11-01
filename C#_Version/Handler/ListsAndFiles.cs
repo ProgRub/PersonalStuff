@@ -543,36 +543,30 @@ namespace Handler
                 }
                 else { break; }
             }
-            if (files.Count > this.MusicFiles.Count)
+            var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
+            foreach (string filename in files)
             {
-                var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
-                foreach (string filename in files)
+                if (!auxList.Contains(Path.GetFileName(filename)))
                 {
-                    if (!auxList.Contains(Path.GetFileName(filename)))
+                    using (var mp3 = TagLib.File.Create(filename))
                     {
-                        using (var mp3 = TagLib.File.Create(filename))
+                        try
                         {
-                            try
-                            {
-                                this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
-                                mp3.Save();
-                            }
-                            catch (Exception)
-                            {
-                            }
+                            this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
+                            mp3.Save();
+                        }
+                        catch (Exception)
+                        {
                         }
                     }
                 }
             }
-            else if(files.Count < this.MusicFiles.Count)
+            auxList = this.MusicFiles.Select(x => x.Filename).ToList();
+            foreach (string filename in auxList)
             {
-                var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
-                foreach (string filename in auxList)
+                if (!files.Contains(Path.Combine(this.MusicDestinyDirectory, filename)))
                 {
-                    if (!files.Contains(filename))
-                    {
-                        FileSystem.DeleteFile(filename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                    }
+                    this.MusicFiles.RemoveAt(this.IndexOfMusicFile(filename));
                 }
             }
             int numThreads = 15;
@@ -596,6 +590,7 @@ namespace Handler
             {
                 threads[i].Join();
             }
+            this.SaveMusicFiles();
         }
 
         public int IndexOfAlbumByName(string albumName)

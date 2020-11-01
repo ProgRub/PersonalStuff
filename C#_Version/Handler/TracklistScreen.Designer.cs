@@ -33,14 +33,16 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.labelLength = new System.Windows.Forms.Label();
             this.buttonBack = new System.Windows.Forms.Button();
+            this.buttonShowOnItunes = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // textBoxTrackList
             // 
-            this.textBoxTrackList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.textBoxTrackList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxTrackList.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxTrackList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxTrackList.ForeColor = System.Drawing.Color.White;
+            this.textBoxTrackList.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxTrackList.Location = new System.Drawing.Point(49, 50);
             this.textBoxTrackList.Multiline = true;
             this.textBoxTrackList.Name = "textBoxTrackList";
@@ -51,7 +53,7 @@
             // labelAlbum
             // 
             this.labelAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelAlbum.ForeColor = System.Drawing.Color.White;
+            this.labelAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelAlbum.Location = new System.Drawing.Point(49, 24);
             this.labelAlbum.Name = "labelAlbum";
             this.labelAlbum.Size = new System.Drawing.Size(582, 23);
@@ -72,7 +74,7 @@
             // labelLength
             // 
             this.labelLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelLength.ForeColor = System.Drawing.Color.White;
+            this.labelLength.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelLength.Location = new System.Drawing.Point(49, 327);
             this.labelLength.Name = "labelLength";
             this.labelLength.Size = new System.Drawing.Size(582, 23);
@@ -82,14 +84,41 @@
             // 
             // buttonBack
             // 
+            this.buttonBack.AutoSize = true;
+            this.buttonBack.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonBack.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonBack.FlatAppearance.BorderSize = 0;
+            this.buttonBack.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonBack.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonBack.Location = new System.Drawing.Point(767, 356);
+            this.buttonBack.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonBack.Location = new System.Drawing.Point(0, 20);
             this.buttonBack.Name = "buttonBack";
-            this.buttonBack.Size = new System.Drawing.Size(75, 23);
+            this.buttonBack.Size = new System.Drawing.Size(49, 27);
             this.buttonBack.TabIndex = 4;
             this.buttonBack.Text = "Back";
             this.buttonBack.UseVisualStyleBackColor = true;
             this.buttonBack.Click += new System.EventHandler(this.buttonBack_Click);
+            // 
+            // buttonShowOnItunes
+            // 
+            this.buttonShowOnItunes.AutoSize = true;
+            this.buttonShowOnItunes.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonShowOnItunes.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonShowOnItunes.FlatAppearance.BorderSize = 0;
+            this.buttonShowOnItunes.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonShowOnItunes.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonShowOnItunes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonShowOnItunes.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonShowOnItunes.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonShowOnItunes.Location = new System.Drawing.Point(750, 356);
+            this.buttonShowOnItunes.Name = "buttonShowOnItunes";
+            this.buttonShowOnItunes.Size = new System.Drawing.Size(122, 27);
+            this.buttonShowOnItunes.TabIndex = 5;
+            this.buttonShowOnItunes.Text = "Show On iTunes";
+            this.buttonShowOnItunes.UseVisualStyleBackColor = true;
+            this.buttonShowOnItunes.Click += new System.EventHandler(this.buttonShowOnItunes_Click);
             // 
             // TracklistScreen
             // 
@@ -98,13 +127,14 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.buttonShowOnItunes);
             this.Controls.Add(this.buttonBack);
             this.Controls.Add(this.labelLength);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.labelAlbum);
             this.Controls.Add(this.textBoxTrackList);
             this.Name = "TracklistScreen";
-            this.Size = new System.Drawing.Size(958, 382);
+            this.Size = new System.Drawing.Size(958, 386);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -118,5 +148,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label labelLength;
         private System.Windows.Forms.Button buttonBack;
+        private System.Windows.Forms.Button buttonShowOnItunes;
     }
 }

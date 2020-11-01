@@ -21,6 +21,7 @@ namespace Downloader
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.CancelButton = this.buttonBack;
             this.ComponentsByLine = new List<List<Control>>();
             this.ComponentsByLine.Add(new List<Control>() { this.label1, this.textBox1 });
             this.ComponentsByLine.Add(new List<Control>() { this.label2, this.textBox2 });
@@ -29,7 +30,6 @@ namespace Downloader
             this.ComponentsByLine.Add(new List<Control>() { this.label5, this.textBox5 });
             this.ComponentsByLine.Add(new List<Control>() { this.label6, this.textBox6 });
             this.NeedsConfirm = false;
-            this.listBoxToDelete.BackColor = this.Window.BackColor;
         }
         #region Event Handlers
         private void buttonGrimeArtistConfirm_Click(object sender, EventArgs e)
@@ -49,9 +49,11 @@ namespace Downloader
                 this.buttonException.Visible = false;
                 this.buttonURLReplacement.Visible = false;
                 this.buttonGrimeArtistConfirm.Text = "Confirm";
+                this.Window.AcceptButton = this.buttonGrimeArtistConfirm;
             }
             else
             {
+                this.Window.AcceptButton = null;
                 this.NeedsConfirm = !this.NeedsConfirm;
                 this.listBoxToDelete.Items.Clear();
                 switch (this.Mode)

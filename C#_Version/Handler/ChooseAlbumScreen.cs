@@ -83,6 +83,32 @@ namespace Handler
             this.Window.ActiveControl = aux;
         }
 
+        private void listViewPossibleAlbums_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keys.Enter == e.KeyCode)
+            {
+                Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text)];
+                this.Hide();
+                TracklistScreen aux = new TracklistScreen(this.Window, albumSelected);
+                aux.Dock = DockStyle.Fill;
+                this.Window.Controls.Add(aux);
+                this.Window.ActiveControl = aux;
+            }
+        }
+
+        private void listViewPossibleHalfAlbums_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keys.Enter == e.KeyCode)
+            {
+                Album albumSelected = this.Window.LAFContainer.Albums[this.Window.LAFContainer.IndexOfAlbumByName(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text)];
+                this.Hide();
+                TracklistScreen aux = new TracklistScreen(this.Window, albumSelected);
+                aux.Dock = DockStyle.Fill;
+                this.Window.Controls.Add(aux);
+                this.Window.ActiveControl = aux;
+            }
+        }
+
         private void listViewPossibleAlbums_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             this.ReversePA = !this.ReversePA & this.PreviousColumnPA == e.Column;

@@ -53,7 +53,7 @@
             // 
             this.labelTitle.AutoSize = true;
             this.labelTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTitle.ForeColor = System.Drawing.Color.White;
+            this.labelTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelTitle.Location = new System.Drawing.Point(520, 6);
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Size = new System.Drawing.Size(256, 26);
@@ -63,7 +63,7 @@
             // label1
             // 
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.White;
+            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.label1.Location = new System.Drawing.Point(3, 50);
             this.label1.Name = "label1";
             this.label1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -74,7 +74,7 @@
             // label2
             // 
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.Color.White;
+            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.label2.Location = new System.Drawing.Point(3, 80);
             this.label2.Name = "label2";
             this.label2.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -85,7 +85,7 @@
             // label3
             // 
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.Color.White;
+            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.label3.Location = new System.Drawing.Point(3, 109);
             this.label3.Name = "label3";
             this.label3.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -96,7 +96,7 @@
             // label4
             // 
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.Color.White;
+            this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.label4.Location = new System.Drawing.Point(3, 138);
             this.label4.Name = "label4";
             this.label4.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -107,7 +107,7 @@
             // label5
             // 
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.ForeColor = System.Drawing.Color.White;
+            this.label5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.label5.Location = new System.Drawing.Point(3, 167);
             this.label5.Name = "label5";
             this.label5.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -118,7 +118,7 @@
             // label6
             // 
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.ForeColor = System.Drawing.Color.White;
+            this.label6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.label6.Location = new System.Drawing.Point(3, 196);
             this.label6.Name = "label6";
             this.label6.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -128,7 +128,10 @@
             // 
             // textBox1
             // 
+            this.textBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBox1.Location = new System.Drawing.Point(111, 47);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(327, 23);
@@ -136,7 +139,10 @@
             // 
             // textBox2
             // 
+            this.textBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBox2.Location = new System.Drawing.Point(111, 77);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(327, 23);
@@ -144,7 +150,10 @@
             // 
             // textBox3
             // 
+            this.textBox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBox3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBox3.Location = new System.Drawing.Point(111, 106);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(327, 23);
@@ -152,7 +161,10 @@
             // 
             // textBox4
             // 
+            this.textBox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBox4.Location = new System.Drawing.Point(111, 135);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(327, 23);
@@ -160,7 +172,10 @@
             // 
             // textBox5
             // 
+            this.textBox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBox5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBox5.Location = new System.Drawing.Point(111, 164);
             this.textBox5.Name = "textBox5";
             this.textBox5.Size = new System.Drawing.Size(327, 23);
@@ -168,7 +183,10 @@
             // 
             // textBox6
             // 
+            this.textBox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBox6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBox6.Location = new System.Drawing.Point(111, 193);
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(327, 23);
@@ -176,9 +194,17 @@
             // 
             // buttonGrimeArtistConfirm
             // 
+            this.buttonGrimeArtistConfirm.AutoSize = true;
+            this.buttonGrimeArtistConfirm.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonGrimeArtistConfirm.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonGrimeArtistConfirm.FlatAppearance.BorderSize = 0;
+            this.buttonGrimeArtistConfirm.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonGrimeArtistConfirm.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonGrimeArtistConfirm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonGrimeArtistConfirm.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonGrimeArtistConfirm.Location = new System.Drawing.Point(200, 240);
             this.buttonGrimeArtistConfirm.Name = "buttonGrimeArtistConfirm";
-            this.buttonGrimeArtistConfirm.Size = new System.Drawing.Size(138, 23);
+            this.buttonGrimeArtistConfirm.Size = new System.Drawing.Size(70, 23);
             this.buttonGrimeArtistConfirm.TabIndex = 13;
             this.buttonGrimeArtistConfirm.Text = "Grime Artist";
             this.buttonGrimeArtistConfirm.UseVisualStyleBackColor = true;
@@ -186,9 +212,17 @@
             // 
             // buttonException
             // 
+            this.buttonException.AutoSize = true;
+            this.buttonException.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonException.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonException.FlatAppearance.BorderSize = 0;
+            this.buttonException.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonException.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonException.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonException.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonException.Location = new System.Drawing.Point(200, 320);
             this.buttonException.Name = "buttonException";
-            this.buttonException.Size = new System.Drawing.Size(138, 23);
+            this.buttonException.Size = new System.Drawing.Size(121, 23);
             this.buttonException.TabIndex = 14;
             this.buttonException.Text = "Year/Lyrics Exception";
             this.buttonException.UseVisualStyleBackColor = true;
@@ -196,9 +230,17 @@
             // 
             // buttonURLReplacement
             // 
+            this.buttonURLReplacement.AutoSize = true;
+            this.buttonURLReplacement.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonURLReplacement.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonURLReplacement.FlatAppearance.BorderSize = 0;
+            this.buttonURLReplacement.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonURLReplacement.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonURLReplacement.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonURLReplacement.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonURLReplacement.Location = new System.Drawing.Point(200, 360);
             this.buttonURLReplacement.Name = "buttonURLReplacement";
-            this.buttonURLReplacement.Size = new System.Drawing.Size(138, 23);
+            this.buttonURLReplacement.Size = new System.Drawing.Size(105, 23);
             this.buttonURLReplacement.TabIndex = 15;
             this.buttonURLReplacement.Text = "URL Replacement";
             this.buttonURLReplacement.UseVisualStyleBackColor = true;
@@ -206,21 +248,30 @@
             // 
             // listBoxToDelete
             // 
-            this.listBoxToDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
-            this.listBoxToDelete.ForeColor = System.Drawing.Color.White;
+            this.listBoxToDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.listBoxToDelete.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.listBoxToDelete.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.listBoxToDelete.FormattingEnabled = true;
             this.listBoxToDelete.Location = new System.Drawing.Point(461, 47);
             this.listBoxToDelete.Name = "listBoxToDelete";
             this.listBoxToDelete.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBoxToDelete.Size = new System.Drawing.Size(948, 342);
+            this.listBoxToDelete.Size = new System.Drawing.Size(948, 340);
             this.listBoxToDelete.TabIndex = 16;
             this.listBoxToDelete.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBoxToDelete_KeyDown);
             // 
             // buttonSongToSkip
             // 
+            this.buttonSongToSkip.AutoSize = true;
+            this.buttonSongToSkip.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonSongToSkip.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonSongToSkip.FlatAppearance.BorderSize = 0;
+            this.buttonSongToSkip.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonSongToSkip.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonSongToSkip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonSongToSkip.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonSongToSkip.Location = new System.Drawing.Point(200, 280);
             this.buttonSongToSkip.Name = "buttonSongToSkip";
-            this.buttonSongToSkip.Size = new System.Drawing.Size(138, 23);
+            this.buttonSongToSkip.Size = new System.Drawing.Size(82, 23);
             this.buttonSongToSkip.TabIndex = 17;
             this.buttonSongToSkip.Text = "Song To Skip";
             this.buttonSongToSkip.UseVisualStyleBackColor = true;
@@ -228,9 +279,17 @@
             // 
             // buttonBack
             // 
+            this.buttonBack.AutoSize = true;
+            this.buttonBack.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonBack.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonBack.FlatAppearance.BorderSize = 0;
+            this.buttonBack.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonBack.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonBack.Location = new System.Drawing.Point(0, 3);
             this.buttonBack.Name = "buttonBack";
-            this.buttonBack.Size = new System.Drawing.Size(138, 23);
+            this.buttonBack.Size = new System.Drawing.Size(42, 23);
             this.buttonBack.TabIndex = 18;
             this.buttonBack.Text = "Back";
             this.buttonBack.UseVisualStyleBackColor = true;

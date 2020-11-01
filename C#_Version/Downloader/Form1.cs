@@ -25,5 +25,10 @@ namespace Downloader
             System.Runtime.InteropServices.Marshal.ReleaseComObject(this.LAFContainer.iTunes);
             System.GC.Collect();
         }
+
+        private void DownloaderForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

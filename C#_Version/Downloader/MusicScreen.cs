@@ -26,13 +26,12 @@ namespace Downloader
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.AcceptButton = this.buttonEndCycleAdvance;
             this.NumberFilesFound = 0;
             this.FileBuffer = new List<string>();
             this.CanAdvance = false;
             this.NewFiles = new List<string>();
             this.labelFilesFound.Text = "0 Files Found";
-            this.TextBoxFilesFound.BackColor = this.Window.BackColor;
-            this.TextBoxFilesMoved.BackColor = this.Window.BackColor;
             Process deemix = new Process();
             deemix.StartInfo.WorkingDirectory = Path.Combine(this.Window.LAFContainer.CurrentDirectory, "auxFiles", "deemix");
             deemix.StartInfo.FileName = "start.bat";

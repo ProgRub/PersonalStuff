@@ -40,7 +40,7 @@ namespace Downloader
             // 
             this.labelFilesFound.AutoSize = true;
             this.labelFilesFound.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelFilesFound.ForeColor = System.Drawing.Color.White;
+            this.labelFilesFound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelFilesFound.Location = new System.Drawing.Point(482, 6);
             this.labelFilesFound.Name = "labelFilesFound";
             this.labelFilesFound.Size = new System.Drawing.Size(143, 25);
@@ -50,9 +50,16 @@ namespace Downloader
             // buttonEndCycleAdvance
             // 
             this.buttonEndCycleAdvance.AutoSize = true;
-            this.buttonEndCycleAdvance.Location = new System.Drawing.Point(453, 494);
+            this.buttonEndCycleAdvance.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonEndCycleAdvance.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonEndCycleAdvance.FlatAppearance.BorderSize = 0;
+            this.buttonEndCycleAdvance.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonEndCycleAdvance.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonEndCycleAdvance.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonEndCycleAdvance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonEndCycleAdvance.Location = new System.Drawing.Point(515, 494);
             this.buttonEndCycleAdvance.Name = "buttonEndCycleAdvance";
-            this.buttonEndCycleAdvance.Size = new System.Drawing.Size(194, 23);
+            this.buttonEndCycleAdvance.Size = new System.Drawing.Size(68, 23);
             this.buttonEndCycleAdvance.TabIndex = 6;
             this.buttonEndCycleAdvance.Text = "Move Files";
             this.buttonEndCycleAdvance.UseVisualStyleBackColor = true;
@@ -60,10 +67,11 @@ namespace Downloader
             // 
             // TextBoxFilesFound
             // 
-            this.TextBoxFilesFound.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.TextBoxFilesFound.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.TextBoxFilesFound.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.TextBoxFilesFound.Cursor = System.Windows.Forms.Cursors.Default;
             this.TextBoxFilesFound.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TextBoxFilesFound.ForeColor = System.Drawing.Color.White;
+            this.TextBoxFilesFound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.TextBoxFilesFound.Location = new System.Drawing.Point(6, 34);
             this.TextBoxFilesFound.Multiline = true;
             this.TextBoxFilesFound.Name = "TextBoxFilesFound";
@@ -73,10 +81,11 @@ namespace Downloader
             // 
             // TextBoxFilesMoved
             // 
-            this.TextBoxFilesMoved.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.TextBoxFilesMoved.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.TextBoxFilesMoved.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.TextBoxFilesMoved.Cursor = System.Windows.Forms.Cursors.Default;
             this.TextBoxFilesMoved.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TextBoxFilesMoved.ForeColor = System.Drawing.Color.White;
+            this.TextBoxFilesMoved.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.TextBoxFilesMoved.Location = new System.Drawing.Point(551, 34);
             this.TextBoxFilesMoved.Multiline = true;
             this.TextBoxFilesMoved.Name = "TextBoxFilesMoved";

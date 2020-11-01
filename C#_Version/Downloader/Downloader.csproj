@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>icons8-download-32.ico</ApplicationIcon>
+    <ApplicationIcon>icons8-download-96.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.11.24.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="icons8-download-32.ico" />
+    <Content Include="icons8-download-96.ico" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="iTunesLib">

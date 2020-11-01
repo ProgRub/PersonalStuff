@@ -41,7 +41,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.ForeColor = System.Drawing.Color.White;
+            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.label3.Location = new System.Drawing.Point(5, 29);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(87, 13);
@@ -50,9 +50,17 @@
             // 
             // buttonChooseMusicDestinyFolder
             // 
+            this.buttonChooseMusicDestinyFolder.AutoSize = true;
+            this.buttonChooseMusicDestinyFolder.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonChooseMusicDestinyFolder.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonChooseMusicDestinyFolder.FlatAppearance.BorderSize = 0;
+            this.buttonChooseMusicDestinyFolder.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonChooseMusicDestinyFolder.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonChooseMusicDestinyFolder.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonChooseMusicDestinyFolder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonChooseMusicDestinyFolder.Location = new System.Drawing.Point(532, 26);
             this.buttonChooseMusicDestinyFolder.Name = "buttonChooseMusicDestinyFolder";
-            this.buttonChooseMusicDestinyFolder.Size = new System.Drawing.Size(75, 23);
+            this.buttonChooseMusicDestinyFolder.Size = new System.Drawing.Size(43, 23);
             this.buttonChooseMusicDestinyFolder.TabIndex = 16;
             this.buttonChooseMusicDestinyFolder.Text = "Open";
             this.buttonChooseMusicDestinyFolder.UseVisualStyleBackColor = true;
@@ -60,7 +68,10 @@
             // 
             // textBoxMusicDestinyDir
             // 
+            this.textBoxMusicDestinyDir.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxMusicDestinyDir.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxMusicDestinyDir.Enabled = false;
+            this.textBoxMusicDestinyDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxMusicDestinyDir.Location = new System.Drawing.Point(100, 26);
             this.textBoxMusicDestinyDir.Name = "textBoxMusicDestinyDir";
             this.textBoxMusicDestinyDir.ReadOnly = true;
@@ -70,7 +81,7 @@
             // helpLabelFileDialog3
             // 
             this.helpLabelFileDialog3.AutoSize = true;
-            this.helpLabelFileDialog3.ForeColor = System.Drawing.Color.White;
+            this.helpLabelFileDialog3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.helpLabelFileDialog3.Location = new System.Drawing.Point(97, 10);
             this.helpLabelFileDialog3.Name = "helpLabelFileDialog3";
             this.helpLabelFileDialog3.Size = new System.Drawing.Size(48, 13);
@@ -79,9 +90,17 @@
             // 
             // buttonChooseAlbum
             // 
+            this.buttonChooseAlbum.AutoSize = true;
+            this.buttonChooseAlbum.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonChooseAlbum.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonChooseAlbum.FlatAppearance.BorderSize = 0;
+            this.buttonChooseAlbum.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonChooseAlbum.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonChooseAlbum.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonChooseAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonChooseAlbum.Location = new System.Drawing.Point(211, 66);
             this.buttonChooseAlbum.Name = "buttonChooseAlbum";
-            this.buttonChooseAlbum.Size = new System.Drawing.Size(205, 23);
+            this.buttonChooseAlbum.Size = new System.Drawing.Size(85, 23);
             this.buttonChooseAlbum.TabIndex = 18;
             this.buttonChooseAlbum.Text = "Choose Album";
             this.buttonChooseAlbum.UseVisualStyleBackColor = true;
@@ -89,9 +108,17 @@
             // 
             // buttonSearchLibrary
             // 
+            this.buttonSearchLibrary.AutoSize = true;
+            this.buttonSearchLibrary.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonSearchLibrary.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonSearchLibrary.FlatAppearance.BorderSize = 0;
+            this.buttonSearchLibrary.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonSearchLibrary.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonSearchLibrary.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonSearchLibrary.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonSearchLibrary.Location = new System.Drawing.Point(211, 106);
             this.buttonSearchLibrary.Name = "buttonSearchLibrary";
-            this.buttonSearchLibrary.Size = new System.Drawing.Size(205, 23);
+            this.buttonSearchLibrary.Size = new System.Drawing.Size(85, 23);
             this.buttonSearchLibrary.TabIndex = 19;
             this.buttonSearchLibrary.Text = "Search Library";
             this.buttonSearchLibrary.UseVisualStyleBackColor = true;
@@ -99,9 +126,17 @@
             // 
             // buttonGenresColors
             // 
+            this.buttonGenresColors.AutoSize = true;
+            this.buttonGenresColors.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonGenresColors.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonGenresColors.FlatAppearance.BorderSize = 0;
+            this.buttonGenresColors.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonGenresColors.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonGenresColors.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonGenresColors.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonGenresColors.Location = new System.Drawing.Point(211, 146);
             this.buttonGenresColors.Name = "buttonGenresColors";
-            this.buttonGenresColors.Size = new System.Drawing.Size(205, 23);
+            this.buttonGenresColors.Size = new System.Drawing.Size(122, 23);
             this.buttonGenresColors.TabIndex = 20;
             this.buttonGenresColors.Text = "Choose Genres Colors";
             this.buttonGenresColors.UseVisualStyleBackColor = true;
@@ -109,9 +144,17 @@
             // 
             // buttonRegisterWorkout
             // 
+            this.buttonRegisterWorkout.AutoSize = true;
+            this.buttonRegisterWorkout.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonRegisterWorkout.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonRegisterWorkout.FlatAppearance.BorderSize = 0;
+            this.buttonRegisterWorkout.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonRegisterWorkout.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonRegisterWorkout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonRegisterWorkout.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonRegisterWorkout.Location = new System.Drawing.Point(211, 188);
             this.buttonRegisterWorkout.Name = "buttonRegisterWorkout";
-            this.buttonRegisterWorkout.Size = new System.Drawing.Size(205, 23);
+            this.buttonRegisterWorkout.Size = new System.Drawing.Size(100, 23);
             this.buttonRegisterWorkout.TabIndex = 21;
             this.buttonRegisterWorkout.Text = "Register Workout";
             this.buttonRegisterWorkout.UseVisualStyleBackColor = true;

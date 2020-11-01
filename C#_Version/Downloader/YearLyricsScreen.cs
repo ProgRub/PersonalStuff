@@ -39,9 +39,6 @@ namespace Downloader
             this.ProgressWorkerDone = false;
             this.NewFiles = newFiles;
             this.AddFileToList = addFileToList;
-            this.richTextBoxArtist.BackColor = this.Window.BackColor;
-            this.richTextBoxAlbum.BackColor = this.Window.BackColor;
-            this.richTextBoxTitle.BackColor = this.Window.BackColor;
             this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
             this.Window.WindowState = FormWindowState.Maximized;
             this.worker = new BackgroundWorker();
@@ -252,6 +249,7 @@ namespace Downloader
 
         private void DisableComponents()
         {
+            this.Window.AcceptButton = null;
             this.textBoxAlbum.ReadOnly = true;
             this.textBoxArtist.ReadOnly = true;
             this.textBoxTitle.ReadOnly = true;
@@ -261,6 +259,7 @@ namespace Downloader
 
         private void EnableComponents(bool forAlbumYear)
         {
+            this.Window.AcceptButton = this.buttonTryAgain;
             if (forAlbumYear) { this.textBoxAlbum.ReadOnly = false; }
             else { this.buttonSkipSong.Enabled = true; }
             this.textBoxArtist.ReadOnly = false;
@@ -480,6 +479,7 @@ namespace Downloader
                             System.Diagnostics.Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentAlbum.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
                         }
                         this.ErrorHandled = false;
+                        this.worker.ReportProgress(11);
                         //this.EnableComponents(true);
                         while (!this.ErrorHandled)
                         {

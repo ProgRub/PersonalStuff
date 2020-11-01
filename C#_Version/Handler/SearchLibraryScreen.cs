@@ -19,6 +19,8 @@ namespace Handler
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.AcceptButton = this.buttonTrackDetails;
+            this.Window.CancelButton = this.buttonBack;
             this.textBoxAlbum.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.Album).ToArray());
             this.textBoxAlbumArtist.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.AlbumArtist).ToArray());
             this.textBoxContributingArtist.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.ContributingArtists).ToArray());

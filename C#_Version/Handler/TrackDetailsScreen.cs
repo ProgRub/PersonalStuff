@@ -21,6 +21,7 @@ namespace Handler
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.CancelButton = this.buttonBack;
             this.Tracks = tracks;
             this.PreviousValues = new List<string>();
             this.textBoxAlbumArtist.Text = this.Tracks[0].AlbumArtist;

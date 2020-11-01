@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using iTunesLib;
 
 namespace Handler
 {
@@ -15,10 +16,13 @@ namespace Handler
     {
         private HandlerForm Window;
         private Album Album;
+        private IITFileOrCDTrack ShowAlbumOnItunes;
         public TracklistScreen(HandlerForm window,Album album)
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.AcceptButton = this.buttonShowOnItunes;
+            this.Window.CancelButton = this.buttonBack;
             this.Album = album;
             this.labelAlbum.Text = this.labelAlbum.Text + this.Album.Title;
             this.labelLength.Text = this.labelLength.Text + this.Window.LAFContainer.StandardFormatTime(this.Album.Length);
@@ -33,6 +37,7 @@ namespace Handler
                     this.textBoxTrackList.AppendText(track.TrackNumber + maxPreviousDisc + ". " + track.Title + Environment.NewLine);
                     if (!imageGot)
                     {
+                        this.ShowAlbumOnItunes = (IITFileOrCDTrack)this.Window.LAFContainer.GetITunesTrack(track.Title, track.Album);
                         using (var mp3 = TagLib.File.Create(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, track.Filename)))
                         {
                             this.pictureBox1.Image = Image.FromStream(new MemoryStream((byte[])(mp3.Tag.Pictures[0].Data.Data)));
@@ -52,6 +57,11 @@ namespace Handler
             this.Dispose();
             this.Window.Controls.OfType<ChooseAlbumScreen>().ToList()[0].Visible = true;
             this.Window.ActiveControl = this.Window.Controls.OfType<ChooseAlbumScreen>().ToList()[0];
+        }
+
+        private void buttonShowOnItunes_Click(object sender, EventArgs e)
+        {
+            this.ShowAlbumOnItunes.Reveal();
         }
     }
 }

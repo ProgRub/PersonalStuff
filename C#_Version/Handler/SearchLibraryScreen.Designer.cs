@@ -49,7 +49,7 @@
             // 
             this.labelAlbumArtist.AutoSize = true;
             this.labelAlbumArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelAlbumArtist.ForeColor = System.Drawing.Color.White;
+            this.labelAlbumArtist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelAlbumArtist.Location = new System.Drawing.Point(46, 33);
             this.labelAlbumArtist.Name = "labelAlbumArtist";
             this.labelAlbumArtist.Size = new System.Drawing.Size(83, 17);
@@ -60,7 +60,10 @@
             // 
             this.textBoxAlbumArtist.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBoxAlbumArtist.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.textBoxAlbumArtist.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxAlbumArtist.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxAlbumArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxAlbumArtist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxAlbumArtist.Location = new System.Drawing.Point(135, 30);
             this.textBoxAlbumArtist.Name = "textBoxAlbumArtist";
             this.textBoxAlbumArtist.Size = new System.Drawing.Size(373, 23);
@@ -71,7 +74,10 @@
             // 
             this.textBoxContributingArtist.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBoxContributingArtist.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.textBoxContributingArtist.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxContributingArtist.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxContributingArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxContributingArtist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxContributingArtist.Location = new System.Drawing.Point(135, 59);
             this.textBoxContributingArtist.Name = "textBoxContributingArtist";
             this.textBoxContributingArtist.Size = new System.Drawing.Size(373, 23);
@@ -82,7 +88,7 @@
             // 
             this.labelContributingArtists.AutoSize = true;
             this.labelContributingArtists.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelContributingArtists.ForeColor = System.Drawing.Color.White;
+            this.labelContributingArtists.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelContributingArtists.Location = new System.Drawing.Point(3, 62);
             this.labelContributingArtists.Name = "labelContributingArtists";
             this.labelContributingArtists.Size = new System.Drawing.Size(127, 17);
@@ -93,7 +99,10 @@
             // 
             this.textBoxAlbum.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBoxAlbum.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.textBoxAlbum.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxAlbum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxAlbum.Location = new System.Drawing.Point(135, 88);
             this.textBoxAlbum.Name = "textBoxAlbum";
             this.textBoxAlbum.Size = new System.Drawing.Size(373, 23);
@@ -104,7 +113,7 @@
             // 
             this.labelAlbum.AutoSize = true;
             this.labelAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelAlbum.ForeColor = System.Drawing.Color.White;
+            this.labelAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelAlbum.Location = new System.Drawing.Point(82, 91);
             this.labelAlbum.Name = "labelAlbum";
             this.labelAlbum.Size = new System.Drawing.Size(47, 17);
@@ -115,7 +124,10 @@
             // 
             this.textBoxTitle.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBoxTitle.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.textBoxTitle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxTitle.Location = new System.Drawing.Point(135, 117);
             this.textBoxTitle.Name = "textBoxTitle";
             this.textBoxTitle.Size = new System.Drawing.Size(373, 23);
@@ -126,7 +138,7 @@
             // 
             this.labelTitle.AutoSize = true;
             this.labelTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTitle.ForeColor = System.Drawing.Color.White;
+            this.labelTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelTitle.Location = new System.Drawing.Point(95, 120);
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Size = new System.Drawing.Size(35, 17);
@@ -137,7 +149,10 @@
             // 
             this.textBoxYear.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBoxYear.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.textBoxYear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxYear.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxYear.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxYear.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxYear.Location = new System.Drawing.Point(135, 146);
             this.textBoxYear.Name = "textBoxYear";
             this.textBoxYear.Size = new System.Drawing.Size(373, 23);
@@ -148,7 +163,7 @@
             // 
             this.labelYear.AutoSize = true;
             this.labelYear.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelYear.ForeColor = System.Drawing.Color.White;
+            this.labelYear.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelYear.Location = new System.Drawing.Point(92, 149);
             this.labelYear.Name = "labelYear";
             this.labelYear.Size = new System.Drawing.Size(38, 17);
@@ -159,7 +174,10 @@
             // 
             this.textBoxGenre.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
             this.textBoxGenre.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.textBoxGenre.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxGenre.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxGenre.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxGenre.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxGenre.Location = new System.Drawing.Point(135, 175);
             this.textBoxGenre.Name = "textBoxGenre";
             this.textBoxGenre.Size = new System.Drawing.Size(373, 23);
@@ -170,7 +188,7 @@
             // 
             this.labelGenre.AutoSize = true;
             this.labelGenre.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelGenre.ForeColor = System.Drawing.Color.White;
+            this.labelGenre.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelGenre.Location = new System.Drawing.Point(82, 178);
             this.labelGenre.Name = "labelGenre";
             this.labelGenre.Size = new System.Drawing.Size(48, 17);
@@ -179,25 +197,34 @@
             // 
             // listBoxResults
             // 
-            this.listBoxResults.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.listBoxResults.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.listBoxResults.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listBoxResults.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.listBoxResults.ForeColor = System.Drawing.Color.White;
+            this.listBoxResults.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.listBoxResults.FormattingEnabled = true;
             this.listBoxResults.ItemHeight = 15;
             this.listBoxResults.Location = new System.Drawing.Point(514, 30);
             this.listBoxResults.Name = "listBoxResults";
             this.listBoxResults.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listBoxResults.Size = new System.Drawing.Size(734, 379);
+            this.listBoxResults.Size = new System.Drawing.Size(734, 377);
             this.listBoxResults.Sorted = true;
             this.listBoxResults.TabIndex = 12;
             this.listBoxResults.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBoxResults_KeyDown);
             // 
             // buttonBack
             // 
+            this.buttonBack.AutoSize = true;
+            this.buttonBack.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonBack.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonBack.FlatAppearance.BorderSize = 0;
+            this.buttonBack.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonBack.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonBack.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonBack.Location = new System.Drawing.Point(6, 229);
+            this.buttonBack.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonBack.Location = new System.Drawing.Point(0, 0);
             this.buttonBack.Name = "buttonBack";
-            this.buttonBack.Size = new System.Drawing.Size(75, 23);
+            this.buttonBack.Size = new System.Drawing.Size(49, 27);
             this.buttonBack.TabIndex = 13;
             this.buttonBack.Text = "Back";
             this.buttonBack.UseVisualStyleBackColor = true;
@@ -205,10 +232,18 @@
             // 
             // buttonTrackDetails
             // 
+            this.buttonTrackDetails.AutoSize = true;
+            this.buttonTrackDetails.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonTrackDetails.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonTrackDetails.FlatAppearance.BorderSize = 0;
+            this.buttonTrackDetails.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonTrackDetails.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonTrackDetails.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonTrackDetails.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonTrackDetails.Location = new System.Drawing.Point(799, 415);
+            this.buttonTrackDetails.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonTrackDetails.Location = new System.Drawing.Point(843, 413);
             this.buttonTrackDetails.Name = "buttonTrackDetails";
-            this.buttonTrackDetails.Size = new System.Drawing.Size(184, 23);
+            this.buttonTrackDetails.Size = new System.Drawing.Size(101, 27);
             this.buttonTrackDetails.TabIndex = 14;
             this.buttonTrackDetails.Text = "Track Details";
             this.buttonTrackDetails.UseVisualStyleBackColor = true;

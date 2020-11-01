@@ -46,7 +46,7 @@
             // labelPossibleAlbums
             // 
             this.labelPossibleAlbums.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPossibleAlbums.ForeColor = System.Drawing.Color.White;
+            this.labelPossibleAlbums.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelPossibleAlbums.Location = new System.Drawing.Point(9, 8);
             this.labelPossibleAlbums.Name = "labelPossibleAlbums";
             this.labelPossibleAlbums.Size = new System.Drawing.Size(774, 23);
@@ -57,7 +57,7 @@
             // labelPossibleHalfAlbums
             // 
             this.labelPossibleHalfAlbums.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelPossibleHalfAlbums.ForeColor = System.Drawing.Color.White;
+            this.labelPossibleHalfAlbums.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelPossibleHalfAlbums.Location = new System.Drawing.Point(9, 411);
             this.labelPossibleHalfAlbums.Name = "labelPossibleHalfAlbums";
             this.labelPossibleHalfAlbums.Size = new System.Drawing.Size(774, 23);
@@ -67,7 +67,8 @@
             // 
             // listViewPossibleHalfAlbums
             // 
-            this.listViewPossibleHalfAlbums.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.listViewPossibleHalfAlbums.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.listViewPossibleHalfAlbums.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewPossibleHalfAlbums.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnArtist,
             this.columnAlbum,
@@ -84,6 +85,7 @@
             this.listViewPossibleHalfAlbums.View = System.Windows.Forms.View.Details;
             this.listViewPossibleHalfAlbums.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewPossibleHalfAlbums_ColumnClick);
             this.listViewPossibleHalfAlbums.DoubleClick += new System.EventHandler(this.listViewPossibleHalfAlbums_DoubleClick);
+            this.listViewPossibleHalfAlbums.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listViewPossibleHalfAlbums_KeyDown);
             // 
             // columnArtist
             // 
@@ -107,7 +109,8 @@
             // 
             // listViewPossibleAlbums
             // 
-            this.listViewPossibleAlbums.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(64)))));
+            this.listViewPossibleAlbums.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.listViewPossibleAlbums.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listViewPossibleAlbums.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
@@ -124,6 +127,7 @@
             this.listViewPossibleAlbums.View = System.Windows.Forms.View.Details;
             this.listViewPossibleAlbums.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listViewPossibleAlbums_ColumnClick);
             this.listViewPossibleAlbums.DoubleClick += new System.EventHandler(this.listViewPossibleAlbums_DoubleClick);
+            this.listViewPossibleAlbums.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listViewPossibleAlbums_KeyDown);
             // 
             // columnHeader1
             // 
@@ -147,10 +151,18 @@
             // 
             // button1
             // 
+            this.button1.AutoSize = true;
+            this.button1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.button1.FlatAppearance.BorderSize = 0;
+            this.button1.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.button1.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(851, 413);
+            this.button1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.button1.Location = new System.Drawing.Point(13, 1);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(49, 27);
             this.button1.TabIndex = 5;
             this.button1.Text = "Back";
             this.button1.UseVisualStyleBackColor = true;
@@ -170,6 +182,7 @@
             this.Name = "ChooseAlbumScreen";
             this.Size = new System.Drawing.Size(1318, 998);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 

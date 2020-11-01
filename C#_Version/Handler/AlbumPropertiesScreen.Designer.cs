@@ -47,7 +47,10 @@
             // 
             // textBoxTimeAlbum
             // 
+            this.textBoxTimeAlbum.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxTimeAlbum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxTimeAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxTimeAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxTimeAlbum.Location = new System.Drawing.Point(235, 31);
             this.textBoxTimeAlbum.Name = "textBoxTimeAlbum";
             this.textBoxTimeAlbum.Size = new System.Drawing.Size(162, 23);
@@ -56,7 +59,10 @@
             // 
             // textBoxLeewayAlbum
             // 
+            this.textBoxLeewayAlbum.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.textBoxLeewayAlbum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxLeewayAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxLeewayAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxLeewayAlbum.Location = new System.Drawing.Point(235, 63);
             this.textBoxLeewayAlbum.Name = "textBoxLeewayAlbum";
             this.textBoxLeewayAlbum.Size = new System.Drawing.Size(162, 23);
@@ -67,7 +73,7 @@
             // 
             this.labelTime.AutoSize = true;
             this.labelTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTime.ForeColor = System.Drawing.Color.White;
+            this.labelTime.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelTime.Location = new System.Drawing.Point(190, 37);
             this.labelTime.Name = "labelTime";
             this.labelTime.Size = new System.Drawing.Size(39, 17);
@@ -78,7 +84,7 @@
             // 
             this.labelLeeway.AutoSize = true;
             this.labelLeeway.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelLeeway.ForeColor = System.Drawing.Color.White;
+            this.labelLeeway.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelLeeway.Location = new System.Drawing.Point(173, 69);
             this.labelLeeway.Name = "labelLeeway";
             this.labelLeeway.Size = new System.Drawing.Size(56, 17);
@@ -96,14 +102,22 @@
             this.checkBoxAllGenres.TabIndex = 4;
             this.checkBoxAllGenres.Text = "All Genres";
             this.checkBoxAllGenres.UseVisualStyleBackColor = true;
-            this.checkBoxAllGenres.CheckedChanged += new System.EventHandler(this.checkBoxAllGenres_CheckedChanged);
+            this.checkBoxAllGenres.MouseClick += new System.Windows.Forms.MouseEventHandler(this.checkBoxAllGenres_MouseClick);
             // 
             // buttonAllAlbums
             // 
+            this.buttonAllAlbums.AutoSize = true;
+            this.buttonAllAlbums.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonAllAlbums.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonAllAlbums.FlatAppearance.BorderSize = 0;
+            this.buttonAllAlbums.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonAllAlbums.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonAllAlbums.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonAllAlbums.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonAllAlbums.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonAllAlbums.Location = new System.Drawing.Point(83, 203);
             this.buttonAllAlbums.Name = "buttonAllAlbums";
-            this.buttonAllAlbums.Size = new System.Drawing.Size(93, 23);
+            this.buttonAllAlbums.Size = new System.Drawing.Size(83, 27);
             this.buttonAllAlbums.TabIndex = 5;
             this.buttonAllAlbums.Text = "All Albums";
             this.buttonAllAlbums.UseVisualStyleBackColor = true;
@@ -111,10 +125,18 @@
             // 
             // buttonAlbumForWorkout
             // 
+            this.buttonAlbumForWorkout.AutoSize = true;
+            this.buttonAlbumForWorkout.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonAlbumForWorkout.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonAlbumForWorkout.FlatAppearance.BorderSize = 0;
+            this.buttonAlbumForWorkout.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonAlbumForWorkout.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonAlbumForWorkout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonAlbumForWorkout.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonAlbumForWorkout.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonAlbumForWorkout.Location = new System.Drawing.Point(437, 31);
             this.buttonAlbumForWorkout.Name = "buttonAlbumForWorkout";
-            this.buttonAlbumForWorkout.Size = new System.Drawing.Size(124, 23);
+            this.buttonAlbumForWorkout.Size = new System.Drawing.Size(96, 27);
             this.buttonAlbumForWorkout.TabIndex = 6;
             this.buttonAlbumForWorkout.Text = "For Workout";
             this.buttonAlbumForWorkout.UseVisualStyleBackColor = true;
@@ -122,10 +144,18 @@
             // 
             // buttonAlbumForCar
             // 
+            this.buttonAlbumForCar.AutoSize = true;
+            this.buttonAlbumForCar.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonAlbumForCar.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonAlbumForCar.FlatAppearance.BorderSize = 0;
+            this.buttonAlbumForCar.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonAlbumForCar.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonAlbumForCar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonAlbumForCar.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonAlbumForCar.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.buttonAlbumForCar.Location = new System.Drawing.Point(437, 63);
             this.buttonAlbumForCar.Name = "buttonAlbumForCar";
-            this.buttonAlbumForCar.Size = new System.Drawing.Size(124, 23);
+            this.buttonAlbumForCar.Size = new System.Drawing.Size(65, 27);
             this.buttonAlbumForCar.TabIndex = 7;
             this.buttonAlbumForCar.Text = "For Car";
             this.buttonAlbumForCar.UseVisualStyleBackColor = true;
@@ -133,7 +163,11 @@
             // 
             // dropdownWorkouts
             // 
+            this.dropdownWorkouts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
+            this.dropdownWorkouts.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dropdownWorkouts.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.dropdownWorkouts.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dropdownWorkouts.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.dropdownWorkouts.FormattingEnabled = true;
             this.dropdownWorkouts.Location = new System.Drawing.Point(437, 30);
             this.dropdownWorkouts.Name = "dropdownWorkouts";
@@ -143,10 +177,18 @@
             // 
             // buttonConfirmWorkout
             // 
+            this.buttonConfirmWorkout.AutoSize = true;
+            this.buttonConfirmWorkout.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonConfirmWorkout.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonConfirmWorkout.FlatAppearance.BorderSize = 0;
+            this.buttonConfirmWorkout.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonConfirmWorkout.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonConfirmWorkout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonConfirmWorkout.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonConfirmWorkout.Location = new System.Drawing.Point(437, 63);
+            this.buttonConfirmWorkout.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonConfirmWorkout.Location = new System.Drawing.Point(478, 64);
             this.buttonConfirmWorkout.Name = "buttonConfirmWorkout";
-            this.buttonConfirmWorkout.Size = new System.Drawing.Size(208, 23);
+            this.buttonConfirmWorkout.Size = new System.Drawing.Size(123, 27);
             this.buttonConfirmWorkout.TabIndex = 9;
             this.buttonConfirmWorkout.Text = "Confirm Workout";
             this.buttonConfirmWorkout.UseVisualStyleBackColor = true;
@@ -155,10 +197,18 @@
             // 
             // buttonConfirm
             // 
+            this.buttonConfirm.AutoSize = true;
+            this.buttonConfirm.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonConfirm.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonConfirm.FlatAppearance.BorderSize = 0;
+            this.buttonConfirm.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonConfirm.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonConfirm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonConfirm.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonConfirm.Location = new System.Drawing.Point(273, 114);
+            this.buttonConfirm.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonConfirm.Location = new System.Drawing.Point(286, 103);
             this.buttonConfirm.Name = "buttonConfirm";
-            this.buttonConfirm.Size = new System.Drawing.Size(93, 23);
+            this.buttonConfirm.Size = new System.Drawing.Size(66, 27);
             this.buttonConfirm.TabIndex = 10;
             this.buttonConfirm.Text = "Confirm";
             this.buttonConfirm.UseVisualStyleBackColor = true;
@@ -168,7 +218,7 @@
             // 
             this.radioButtonBoth.AutoSize = true;
             this.radioButtonBoth.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.radioButtonBoth.ForeColor = System.Drawing.Color.White;
+            this.radioButtonBoth.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.radioButtonBoth.Location = new System.Drawing.Point(83, 123);
             this.radioButtonBoth.Name = "radioButtonBoth";
             this.radioButtonBoth.Size = new System.Drawing.Size(55, 21);
@@ -181,7 +231,7 @@
             // 
             this.radioButtonOver.AutoSize = true;
             this.radioButtonOver.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.radioButtonOver.ForeColor = System.Drawing.Color.White;
+            this.radioButtonOver.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.radioButtonOver.Location = new System.Drawing.Point(83, 146);
             this.radioButtonOver.Name = "radioButtonOver";
             this.radioButtonOver.Size = new System.Drawing.Size(57, 21);
@@ -194,7 +244,7 @@
             // 
             this.radioButtonUnder.AutoSize = true;
             this.radioButtonUnder.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.radioButtonUnder.ForeColor = System.Drawing.Color.White;
+            this.radioButtonUnder.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.radioButtonUnder.Location = new System.Drawing.Point(83, 169);
             this.radioButtonUnder.Name = "radioButtonUnder";
             this.radioButtonUnder.Size = new System.Drawing.Size(65, 21);
@@ -207,7 +257,7 @@
             // 
             this.labelLeewayType.AutoSize = true;
             this.labelLeewayType.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelLeewayType.ForeColor = System.Drawing.Color.White;
+            this.labelLeewayType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelLeewayType.Location = new System.Drawing.Point(80, 103);
             this.labelLeewayType.Name = "labelLeewayType";
             this.labelLeewayType.Size = new System.Drawing.Size(92, 17);

@@ -17,6 +17,8 @@ namespace Handler
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.AcceptButton = this.buttonConfirm;
+            this.Window.CancelButton = this.buttonBack;
             this.comboBoxWokouts.Items.AddRange(this.Window.LAFContainer.WorkoutDatabase.Keys.ToArray());
             this.comboBoxWokouts.Items.Add("New Workout");
         }
