@@ -183,7 +183,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="icons8-music-32.ico" />
     <Content Include="icons8-music-library-96.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

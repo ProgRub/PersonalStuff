@@ -52,6 +52,8 @@ namespace Handler
             this.labelLength.Location = new Point(this.textBoxTrackList.Location.X, this.textBoxTrackList.Location.Y + this.textBoxTrackList.Size.Height);
         }
 
+        #region Event Handlers
+
         private void buttonBack_Click(object sender, EventArgs e)
         {
             this.Dispose();
@@ -62,6 +64,8 @@ namespace Handler
         private void buttonShowOnItunes_Click(object sender, EventArgs e)
         {
             this.ShowAlbumOnItunes.Reveal();
+            this.Window.LAFContainer.iTunes.BrowserWindow.Visible = true;
         }
+        #endregion
     }
 }

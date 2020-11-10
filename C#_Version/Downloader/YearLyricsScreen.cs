@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Diagnostics;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using HtmlAgilityPack;
@@ -41,6 +43,14 @@ namespace Downloader
             this.AddFileToList = addFileToList;
             this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
             this.Window.WindowState = FormWindowState.Maximized;
+            try
+            {
+                Process.GetProcessesByName("python")[0].Kill();
+            }
+            catch (IndexOutOfRangeException)
+            {
+                Console.WriteLine("NONEXISTENT");
+            }
             this.worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(this.GetLyricsAndYear);
             worker.ProgressChanged += new ProgressChangedEventHandler(this.ChangeUI);
@@ -146,26 +156,13 @@ namespace Downloader
         {
             if (this.buttonTryAgain.Enabled)
             {
+                this.ErrorHandled = true;
                 this.CurrentArtist = this.textBoxArtist.Text;
                 this.CurrentAlbum = this.textBoxAlbum.Text;
                 this.CurrentTitle = this.textBoxTitle.Text;
                 this.Value = new List<string>() { this.CurrentArtist, this.CurrentAlbum, this.CurrentTitle };
-                this.DisableComponents();
                 this.worker.ReportProgress(10);
                 while (!this.ProgressWorkerDone) { }
-                if (!this.buttonSkipSong.Enabled)
-                {
-                    this.worker.ReportProgress(8);
-                    while (!this.ProgressWorkerDone) { }
-                    this.GetYear();
-                }
-                else
-                {
-                    this.worker.ReportProgress(9);
-                    while (!this.ProgressWorkerDone) { }
-                    this.GetLyrics();
-                }
-                this.ErrorHandled = true;
             }
         }
 
@@ -374,6 +371,7 @@ namespace Downloader
 
         private void SetYearInFile()
         {
+            this.ErrorHandled = true;
             using (var mp3 = TagLib.File.Create(this.Filename))
             {
                 //var mp3 = TagLib.File.Create(this.Filename);
@@ -409,7 +407,6 @@ namespace Downloader
                         this.PagesVisited_Year.Add(this.CurrentArtist + this.CurrentAlbum, Int32.Parse(this.CurrentYear));
                     }
                     this.SetYearInFile();
-                    this.ErrorHandled = true;
                     return;
                 }
                 else
@@ -437,7 +434,6 @@ namespace Downloader
                                         while (!this.ProgressWorkerDone) { }
                                         //this.textBoxYear.Text = aux.Last();
                                         this.SetYearInFile();
-                                        this.ErrorHandled = true;
                                         return;
                                     }
                                 }
@@ -459,7 +455,6 @@ namespace Downloader
                                         while (!this.ProgressWorkerDone) { }
                                         //this.textBoxYear.Text = aux.Last();
                                         this.SetYearInFile();
-                                        this.ErrorHandled = true;
                                         return;
                                     }
                                 }
@@ -472,11 +467,11 @@ namespace Downloader
                         SystemSounds.Exclamation.Play();
                         if (this.TrackCount < 5)
                         {
-                            System.Diagnostics.Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentTitle.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
+                            Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentTitle.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
                         }
                         else
                         {
-                            System.Diagnostics.Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentAlbum.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
+                            Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentAlbum.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
                         }
                         this.ErrorHandled = false;
                         this.worker.ReportProgress(11);
@@ -492,6 +487,7 @@ namespace Downloader
         }
         private void SetLyricsInFile()
         {
+            this.ErrorHandled = true;
             using (var mp3 = TagLib.File.Create(this.Filename))
             {
                 //var mp3 = TagLib.File.Create(this.Filename);
@@ -514,7 +510,6 @@ namespace Downloader
                     if (this.CurrentLyrics != "")
                     {
                         this.SetLyricsInFile();
-                        this.ErrorHandled = true;
                         return;
                     }
                 }
@@ -522,11 +517,10 @@ namespace Downloader
                 {
                     this.ExceptionRaised = true;
                     SystemSounds.Exclamation.Play();
-                    System.Diagnostics.Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentTitle.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
+                    Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentTitle.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
                     //this.EnableComponents(false);
                     this.ErrorHandled = false;
                     this.worker.ReportProgress(12);
-                    while (!this.ProgressWorkerDone) { }
                     while (!this.ErrorHandled)
                     {
                         Task.Delay(1000);
@@ -564,7 +558,7 @@ namespace Downloader
                 //this.ChangeTextColor(false);
                 this.worker.ReportProgress(13);
                 while (!this.ProgressWorkerDone) { }
-                if (this.ExceptionRaised && this.Key.SequenceEqual(this.Value))
+                if (this.ExceptionRaised)
                 {
                     if (this.Key[2] == this.Value[2])
                     {
@@ -623,8 +617,14 @@ namespace Downloader
                     this.Window.LAFContainer.AddMusicFile(this.Filename);
                 }
             }
-            this.Window.LAFContainer.SaveNumberFilesLastModified();
-            this.Window.LAFContainer.SaveMusicFiles();
+            Thread saveExceptions = new Thread(this.Window.LAFContainer.SaveExceptions);
+            Thread saveMFs = new Thread(this.Window.LAFContainer.SaveMusicFiles);
+            saveExceptions.Start();
+            saveMFs.Start();
+            saveExceptions.Join();
+            saveMFs.Join();
+            //this.Window.LAFContainer.SaveExceptions();
+            //this.Window.LAFContainer.SaveMusicFiles();
             this.worker.ReportProgress(17);
         }
     }

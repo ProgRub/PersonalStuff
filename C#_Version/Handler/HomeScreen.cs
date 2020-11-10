@@ -21,6 +21,7 @@ namespace Handler
             this.folderDialog = new CommonOpenFileDialog();
             this.folderDialog.IsFolderPicker = true;
         }
+        #region Event Handlers
 
         private void HomeScreen_Enter(object sender, EventArgs e)
         {
@@ -36,6 +37,7 @@ namespace Handler
             {
                 this.textBoxMusicDestinyDir.Text = this.folderDialog.FileName;
                 this.Window.LAFContainer.MusicDestinyDirectory = this.folderDialog.FileName;
+                this.Window.LAFContainer.SaveDirectories();
             }
         }
 
@@ -74,5 +76,6 @@ namespace Handler
             this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
         }
+        #endregion
     }
 }

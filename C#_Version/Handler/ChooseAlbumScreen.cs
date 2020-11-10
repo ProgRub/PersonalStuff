@@ -71,7 +71,7 @@ namespace Handler
                 this.listViewPossibleHalfAlbums.Items.Add(item);
             }
         }
-
+        #region Event Handlers
         private void listViewPossibleAlbums_DoubleClick(object sender, EventArgs e)
         {
             //Console.WriteLine(this.listViewPossibleAlbums.SelectedItems[0].SubItems[1].Text);
@@ -138,6 +138,7 @@ namespace Handler
             this.listViewPossibleHalfAlbums.ListViewItemSorter = new ListViewItemComparer(e.Column, this.ReversePHA);
             this.PreviousColumnPHA = e.Column;
         }
+        #endregion
 
         private void GetAlbums()
         {

@@ -26,14 +26,16 @@ namespace Handler
         public List<Album> Albums;
         public Dictionary<List<string>, List<string>> ExceptionsReplacements;
         public Dictionary<string, string> UrlReplacements;
-        public List<string> GrimeArtists;
+        public List<string> GrimeArtists, Files;
         public Dictionary<string, Color> GenresColors;
         public Dictionary<string, List<int>> WorkoutDatabase;
         private readonly string DetailsFile, SongsFile, ExceptionsFile;
         private int NumberOfFilesFromFile;
         private double LastModifiedTimeFromFile;
+        private long LastModifiedTime;
         public iTunesApp iTunes { get; }
         public IITLibraryPlaylist iTunesLibrary { get; }
+        private const int NUMBER_OF_THREADS = 15;
 
         public ListsAndFiles()
         {
@@ -402,62 +404,6 @@ namespace Handler
             xmlDocument.Save(this.DetailsFile);
         }
 
-        public void SaveGrimeArtists()
-        {
-            XDocument xmlDocument = XDocument.Load(this.DetailsFile);
-            xmlDocument.Root.Elements("Artist").Remove();
-            foreach (string artist in this.GrimeArtists)
-            {
-                xmlDocument.Root.Add(new XElement("Artist", artist));
-            }
-            xmlDocument.Save(this.DetailsFile);
-        }
-
-        public void SaveExceptions()
-        {
-            XDocument xmlDocument = XDocument.Load(this.ExceptionsFile);
-            xmlDocument.Root.Elements().Remove();
-            foreach (List<string> key in this.ExceptionsReplacements.Keys)
-            {
-                XElement child = new XElement("Exception");
-                child.SetAttributeValue("type", 0.ToString());
-                XElement oldArtist = new XElement("OldArtist", key[0]);
-                XElement oldAlbum = new XElement("OldAlbum", key[1]);
-                XElement oldTitle = new XElement("OldTitle", key[2]);
-                XElement newArtist = new XElement("NewArtist", this.ExceptionsReplacements[key][0]);
-                XElement newAlbum = new XElement("NewAlbum", this.ExceptionsReplacements[key][1]);
-                XElement newTitle = new XElement("NewTitle", this.ExceptionsReplacements[key][2]);
-                child.Add(oldArtist);
-                child.Add(oldAlbum);
-                child.Add(oldTitle);
-                child.Add(newArtist);
-                child.Add(newAlbum);
-                child.Add(newTitle);
-                xmlDocument.Root.Add(child);
-            }
-            foreach (List<string> song in this.SongsToSkip)
-            {
-                XElement child = new XElement("Exception");
-                child.SetAttributeValue("type", 1.ToString());
-                XElement artist = new XElement("Artist", song[0]);
-                XElement album = new XElement("Album", song[1]);
-                XElement title = new XElement("Title", song[2]);
-                child.Add(artist);
-                child.Add(album);
-                child.Add(title);
-                xmlDocument.Root.Add(child);
-            }
-            foreach (string old in this.UrlReplacements.Keys)
-            {
-                XElement pair = new XElement("Pair");
-                XElement oldChild = new XElement("Old", String.Format("\"{0}\"", old));
-                XElement newChild = new XElement("New", String.Format("\"{0}\"", this.UrlReplacements[old]));
-                pair.Add(oldChild);
-                pair.Add(newChild);
-                xmlDocument.Root.Add(pair);
-            }
-            xmlDocument.Save(this.ExceptionsFile);
-        }
         public void SaveMusicFiles()
         {
             XDocument xmlDocument = XDocument.Load(this.SongsFile);
@@ -496,97 +442,48 @@ namespace Handler
             return -1;
         }
 
-        public void AddMusicFile(string filename)
+        private void CheckMusicFilesAndUpdatePlayCounts(object sender, DoWorkEventArgs e)
         {
-            if (this.MusicFiles.All(x => x.Filename != Path.GetFileName(filename)))
+            var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
+            var files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
+            files = files.Where(x => !auxList.Contains(Path.GetFileName(x))).ToList();
+            foreach (string filename in files)
             {
                 using (var mp3 = TagLib.File.Create(filename))
                 {
                     this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
-                    while (true)
-                    {
-                        try
-                        {
-                            mp3.Save();
-                            break;
-                        }
-                        catch (IOException)
-                        {
-                            Console.WriteLine("HERE");
-                        }
-                    }
+                    mp3.Save();
+
                 }
             }
-        }
-        private void CheckMusicFilesAndUpdatePlayCounts(object sender, DoWorkEventArgs e)
-        {
-            var files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
-            files = files.OrderBy(x => File.GetLastWriteTime(x).ToFileTime()).ToList();
-            long lastModifiedTime = this.GetLastModifiedTime();
-            foreach (string filename in files)
-            {
-                if (File.GetLastWriteTime(filename).ToFileTime() > lastModifiedTime)
-                {
-                    using (var mp3 = TagLib.File.Create(filename))
-                    {
-                        int index = this.IndexOfMusicFile(Path.GetFileName(filename));
-                        if (index == -1)
-                        {
-                            this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
-                        }
-                        else
-                        {
-                            this.MusicFiles[index] = new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Properties.Duration.TotalSeconds, 0);
-                        }
-                        mp3.Save();
-                    }
-                }
-                else { break; }
-            }
-            var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
-            foreach (string filename in files)
-            {
-                if (!auxList.Contains(Path.GetFileName(filename)))
-                {
-                    using (var mp3 = TagLib.File.Create(filename))
-                    {
-                        try
-                        {
-                            this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
-                            mp3.Save();
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    }
-                }
-            }
-            auxList = this.MusicFiles.Select(x => x.Filename).ToList();
+            files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
+            auxList = auxList.Where(x => !files.Contains(Path.Combine(this.MusicDestinyDirectory, x))).ToList();
             foreach (string filename in auxList)
             {
-                if (!files.Contains(Path.Combine(this.MusicDestinyDirectory, filename)))
-                {
-                    this.MusicFiles.RemoveAt(this.IndexOfMusicFile(filename));
-                }
+                this.MusicFiles.RemoveAt(this.IndexOfMusicFile(filename));
             }
-            int numThreads = 15;
-            int filesPerThread = this.MusicFiles.Count / numThreads;
-            Thread[] threads = new Thread[numThreads];
-            for (int i = 0; i < numThreads; i++)
+            this.Files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
+            this.LastModifiedTime = this.GetLastModifiedTime();
+            this.Files = this.Files.Where(x => File.GetLastWriteTime(x).ToFileTime() > this.LastModifiedTime).ToList();
+            int filesPerThread = this.Files.Count / NUMBER_OF_THREADS;
+            Thread[] threads = new Thread[NUMBER_OF_THREADS + 1];
+            for (int i = 0; i < threads.Length; i++)
+            {
+                threads[i] = new Thread(new ParameterizedThreadStart(UpdateModifiedFiles));
+                threads[i].Start(i);
+            }
+            for (int i = 0; i < threads.Length; ++i)
+            {
+                threads[i].Join();
+            }
+            filesPerThread = this.MusicFiles.Count / NUMBER_OF_THREADS;
+            threads = new Thread[NUMBER_OF_THREADS + 1];
+            for (int i = 0; i < threads.Length; i++)
             {
                 threads[i] = new Thread(new ParameterizedThreadStart(UpdatePlayCounts));
                 threads[i].Start(i);
             }
-            int actual = filesPerThread * numThreads;
-            for (int index = actual; index < this.MusicFiles.Count; ++index)
-            {
-                var track = this.GetITunesTrack(this.MusicFiles[index].Title, this.MusicFiles[index].Album);
-                if (track != null)
-                {
-                    this.MusicFiles[index].PlayCount = track.PlayedCount;
-                }
-            }
-            for (int i = 0; i < numThreads; ++i)
+            for (int i = 0; i < threads.Length; ++i)
             {
                 threads[i].Join();
             }
@@ -654,21 +551,37 @@ namespace Handler
             return null;
         }
 
-        private void UpdatePlayCounts(object arg)
+        private void UpdateModifiedFiles(object arg)
         {
-            //Console.WriteLine("Thread #" + arg + " has begun...");
-            int start = (int)arg * (this.MusicFiles.Count / 15);
-            int end = ((int)arg + 1) * (this.MusicFiles.Count / 15);
+            int start = (int)arg * (this.Files.Count / NUMBER_OF_THREADS);
+            int end = Math.Min(((int)arg + 1) * (this.Files.Count / NUMBER_OF_THREADS), this.Files.Count);
+            Console.WriteLine(start + " " + end);
             for (int index = start; index < end; index++)
             {
-                //Console.WriteLine(index);
+                string filename = this.Files[index];
+                using (var mp3 = TagLib.File.Create(filename))
+                {
+                    int indexMF = this.IndexOfMusicFile(Path.GetFileName(filename));
+                    this.MusicFiles[indexMF] = new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, (int)mp3.Properties.Duration.TotalSeconds, this.MusicFiles[indexMF].PlayCount);
+                    mp3.Save();
+                }
+            }
+        }
+
+
+        private void UpdatePlayCounts(object arg)
+        {
+            int start = (int)arg * (this.MusicFiles.Count / NUMBER_OF_THREADS);
+            int end = Math.Min(((int)arg + 1) * (this.MusicFiles.Count / NUMBER_OF_THREADS), this.MusicFiles.Count);
+            for (int index = start; index < end; index++)
+            {
                 var track = this.GetITunesTrack(this.MusicFiles[index].Title, this.MusicFiles[index].Album);
                 if (track != null)
                 {
                     this.MusicFiles[index].PlayCount = track.PlayedCount;
                 }
             }
-            //Console.WriteLine("Thread #" + arg + " has ended");
         }
+
     }
 }

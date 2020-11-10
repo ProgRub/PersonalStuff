@@ -53,7 +53,7 @@
             this.richTextBoxArtist.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
             this.richTextBoxArtist.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.richTextBoxArtist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.richTextBoxArtist.Location = new System.Drawing.Point(96, 76);
+            this.richTextBoxArtist.Location = new System.Drawing.Point(146, 75);
             this.richTextBoxArtist.Name = "richTextBoxArtist";
             this.richTextBoxArtist.ReadOnly = true;
             this.richTextBoxArtist.Size = new System.Drawing.Size(304, 534);
@@ -65,7 +65,7 @@
             this.richTextBoxAlbum.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
             this.richTextBoxAlbum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.richTextBoxAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.richTextBoxAlbum.Location = new System.Drawing.Point(406, 76);
+            this.richTextBoxAlbum.Location = new System.Drawing.Point(456, 75);
             this.richTextBoxAlbum.Name = "richTextBoxAlbum";
             this.richTextBoxAlbum.ReadOnly = true;
             this.richTextBoxAlbum.Size = new System.Drawing.Size(579, 534);
@@ -77,7 +77,7 @@
             this.richTextBoxTitle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
             this.richTextBoxTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.richTextBoxTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.richTextBoxTitle.Location = new System.Drawing.Point(991, 76);
+            this.richTextBoxTitle.Location = new System.Drawing.Point(1041, 75);
             this.richTextBoxTitle.Name = "richTextBoxTitle";
             this.richTextBoxTitle.ReadOnly = true;
             this.richTextBoxTitle.Size = new System.Drawing.Size(552, 534);
@@ -89,7 +89,7 @@
             this.labelUrlBeingChecked.AutoSize = true;
             this.labelUrlBeingChecked.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelUrlBeingChecked.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelUrlBeingChecked.Location = new System.Drawing.Point(598, 613);
+            this.labelUrlBeingChecked.Location = new System.Drawing.Point(648, 612);
             this.labelUrlBeingChecked.Name = "labelUrlBeingChecked";
             this.labelUrlBeingChecked.Size = new System.Drawing.Size(51, 20);
             this.labelUrlBeingChecked.TabIndex = 3;
@@ -100,7 +100,7 @@
             this.labelArtist.AutoSize = true;
             this.labelArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelArtist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelArtist.Location = new System.Drawing.Point(541, 638);
+            this.labelArtist.Location = new System.Drawing.Point(591, 637);
             this.labelArtist.Name = "labelArtist";
             this.labelArtist.Size = new System.Drawing.Size(46, 20);
             this.labelArtist.TabIndex = 4;
@@ -111,7 +111,7 @@
             this.labelAlbum.AutoSize = true;
             this.labelAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelAlbum.Location = new System.Drawing.Point(541, 667);
+            this.labelAlbum.Location = new System.Drawing.Point(591, 666);
             this.labelAlbum.Name = "labelAlbum";
             this.labelAlbum.Size = new System.Drawing.Size(54, 20);
             this.labelAlbum.TabIndex = 5;
@@ -122,7 +122,7 @@
             this.labelTitle.AutoSize = true;
             this.labelTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelTitle.Location = new System.Drawing.Point(541, 696);
+            this.labelTitle.Location = new System.Drawing.Point(591, 695);
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Size = new System.Drawing.Size(38, 20);
             this.labelTitle.TabIndex = 6;
@@ -134,7 +134,7 @@
             this.textBoxArtist.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxArtist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.textBoxArtist.Location = new System.Drawing.Point(602, 636);
+            this.textBoxArtist.Location = new System.Drawing.Point(652, 635);
             this.textBoxArtist.Name = "textBoxArtist";
             this.textBoxArtist.ReadOnly = true;
             this.textBoxArtist.Size = new System.Drawing.Size(530, 22);
@@ -146,7 +146,7 @@
             this.textBoxAlbum.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.textBoxAlbum.Location = new System.Drawing.Point(602, 664);
+            this.textBoxAlbum.Location = new System.Drawing.Point(652, 663);
             this.textBoxAlbum.Name = "textBoxAlbum";
             this.textBoxAlbum.ReadOnly = true;
             this.textBoxAlbum.Size = new System.Drawing.Size(530, 23);
@@ -158,7 +158,7 @@
             this.textBoxTitle.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.textBoxTitle.Location = new System.Drawing.Point(602, 693);
+            this.textBoxTitle.Location = new System.Drawing.Point(652, 692);
             this.textBoxTitle.Name = "textBoxTitle";
             this.textBoxTitle.ReadOnly = true;
             this.textBoxTitle.Size = new System.Drawing.Size(530, 23);
@@ -175,7 +175,7 @@
             this.buttonTryAgain.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonTryAgain.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonTryAgain.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
-            this.buttonTryAgain.Location = new System.Drawing.Point(815, 751);
+            this.buttonTryAgain.Location = new System.Drawing.Point(865, 750);
             this.buttonTryAgain.Name = "buttonTryAgain";
             this.buttonTryAgain.Size = new System.Drawing.Size(79, 27);
             this.buttonTryAgain.TabIndex = 10;
@@ -194,7 +194,7 @@
             this.buttonSkipSong.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonSkipSong.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonSkipSong.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
-            this.buttonSkipSong.Location = new System.Drawing.Point(815, 784);
+            this.buttonSkipSong.Location = new System.Drawing.Point(865, 783);
             this.buttonSkipSong.Name = "buttonSkipSong";
             this.buttonSkipSong.Size = new System.Drawing.Size(82, 27);
             this.buttonSkipSong.TabIndex = 11;
@@ -207,7 +207,7 @@
             this.labelFilesProcessed.AutoSize = true;
             this.labelFilesProcessed.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelFilesProcessed.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelFilesProcessed.Location = new System.Drawing.Point(757, 17);
+            this.labelFilesProcessed.Location = new System.Drawing.Point(807, 16);
             this.labelFilesProcessed.Name = "labelFilesProcessed";
             this.labelFilesProcessed.Size = new System.Drawing.Size(185, 26);
             this.labelFilesProcessed.TabIndex = 12;
@@ -219,7 +219,7 @@
             this.textBoxYear.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxYear.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxYear.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.textBoxYear.Location = new System.Drawing.Point(602, 722);
+            this.textBoxYear.Location = new System.Drawing.Point(652, 721);
             this.textBoxYear.Name = "textBoxYear";
             this.textBoxYear.ReadOnly = true;
             this.textBoxYear.Size = new System.Drawing.Size(530, 23);
@@ -230,7 +230,7 @@
             this.labelYear.AutoSize = true;
             this.labelYear.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelYear.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelYear.Location = new System.Drawing.Point(544, 725);
+            this.labelYear.Location = new System.Drawing.Point(594, 724);
             this.labelYear.Name = "labelYear";
             this.labelYear.Size = new System.Drawing.Size(43, 20);
             this.labelYear.TabIndex = 13;
@@ -241,7 +241,7 @@
             this.labelTBArtist.AutoSize = true;
             this.labelTBArtist.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTBArtist.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelTBArtist.Location = new System.Drawing.Point(222, 53);
+            this.labelTBArtist.Location = new System.Drawing.Point(272, 52);
             this.labelTBArtist.Name = "labelTBArtist";
             this.labelTBArtist.Size = new System.Drawing.Size(46, 20);
             this.labelTBArtist.TabIndex = 15;
@@ -252,7 +252,7 @@
             this.labelTBAlbum.AutoSize = true;
             this.labelTBAlbum.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTBAlbum.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelTBAlbum.Location = new System.Drawing.Point(669, 53);
+            this.labelTBAlbum.Location = new System.Drawing.Point(719, 52);
             this.labelTBAlbum.Name = "labelTBAlbum";
             this.labelTBAlbum.Size = new System.Drawing.Size(54, 20);
             this.labelTBAlbum.TabIndex = 16;
@@ -263,7 +263,7 @@
             this.labelTBTitle.AutoSize = true;
             this.labelTBTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTBTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelTBTitle.Location = new System.Drawing.Point(1264, 53);
+            this.labelTBTitle.Location = new System.Drawing.Point(1314, 52);
             this.labelTBTitle.Name = "labelTBTitle";
             this.labelTBTitle.Size = new System.Drawing.Size(38, 20);
             this.labelTBTitle.TabIndex = 17;
@@ -294,7 +294,7 @@
             this.Controls.Add(this.richTextBoxAlbum);
             this.Controls.Add(this.richTextBoxArtist);
             this.Name = "YearLyricsScreen";
-            this.Size = new System.Drawing.Size(1579, 826);
+            this.Size = new System.Drawing.Size(1596, 826);
             this.ResumeLayout(false);
             this.PerformLayout();
 

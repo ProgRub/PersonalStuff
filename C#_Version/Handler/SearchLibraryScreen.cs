@@ -30,6 +30,79 @@ namespace Handler
             this.listBoxResults.Items.AddRange(this.Window.LAFContainer.MusicFiles.Select(x => x.Filename).ToArray());
         }
 
+        #region Event Handlers
+
+        private void textBoxAlbumArtist_TextChanged(object sender, EventArgs e)
+        {
+            this.UpdateResults(0);
+        }
+
+        private void textBoxContributingArtist_TextChanged(object sender, EventArgs e)
+        {
+            this.UpdateResults(1);
+        }
+
+        private void textBoxAlbum_TextChanged(object sender, EventArgs e)
+        {
+            this.UpdateResults(2);
+        }
+
+        private void textBoxTitle_TextChanged(object sender, EventArgs e)
+        {
+            this.UpdateResults(3);
+        }
+
+        private void textBoxYear_TextChanged(object sender, EventArgs e)
+        {
+            this.UpdateResults(4);
+        }
+
+        private void textBoxGenre_TextChanged(object sender, EventArgs e)
+        {
+            this.UpdateResults(5);
+        }
+
+        private void listBoxResults_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (Keys.Delete == e.KeyCode)
+            {
+                for (int index = 0; index < this.listBoxResults.Items.Count; index++)
+                {
+                    if (this.listBoxResults.GetSelected(index))
+                    {
+                        int musicFileIndex = this.Window.LAFContainer.IndexOfMusicFile(this.listBoxResults.Items[index].ToString());
+                        FileSystem.DeleteFile(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, this.Window.LAFContainer.MusicFiles[musicFileIndex].Filename), UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        this.Window.LAFContainer.GetITunesTrack(this.Window.LAFContainer.MusicFiles[musicFileIndex].Title, this.Window.LAFContainer.MusicFiles[musicFileIndex].Album).Delete();
+                        this.Window.LAFContainer.MusicFiles.RemoveAt(musicFileIndex);
+                        this.listBoxResults.Items.RemoveAt(index);
+                        index--;
+                    }
+                }
+            }
+        }
+
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            this.Window.LAFContainer.SaveNumberFilesLastModified();
+            this.Window.LAFContainer.SaveMusicFiles();
+            this.Dispose();
+            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
+            this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
+        }
+
+        private void buttonTrackDetails_Click(object sender, EventArgs e)
+        {
+            if (this.listBoxResults.SelectedItems.Count > 0)
+            {
+                this.Hide();
+                TrackDetailsScreen aux = new TrackDetailsScreen(this.Window, this.Window.LAFContainer.MusicFiles.Where(x => this.listBoxResults.SelectedItems.Contains(x.Filename)).ToList());
+                aux.Dock = DockStyle.Fill;
+                this.Window.Controls.Add(aux);
+                this.Window.ActiveControl = aux;
+            }
+        }
+        #endregion
+
         private void UpdateResults(int whichOne)
         {
             List<MusicFile> results = new List<MusicFile>(this.Window.LAFContainer.MusicFiles);
@@ -144,76 +217,6 @@ namespace Handler
             }
             this.listBoxResults.Items.Clear();
             this.listBoxResults.Items.AddRange(results.Select(x => x.Filename).ToArray());
-        }
-
-        private void textBoxAlbumArtist_TextChanged(object sender, EventArgs e)
-        {
-            this.UpdateResults(0);
-        }
-
-        private void textBoxContributingArtist_TextChanged(object sender, EventArgs e)
-        {
-            this.UpdateResults(1);
-        }
-
-        private void textBoxAlbum_TextChanged(object sender, EventArgs e)
-        {
-            this.UpdateResults(2);
-        }
-
-        private void textBoxTitle_TextChanged(object sender, EventArgs e)
-        {
-            this.UpdateResults(3);
-        }
-
-        private void textBoxYear_TextChanged(object sender, EventArgs e)
-        {
-            this.UpdateResults(4);
-        }
-
-        private void textBoxGenre_TextChanged(object sender, EventArgs e)
-        {
-            this.UpdateResults(5);
-        }
-
-        private void listBoxResults_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (Keys.Delete == e.KeyCode)
-            {
-                for (int index = 0; index < this.listBoxResults.Items.Count; index++)
-                {
-                    if (this.listBoxResults.GetSelected(index))
-                    {
-                        int musicFileIndex = this.Window.LAFContainer.IndexOfMusicFile(this.listBoxResults.Items[index].ToString());
-                        FileSystem.DeleteFile(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, this.Window.LAFContainer.MusicFiles[musicFileIndex].Filename), UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                        this.Window.LAFContainer.GetITunesTrack(this.Window.LAFContainer.MusicFiles[musicFileIndex].Title, this.Window.LAFContainer.MusicFiles[musicFileIndex].Album).Delete();
-                        this.Window.LAFContainer.MusicFiles.RemoveAt(musicFileIndex);
-                        this.listBoxResults.Items.RemoveAt(index);
-                        index--;
-                    }
-                }
-            }
-        }
-
-        private void buttonBack_Click(object sender, EventArgs e)
-        {
-            this.Window.LAFContainer.SaveNumberFilesLastModified();
-            this.Window.LAFContainer.SaveMusicFiles();
-            this.Dispose();
-            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
-            this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
-        }
-
-        private void buttonTrackDetails_Click(object sender, EventArgs e)
-        {
-            if (this.listBoxResults.SelectedItems.Count > 0)
-            {
-                this.Hide();
-                TrackDetailsScreen aux = new TrackDetailsScreen(this.Window,this.Window.LAFContainer.MusicFiles.Where(x => this.listBoxResults.SelectedItems.Contains(x.Filename)).ToList());
-                aux.Dock = DockStyle.Fill;
-                this.Window.Controls.Add(aux);
-                this.Window.ActiveControl = aux;
-            }
         }
     }
 }

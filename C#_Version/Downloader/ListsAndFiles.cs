@@ -426,6 +426,7 @@ namespace Downloader
         }
         public void SaveMusicFiles()
         {
+            this.SaveNumberFilesLastModified();
             XDocument xmlDocument = XDocument.Load(this.SongsFile);
             xmlDocument.Root.Elements().Remove();
             foreach (MusicFile musicFile in this.MusicFiles)
@@ -450,7 +451,6 @@ namespace Downloader
         }
         #endregion
 
-
         public void AddMusicFile(string filename)
         {
             if (this.MusicFiles.All(x => x.Filename != Path.GetFileName(filename)))
@@ -472,21 +472,6 @@ namespace Downloader
                     }
                 }
             }
-        }
-        private IITTrack GetITunesTrack(string title, string album)
-        {
-            var tracks = this.iTunesLibrary.Search(title, ITPlaylistSearchField.ITPlaylistSearchFieldSongNames);
-            if (tracks != null)
-            {
-                for (int index = 1; index <= tracks.Count; index++)
-                {
-                    if (tracks[index].Album == album)
-                    {
-                        return tracks[index];
-                    }
-                }
-            }
-            return null;
         }
 
     }

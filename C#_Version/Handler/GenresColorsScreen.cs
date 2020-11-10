@@ -47,6 +47,8 @@ namespace Handler
             }
         }
 
+        #region Event Handlers
+
         private void ChangeGenreColor(object sender, EventArgs e)
         {
             DialogResult dialogResult = this.colorDialog1.ShowDialog();
@@ -64,5 +66,6 @@ namespace Handler
             this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
             this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
         }
+        #endregion
     }
 }

@@ -45,11 +45,12 @@ namespace Downloader
         private void buttonMoveFile_Click(object sender, EventArgs e)
         {
             this.ChosenDirectory = this.dropdownDirectories.SelectedItem.ToString();
+            this.NumberFiles++;
+            this.labelFilesFound.Text = this.NumberFiles + " Files Found";
             if (this.ChosenDirectory == "Delete File")
             {
                 FileSystem.DeleteFile(this.CurrentFile, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                this.TextBoxFilesMoved.AppendText(this.CurrentFile +" deleted" + Environment.NewLine);
-                this.TextBoxFilesFound.AppendText(Environment.NewLine);
+                this.TextBoxFilesMoved.AppendText(this.CurrentFile + " deleted" + Environment.NewLine);
             }
             else if (this.ChosenDirectory != "Skip File")
             {
@@ -66,19 +67,21 @@ namespace Downloader
                     try
                     {
                         File.Move(this.CurrentFile, Path.Combine(this.OneDrive, this.ChosenDirectory, this.textBoxFilename.Text));
-                        this.TextBoxFilesMoved.AppendText(Path.Combine(this.ChosenDirectory, this.textBoxFilename.Text)+Environment.NewLine);
-                        this.TextBoxFilesFound.AppendText(Environment.NewLine);
-                        this.textBoxFilename.Text = "";
-                        this.NumberFiles++;
-                        this.labelFilesFound.Text = this.NumberFiles + " Files Found";
+                        this.TextBoxFilesMoved.AppendText(Path.Combine(this.ChosenDirectory, this.textBoxFilename.Text) + Environment.NewLine);
                         break;
                     }
                     catch (IOException)
                     {
-                        FileSystem.DeleteFile(Path.Combine(this.OneDrive, this.ChosenDirectory, Path.GetFileName(this.CurrentFile)), UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        FileSystem.DeleteFile(this.CurrentFile, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                     }
                 }
             }
+            else
+            {
+                this.TextBoxFilesMoved.AppendText(this.textBoxFilename.Text + " skipped" + Environment.NewLine);
+            }
+            this.textBoxFilename.Text = "";
+            this.TextBoxFilesFound.AppendText(Environment.NewLine);
             this.CheckedFiles.Add(this.CurrentFile);
             this.TimerCheckDownloads.Start();
         }
@@ -104,7 +107,7 @@ namespace Downloader
                 {
                     this.CurrentFile = filename;
                     this.TextBoxFilesFound.AppendText(Path.GetFileName(filename));
-                    this.textBoxFilename.Text = Path.GetFileName(filename).Replace(" ", "_") ;
+                    this.textBoxFilename.Text = Path.GetFileName(filename).Replace(" ", "_");
                     this.TimerCheckDownloads.Stop();
                     break;
                 }

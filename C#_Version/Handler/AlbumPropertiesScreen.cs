@@ -47,6 +47,8 @@ namespace Handler
             //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
         }
 
+        #region Event Handlers
+
         private void checkBoxAllGenres_MouseClick(object sender, MouseEventArgs e)
         {
             Console.WriteLine(this.checkBoxAllGenres.Checked);
@@ -186,5 +188,6 @@ namespace Handler
                 this.textBoxLeewayAlbum.Text = "";
             }
         }
+        #endregion
     }
 }

@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.IO;
 using iTunesLib;
@@ -17,13 +17,16 @@ namespace Handler
         private HandlerForm Window;
         private List<MusicFile> Tracks;
         private List<string> PreviousValues;
-        public TrackDetailsScreen(HandlerForm window,List<MusicFile> tracks)
+        private List<string> NewValues;
+        private int NUMBER_OF_THREADS = 15;
+        public TrackDetailsScreen(HandlerForm window, List<MusicFile> tracks)
         {
             InitializeComponent();
             this.Window = window;
             this.Window.CancelButton = this.buttonBack;
             this.Tracks = tracks;
             this.PreviousValues = new List<string>();
+            this.NewValues = new List<string>();
             this.textBoxAlbumArtist.Text = this.Tracks[0].AlbumArtist;
             this.textBoxContributingArtist.Text = this.Tracks[0].ContributingArtists;
             this.textBoxAlbum.Text = this.Tracks[0].Album;
@@ -84,43 +87,75 @@ namespace Handler
             this.PreviousValues.Add(this.textBoxPlayCount.Text);
         }
 
+        #region Event Handlers
         private void buttonBack_Click(object sender, EventArgs e)
         {
-            foreach (MusicFile musicFile in this.Tracks)
+            this.NewValues.Add(this.textBoxAlbumArtist.Text);
+            this.NewValues.Add(this.textBoxContributingArtist.Text);
+            this.NewValues.Add(this.textBoxAlbum.Text);
+            this.NewValues.Add(this.textBoxTitle.Text);
+            this.NewValues.Add(this.textBoxTrackNumber.Text);
+            this.NewValues.Add(this.textBoxDiscNumber.Text);
+            this.NewValues.Add(this.textBoxYear.Text);
+            this.NewValues.Add(this.textBoxGenre.Text);
+            this.NewValues.Add(this.textBoxPlayCount.Text);
+            this.Dispose();
+            this.Window.ActiveControl = this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0];
+            this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0].Visible = true;
+            this.NUMBER_OF_THREADS = Math.Min(this.Tracks.Count, this.NUMBER_OF_THREADS);
+            int tracksPerThread = this.Tracks.Count / NUMBER_OF_THREADS;
+            Thread[] threads = new Thread[NUMBER_OF_THREADS+1];
+            for (int i = 0; i < threads.Length; i++)
             {
+                threads[i] = new Thread(new ParameterizedThreadStart(UpdateFiles));
+                threads[i].Start(i);
+            }
+            for (int i = 0; i < threads.Length; ++i)
+            {
+                threads[i].Join();
+            }
+        }
+        #endregion
+
+        private void UpdateFiles(object arg)
+        {
+            int start = (int)arg * (this.Tracks.Count / NUMBER_OF_THREADS);
+            int end = Math.Min(((int)arg + 1) * (this.Tracks.Count / NUMBER_OF_THREADS), this.Tracks.Count);
+            for (int index = start; index < end; index++)
+            {
+                MusicFile musicFile = this.Tracks[index];
                 using (var mp3 = TagLib.File.Create(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, musicFile.Filename)))
                 {
-                    Console.WriteLine("HERE");
-                    IITFileOrCDTrack iTunesTrack = (IITFileOrCDTrack)this.Window.LAFContainer.GetITunesTrack(musicFile.Title,musicFile.Album);
-                    if (this.PreviousValues[0] != this.textBoxAlbumArtist.Text)
+                    IITFileOrCDTrack iTunesTrack = (IITFileOrCDTrack)this.Window.LAFContainer.GetITunesTrack(musicFile.Title, musicFile.Album);
+                    if (this.PreviousValues[0] != this.NewValues[0])
                     {
-                        mp3.Tag.AlbumArtists = new string[] { this.textBoxAlbumArtist.Text };
-                        musicFile.AlbumArtist = this.textBoxAlbumArtist.Text;
+                        mp3.Tag.AlbumArtists = new string[] { this.NewValues[0] };
+                        musicFile.AlbumArtist = this.NewValues[0];
                         iTunesTrack.AlbumArtist = musicFile.AlbumArtist;
                     }
-                    if (this.PreviousValues[1] != this.textBoxContributingArtist.Text)
+                    if (this.PreviousValues[1] != this.NewValues[1])
                     {
-                        mp3.Tag.Performers = new string[] { this.textBoxContributingArtist.Text };
-                        musicFile.ContributingArtists = this.textBoxContributingArtist.Text;
+                        mp3.Tag.Performers = new string[] { this.NewValues[1] };
+                        musicFile.ContributingArtists = this.NewValues[1];
                         iTunesTrack.Artist = musicFile.ContributingArtists;
                     }
-                    if (this.PreviousValues[2] != this.textBoxAlbum.Text)
+                    if (this.PreviousValues[2] != this.NewValues[2])
                     {
-                        mp3.Tag.Album = this.textBoxAlbum.Text;
-                        musicFile.Album = this.textBoxAlbum.Text;
+                        mp3.Tag.Album = this.NewValues[2];
+                        musicFile.Album = mp3.Tag.Album;
                         iTunesTrack.Album = musicFile.Album;
                     }
-                    if (this.PreviousValues[3] != this.textBoxTitle.Text)
+                    if (this.PreviousValues[3] != this.NewValues[3])
                     {
-                        mp3.Tag.Title = this.textBoxTitle.Text;
-                        musicFile.Title = this.textBoxTitle.Text;
+                        mp3.Tag.Title = this.NewValues[3];
+                        musicFile.Title = mp3.Tag.Title;
                         iTunesTrack.Name = musicFile.Title;
                     }
-                    if (this.PreviousValues[4] != this.textBoxTrackNumber.Text)
+                    if (this.PreviousValues[4] != this.NewValues[4])
                     {
-                        bool plus = this.textBoxTrackNumber.Text.StartsWith("+");
-                        bool minus = this.textBoxTrackNumber.Text.StartsWith("-");
-                        uint amount = !plus & !minus ? UInt32.Parse(this.textBoxTrackNumber.Text) : UInt32.Parse(this.textBoxTrackNumber.Text.Substring(1));
+                        bool plus = this.NewValues[4].StartsWith("+");
+                        bool minus = this.NewValues[4].StartsWith("-");
+                        uint amount = !plus & !minus ? UInt32.Parse(this.NewValues[4]) : UInt32.Parse(this.NewValues[4].Substring(1));
                         if (plus)
                         {
                             mp3.Tag.Track += amount;
@@ -131,16 +166,16 @@ namespace Handler
                         }
                         else
                         {
-                            mp3.Tag.Track =amount;
+                            mp3.Tag.Track = amount;
                         }
                         musicFile.TrackNumber = (int)mp3.Tag.Track;
                         iTunesTrack.TrackNumber = musicFile.TrackNumber;
                     }
-                    if (this.PreviousValues[5] != this.textBoxDiscNumber.Text)
+                    if (this.PreviousValues[5] != this.NewValues[5])
                     {
-                        bool plus = this.textBoxDiscNumber.Text.StartsWith("+");
-                        bool minus = this.textBoxDiscNumber.Text.StartsWith("-");
-                        uint amount = !plus & !minus ? UInt32.Parse(this.textBoxDiscNumber.Text) : UInt32.Parse(this.textBoxDiscNumber.Text.Substring(1));
+                        bool plus = this.NewValues[5].StartsWith("+");
+                        bool minus = this.NewValues[5].StartsWith("-");
+                        uint amount = !plus & !minus ? UInt32.Parse(this.NewValues[5]) : UInt32.Parse(this.NewValues[5].Substring(1));
                         if (plus)
                         {
                             mp3.Tag.Disc += amount;
@@ -156,11 +191,11 @@ namespace Handler
                         musicFile.DiscNumber = (int)mp3.Tag.Disc;
                         iTunesTrack.DiscNumber = musicFile.DiscNumber;
                     }
-                    if (this.PreviousValues[6] != this.textBoxYear.Text)
+                    if (this.PreviousValues[6] != this.NewValues[6])
                     {
-                        bool plus = this.textBoxYear.Text.StartsWith("+");
-                        bool minus = this.textBoxYear.Text.StartsWith("-");
-                        uint amount = !plus & !minus ? UInt32.Parse(this.textBoxYear.Text) : UInt32.Parse(this.textBoxYear.Text.Substring(1));
+                        bool plus = this.NewValues[6].StartsWith("+");
+                        bool minus = this.NewValues[6].StartsWith("-");
+                        uint amount = !plus & !minus ? UInt32.Parse(this.NewValues[6]) : UInt32.Parse(this.NewValues[6].Substring(1));
                         if (plus)
                         {
                             mp3.Tag.Year += amount;
@@ -176,17 +211,17 @@ namespace Handler
                         musicFile.Year = (int)mp3.Tag.Year;
                         iTunesTrack.Year = musicFile.Year;
                     }
-                    if (this.PreviousValues[7] != this.textBoxGenre.Text)
+                    if (this.PreviousValues[7] != this.NewValues[7])
                     {
-                        mp3.Tag.Genres = new string[] { this.textBoxGenre.Text };
+                        mp3.Tag.Genres = new string[] { this.NewValues[7] };
                         musicFile.Genre = mp3.Tag.Genres[0];
                         iTunesTrack.Genre = musicFile.Genre;
                     }
-                    if (this.PreviousValues[8] != this.textBoxPlayCount.Text)
+                    if (this.PreviousValues[8] != this.NewValues[8])
                     {
-                        bool plus = this.textBoxYear.Text.StartsWith("+");
-                        bool minus = this.textBoxYear.Text.StartsWith("-");
-                        int amount = !plus & !minus ? Int32.Parse(this.textBoxYear.Text) : Int32.Parse(this.textBoxYear.Text.Substring(1));
+                        bool plus = this.NewValues[8].StartsWith("+");
+                        bool minus = this.NewValues[8].StartsWith("-");
+                        int amount = !plus & !minus ? Int32.Parse(this.NewValues[8]) : Int32.Parse(this.NewValues[8].Substring(1));
                         if (plus)
                         {
                             iTunesTrack.PlayedCount += amount;
@@ -202,12 +237,8 @@ namespace Handler
                         musicFile.PlayCount = iTunesTrack.PlayedCount;
                     }
                     mp3.Save();
-                    this.Window.LAFContainer.iTunesLibrary.AddFile(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, musicFile.Filename));
                 }
             }
-            this.Dispose();
-            this.Window.ActiveControl = this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0];
-            this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0].Visible = true;
         }
     }
 }
