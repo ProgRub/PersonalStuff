@@ -77,8 +77,7 @@ namespace Downloader
                             startParenthesisPosition = word.IndexOf("[");
                             endParenthesisPosition = word.IndexOf("]");
                         }
-                        Console.WriteLine(word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1));
-                        if (word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1).Contains(wordToRemove))
+                        if (startParenthesisPosition!=-1 && word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1).Contains(wordToRemove))
                         {
                             word = this.RemoveWordsFromWord(setOfWords, word.Remove(startParenthesisPosition - 1, endParenthesisPosition - startParenthesisPosition + 2));
                         }
@@ -177,7 +176,7 @@ namespace Downloader
             files = files.OrderBy(x => File.GetLastWriteTime(x).ToFileTime()).ToList();
             try
             {
-                return File.GetLastWriteTime(files[0]).ToFileTime();
+                return File.GetLastWriteTime(files[files.Count-1]).ToFileTime();
             }
             catch (ArgumentOutOfRangeException)
             {

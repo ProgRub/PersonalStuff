@@ -15,6 +15,7 @@ namespace Handler
         {
             System.Runtime.InteropServices.Marshal.ReleaseComObject(this.LAFContainer.iTunes);
             System.GC.Collect();
+            this.LAFContainer.backgroundWork.Join();
         }
     }
 }

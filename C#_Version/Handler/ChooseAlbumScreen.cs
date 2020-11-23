@@ -142,7 +142,7 @@ namespace Handler
 
         private void GetAlbums()
         {
-            int underTime, overTime = 0;
+            int underTime, overTime;
             foreach (Album album in this.Window.LAFContainer.Albums)
             {
                 int leeway = 60;
@@ -153,7 +153,7 @@ namespace Handler
                     while (leeway <= this.AlbumLeeway)
                     {
                         underTime = this.AlbumTime - this.AlbumLeeway * this.Under;
-                        overTime = this.AlbumTime + this.AlbumLeeway * this.Under;
+                        overTime = this.AlbumTime + this.AlbumLeeway * this.Over;
                         if (albumLength >= underTime && albumLength <= overTime)
                         {
                             this.PossibleAlbums.Add(album);

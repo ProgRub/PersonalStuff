@@ -31,11 +31,11 @@ namespace Handler
         public Dictionary<string, List<int>> WorkoutDatabase;
         private readonly string DetailsFile, SongsFile, ExceptionsFile;
         private int NumberOfFilesFromFile;
-        private double LastModifiedTimeFromFile;
-        private long LastModifiedTime;
+        private long LastModifiedTimeFromFile;
         public iTunesApp iTunes { get; }
         public IITLibraryPlaylist iTunesLibrary { get; }
         private const int NUMBER_OF_THREADS = 15;
+        public Thread backgroundWork;
 
         public ListsAndFiles()
         {
@@ -57,9 +57,11 @@ namespace Handler
             this.GetAllFromFiles();
             this.iTunes = new iTunesApp();
             this.iTunesLibrary = this.iTunes.LibraryPlaylist;
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(this.CheckMusicFilesAndUpdatePlayCounts);
-            worker.RunWorkerAsync();
+            this.backgroundWork = new Thread(CheckMusicFilesAndUpdatePlayCounts);
+            this.backgroundWork.Start();
+            //BackgroundWorker worker = new BackgroundWorker();
+            //worker.DoWork += new DoWorkEventHandler(this.CheckMusicFilesAndUpdatePlayCounts);
+            //worker.RunWorkerAsync();
             //BackgroundWorker updatePC = new BackgroundWorker();
             //updatePC.DoWork += new DoWorkEventHandler(this.UpdatePlayCounts);
             //updatePC.RunWorkerAsync();
@@ -188,7 +190,7 @@ namespace Handler
             files = files.OrderBy(x => File.GetLastWriteTime(x).ToFileTime()).ToList();
             try
             {
-                return File.GetLastWriteTime(files[0]).ToFileTime();
+                return File.GetLastWriteTime(files[files.Count-1]).ToFileTime();
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -225,7 +227,7 @@ namespace Handler
             try
             {
                 this.NumberOfFilesFromFile = Int32.Parse(xmlDocument.Root.Element("NumberFiles").Value);
-                this.LastModifiedTimeFromFile = float.Parse(xmlDocument.Root.Element("LastModified").Value);
+                this.LastModifiedTimeFromFile = long.Parse(xmlDocument.Root.Element("LastModified").Value);
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -406,6 +408,7 @@ namespace Handler
 
         public void SaveMusicFiles()
         {
+            this.SaveNumberFilesLastModified();
             XDocument xmlDocument = XDocument.Load(this.SongsFile);
             xmlDocument.Root.Elements().Remove();
             foreach (MusicFile musicFile in this.MusicFiles)
@@ -442,7 +445,7 @@ namespace Handler
             return -1;
         }
 
-        private void CheckMusicFilesAndUpdatePlayCounts(object sender, DoWorkEventArgs e)
+        private void CheckMusicFilesAndUpdatePlayCounts()
         {
             var auxList = this.MusicFiles.Select(x => x.Filename).ToList();
             var files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
@@ -463,18 +466,22 @@ namespace Handler
                 this.MusicFiles.RemoveAt(this.IndexOfMusicFile(filename));
             }
             this.Files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
-            this.LastModifiedTime = this.GetLastModifiedTime();
-            this.Files = this.Files.Where(x => File.GetLastWriteTime(x).ToFileTime() > this.LastModifiedTime).ToList();
+            //Console.WriteLine(this.LastModifiedTimeFromFile);
+            //Console.WriteLine(this.GetLastModifiedTime());
+            this.Files = this.Files.Where(x => File.GetLastWriteTime(x).ToFileTime() > this.LastModifiedTimeFromFile).ToList();
             int filesPerThread = this.Files.Count / NUMBER_OF_THREADS;
             Thread[] threads = new Thread[NUMBER_OF_THREADS + 1];
-            for (int i = 0; i < threads.Length; i++)
+            if (this.Files.Count > 0)
             {
-                threads[i] = new Thread(new ParameterizedThreadStart(UpdateModifiedFiles));
-                threads[i].Start(i);
-            }
-            for (int i = 0; i < threads.Length; ++i)
-            {
-                threads[i].Join();
+                for (int i = 0; i < threads.Length; i++)
+                {
+                    threads[i] = new Thread(new ParameterizedThreadStart(UpdateModifiedFiles));
+                    threads[i].Start(i);
+                }
+                for (int i = 0; i < threads.Length; ++i)
+                {
+                    threads[i].Join();
+                }
             }
             filesPerThread = this.MusicFiles.Count / NUMBER_OF_THREADS;
             threads = new Thread[NUMBER_OF_THREADS + 1];
@@ -555,7 +562,7 @@ namespace Handler
         {
             int start = (int)arg * (this.Files.Count / NUMBER_OF_THREADS);
             int end = Math.Min(((int)arg + 1) * (this.Files.Count / NUMBER_OF_THREADS), this.Files.Count);
-            Console.WriteLine(start + " " + end);
+            //Console.WriteLine(start + " " + end);
             for (int index = start; index < end; index++)
             {
                 string filename = this.Files[index];
@@ -575,10 +582,16 @@ namespace Handler
             int end = Math.Min(((int)arg + 1) * (this.MusicFiles.Count / NUMBER_OF_THREADS), this.MusicFiles.Count);
             for (int index = start; index < end; index++)
             {
+                try { 
                 var track = this.GetITunesTrack(this.MusicFiles[index].Title, this.MusicFiles[index].Album);
                 if (track != null)
                 {
                     this.MusicFiles[index].PlayCount = track.PlayedCount;
+                }
+                }
+                catch (IOException)
+                {
+                    Console.WriteLine("CANT ACCESS");
                 }
             }
         }

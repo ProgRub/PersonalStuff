@@ -83,7 +83,6 @@ namespace Handler
 
         private void buttonBack_Click(object sender, EventArgs e)
         {
-            this.Window.LAFContainer.SaveNumberFilesLastModified();
             this.Window.LAFContainer.SaveMusicFiles();
             this.Dispose();
             this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
