@@ -10,39 +10,41 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using HtmlAgilityPack;
 using System.Media;
+using System.Net;
 
 namespace Downloader
 {
     public partial class YearLyricsScreen : UserControl
     {
         public DownloaderForm Window { get; set; }
-        private List<string> NewFiles;
-        private Dictionary<string, int> PagesVisited_Year;
-        private int NumberFilesProcessed;
-        private string CurrentLyrics;
-        private bool ExceptionRaised, ErrorHandled, ProgressWorkerDone;
-        private List<string> Key;
-        private List<string> Value;
-        private string Filename;
-        private uint TrackCount;
-        private BackgroundWorker worker;
-        private string CurrentArtist, CurrentAlbum, CurrentTitle, CurrentYear;
-        private bool AddFileToList;
+        public List<string> NewFiles;
+        public Dictionary<string, int> PagesVisited_Year;
+        public int NumberFilesProcessed;
+        private bool ErrorOcurred;
+        private int NUMBER_OF_THREADS = 6;
+        private List<int> WorkersLineIndex;
+        private List<bool> WorkersDoneReport;
+        public Semaphore SemError, SemErrorHandled, SemAllFiles;
+        public Mutex MutexWorkers;
+        private int WorkerIndexError;
 
-        public YearLyricsScreen(DownloaderForm window, List<string> newFiles, bool addFileToList)
+        public YearLyricsScreen(DownloaderForm window, List<string> newFiles)
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.LAFContainer.openITunes();
             this.PagesVisited_Year = new Dictionary<string, int>();
             this.NumberFilesProcessed = 0;
-            this.ExceptionRaised = false;
-            this.Filename = "";
-            this.ErrorHandled = true;
-            this.ProgressWorkerDone = false;
+            this.ErrorOcurred = false;
             this.NewFiles = newFiles;
-            this.AddFileToList = addFileToList;
+            this.SemAllFiles = new Semaphore(0, 1);
+            this.SemError = new Semaphore(1, 1);
+            this.SemErrorHandled = new Semaphore(0, 1);
+            this.MutexWorkers = new Mutex();
+            this.WorkerIndexError = -1;
             this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
             this.Window.WindowState = FormWindowState.Maximized;
+            this.NUMBER_OF_THREADS = Math.Min(this.NewFiles.Count, this.NUMBER_OF_THREADS);
             try
             {
                 Process.GetProcessesByName("python")[0].Kill();
@@ -51,143 +53,374 @@ namespace Downloader
             {
                 Console.WriteLine("NONEXISTENT");
             }
-            this.worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(this.GetLyricsAndYear);
-            worker.ProgressChanged += new ProgressChangedEventHandler(this.ChangeUI);
-            this.worker.WorkerReportsProgress = true;
-            this.worker.RunWorkerAsync();
-        }
-        private void ChangeUI(object sender, ProgressChangedEventArgs e)
-        {
-            this.ProgressWorkerDone = false;
-            switch (e.ProgressPercentage)
-            {
-                case 0:
-                    this.textBoxArtist.Text = this.CurrentArtist;
-                    this.textBoxAlbum.Text = this.CurrentAlbum;
-                    this.textBoxTitle.Text = this.CurrentTitle;
-                    this.textBoxYear.Text = this.CurrentYear;
-                    break;
-                case 1:
-                    this.AddToOutput();
-                    break;
-                case 2:
-                    this.textBoxArtist.Text = this.CurrentArtist;
-                    this.textBoxAlbum.Text = this.CurrentAlbum;
-                    //this.ChangeOutput(0,true);
-                    //this.ChangeOutput(1, true);
-                    //self.changeOutput(0, True)
-                    //self.changeOutput(1, True)
-                    break;
-                case 3:
-                    this.textBoxArtist.Text = this.CurrentArtist;
-                    this.textBoxAlbum.Text = this.CurrentAlbum;
-                    this.textBoxTitle.Text = this.CurrentTitle;
-                    //this.ChangeOutput(0, false);
-                    //this.ChangeOutput(2, false);
-                    //self.changeOutput(0, True)
-                    //self.changeOutput(2, True)
-                    break;
-                case 4:
-                    this.textBoxArtist.Text = this.CurrentArtist;
-                    this.textBoxAlbum.Text = this.CurrentAlbum;
-                    break;
-                case 5:
-                    this.textBoxYear.Text = this.CurrentYear;
-                    break;
-                case 6:
-                    this.labelUrlBeingChecked.Text = e.UserState.ToString();
-                    break;
-                case 7:
-                    this.textBoxYear.Text = this.CurrentYear;
-                    break;
-                case 8:
-                    //this.ChangeOutput(0, true);
-                    //this.ChangeOutput(1, true);
-                    break;
-                case 9:
-                    //this.ChangeOutput(0, false);
-                    //this.ChangeOutput(2, false);
-                    break;
-                case 10:
-                    this.DisableComponents();
-                    break;
-                case 11:
-                    this.EnableComponents(true);
-                    break;
-                case 12:
-                    this.EnableComponents(false);
-                    break;
-                case 13:
-                    this.ChangeTextColor(false);
-                    break;
-                case 14:
-                    this.ChangeTextColor(true);
-                    break;
-                case 15:
-                    this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
-                    break;
-                case 16:
-                    this.richTextBoxArtist.AppendText(Environment.NewLine);
-                    this.richTextBoxAlbum.AppendText(Environment.NewLine);
-                    this.richTextBoxTitle.AppendText(Environment.NewLine);
-                    break;
-                case 17:
-                    this.textBoxArtist.Visible = false;
-                    this.textBoxTitle.Visible = false;
-                    this.textBoxYear.Visible = false;
-                    this.textBoxAlbum.Visible = false;
-                    this.labelArtist.Visible = false;
-                    this.labelAlbum.Visible = false;
-                    this.labelTitle.Visible = false;
-                    this.labelYear.Visible = false;
-                    this.labelUrlBeingChecked.Visible = false;
-                    this.buttonSkipSong.Visible = false;
-                    this.buttonTryAgain.Visible = false;
-                    this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed. All Done!";
-                    break;
-                default:
-                    break;
-            }
-            this.ProgressWorkerDone = true;
         }
 
+#warning TODO: Wicked Skeng Man 4 blocking it
+        //private void ChangeUI(object sender, ProgressChangedEventArgs e)
+        //{
+        //    this.ProgressWorkerDone = false;
+        //    switch (e.ProgressPercentage)
+        //    {
+        //        case 0:
+        //            this.textBoxArtist.Text = artist;
+        //            this.textBoxAlbum.Text = album;
+        //            this.textBoxTitle.Text = title;
+        //            this.textBoxYear.Text = year;
+        //            break;
+        //        case 1:
+        //            this.AddToOutput();
+        //            break;
+        //        case 2:
+        //            this.textBoxArtist.Text = artist;
+        //            this.textBoxAlbum.Text = album;
+        //            //this.ChangeOutput(0,true);
+        //            //this.ChangeOutput(1, true);
+        //            //self.changeOutput(0, True)
+        //            //self.changeOutput(1, True)
+        //            break;
+        //        case 3:
+        //            this.textBoxArtist.Text = artist;
+        //            this.textBoxAlbum.Text = album;
+        //            this.textBoxTitle.Text = title;
+        //            //this.ChangeOutput(0, false);
+        //            //this.ChangeOutput(2, false);
+        //            //self.changeOutput(0, True)
+        //            //self.changeOutput(2, True)
+        //            break;
+        //        case 4:
+        //            this.textBoxArtist.Text = artist;
+        //            this.textBoxAlbum.Text = album;
+        //            break;
+        //        case 5:
+        //            this.textBoxYear.Text = year;
+        //            break;
+        //        case 6:
+        //            this.labelUrlBeingChecked.Text = e.UserState.ToString();
+        //            break;
+        //        case 7:
+        //            this.textBoxYear.Text = year;
+        //            break;
+        //        case 8:
+        //            //this.ChangeOutput(0, true);
+        //            //this.ChangeOutput(1, true);
+        //            break;
+        //        case 9:
+        //            //this.ChangeOutput(0, false);
+        //            //this.ChangeOutput(2, false);
+        //            break;
+        //        case 10:
+        //            this.DisableComponents();
+        //            break;
+        //        case 11:
+        //            this.EnableComponents(true);
+        //            break;
+        //        case 12:
+        //            this.EnableComponents(false);
+        //            break;
+        //        case 13:
+        //            this.ChangeTextColor(false);
+        //            break;
+        //        case 14:
+        //            this.ChangeTextColor(true);
+        //            break;
+        //        case 15:
+        //            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
+        //            break;
+        //        case 16:
+        //            this.richTextBoxArtist.AppendText(Environment.NewLine);
+        //            this.richTextBoxAlbum.AppendText(Environment.NewLine);
+        //            this.richTextBoxTitle.AppendText(Environment.NewLine);
+        //            break;
+        //        case 17:
+        //            this.textBoxArtist.Visible = false;
+        //            this.textBoxTitle.Visible = false;
+        //            this.textBoxYear.Visible = false;
+        //            this.textBoxAlbum.Visible = false;
+        //            this.labelArtist.Visible = false;
+        //            this.labelAlbum.Visible = false;
+        //            this.labelTitle.Visible = false;
+        //            this.labelYear.Visible = false;
+        //            this.labelUrlBeingChecked.Visible = false;
+        //            this.buttonSkipYear.Visible = false;
+        //            this.buttonSkipLyrics.Visible = false;
+        //            this.buttonTryAgain.Visible = false;
+        //            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed. All Done!";
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //    this.ProgressWorkerDone = true;
+        //}
+        #region EventHandlers
         private void buttonTryAgain_Click(object sender, EventArgs e)
         {
             if (this.buttonTryAgain.Enabled)
             {
-                this.ErrorHandled = true;
-                this.CurrentArtist = this.textBoxArtist.Text;
-                this.CurrentAlbum = this.textBoxAlbum.Text;
-                this.CurrentTitle = this.textBoxTitle.Text;
-                this.Value = new List<string>() { this.CurrentArtist, this.CurrentAlbum, this.CurrentTitle };
-                this.worker.ReportProgress(10);
-                while (!this.ProgressWorkerDone) { }
+                this.SemErrorHandled.Release();
             }
         }
 
-        private void buttonSkipSong_Click(object sender, EventArgs e)
+        private void buttonSkipYear_Click(object sender, EventArgs e)
         {
-            if (this.buttonSkipSong.Enabled)
+            if (this.buttonSkipYear.Enabled)
             {
-                this.CurrentLyrics = "None";
-                this.Window.LAFContainer.SongsToSkip.Add(new List<string>() { this.textBoxArtist.Text, this.textBoxAlbum.Text, this.textBoxTitle.Text });
-                this.ErrorHandled = true;
+                this.SemErrorHandled.Release();
             }
         }
 
-
-        private void AddToOutput()
+        private void buttonSkipLyrics_Click(object sender, EventArgs e)
         {
-            this.richTextBoxArtist.AppendText(this.CurrentArtist);
-            this.richTextBoxAlbum.AppendText(this.CurrentAlbum);
-            this.richTextBoxTitle.AppendText(this.CurrentTitle);
-            this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
-            this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxAlbum.Lines[this.NumberFilesProcessed].Length);
-            this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxTitle.Lines[this.NumberFilesProcessed].Length);
-            this.richTextBoxArtist.SelectionColor = Color.Yellow;
-            this.richTextBoxAlbum.SelectionColor = Color.Yellow;
-            this.richTextBoxTitle.SelectionColor = Color.Yellow;
+            if (this.buttonSkipLyrics.Enabled)
+            {
+                this.SemErrorHandled.Release();
+            }
+        }
+
+        private void YearLyricsScreen_Enter(object sender, EventArgs e)
+        {
+            for (int index = 0; index < NUMBER_OF_THREADS; index++)
+            {
+                this.textBoxThreadStatus.AppendText("Thread " + index + Environment.NewLine);
+            }
+            Task.Delay(100).ContinueWith(t => this.StartThreads());
+        }
+        #endregion
+
+        private void StartThreads()
+        {
+            BackgroundWorker aux;
+            this.WorkersLineIndex = new List<int>();
+            this.WorkersDoneReport = new List<bool>();
+            int filesPerThread = this.NewFiles.Count / this.NUMBER_OF_THREADS;
+            List<int> filesPerThreadList = new List<int>();
+            for (int index = 0; index < NUMBER_OF_THREADS; index++)
+            {
+                filesPerThreadList.Add(filesPerThread);
+            }
+            int indexThreads = 0;
+            int totalFiles = this.NewFiles.Count - filesPerThread * NUMBER_OF_THREADS;
+            while (totalFiles > 0)
+            {
+                filesPerThreadList[indexThreads]++;
+                totalFiles--;
+                indexThreads = (indexThreads + 1) % NUMBER_OF_THREADS;
+            }
+            int previousFiles = 0;
+            for (int index = 0; index < NUMBER_OF_THREADS; index++)
+            {
+                aux = new BackgroundWorker();
+                this.WorkersLineIndex.Add(0);
+                this.WorkersDoneReport.Add(false);
+                aux.WorkerReportsProgress = true;
+                aux.DoWork += new DoWorkEventHandler(this.GetLyricsAndYear);
+                aux.ProgressChanged += new ProgressChangedEventHandler(this.ChangeUI);
+                aux.RunWorkerCompleted += new RunWorkerCompletedEventHandler(this.WorkerDone);
+                if (index != 0)
+                {
+                    previousFiles += filesPerThreadList[index - 1];
+                }
+                aux.RunWorkerAsync(this.NewFiles.Skip(previousFiles).Take(filesPerThreadList[index]).ToList());
+            }
+            this.SemAllFiles.WaitOne();
+            Thread saveExceptions = new Thread(this.Window.LAFContainer.SaveExceptions);
+            Thread saveMFs = new Thread(this.Window.LAFContainer.SaveMusicFiles);
+            saveExceptions.Start();
+            saveMFs.Start();
+            saveExceptions.Join();
+            saveMFs.Join();
+            this.FinishedAllFiles();
+        }
+
+        public void DisableComponents()
+        {
+            Action update = () => this.Window.AcceptButton = null;
+            this.Window.Invoke(update);
+            update = () => { this.textBoxAlbum.ReadOnly = true; this.textBoxAlbum.Text = ""; };
+            this.textBoxAlbum.Invoke(update);
+            update = () => { this.textBoxArtist.ReadOnly = true; this.textBoxArtist.Text = ""; };
+            this.textBoxArtist.Invoke(update);
+            update = () => { this.textBoxTitle.ReadOnly = true; this.textBoxTitle.Text = ""; };
+            this.textBoxTitle.Invoke(update);
+            update = () => { this.textBoxYear.ReadOnly = true; this.textBoxYear.Text = ""; };
+            this.textBoxYear.Invoke(update);
+            update = () => this.labelUrlBeingChecked.Text = "Genius URL";
+            this.labelUrlBeingChecked.Invoke(update);
+            update = () => this.buttonSkipYear.Enabled = false;
+            this.buttonSkipYear.Invoke(update);
+            update = () => this.buttonTryAgain.Enabled = false;
+            this.buttonTryAgain.Invoke(update);
+            update = () => this.buttonSkipLyrics.Enabled = false;
+            this.buttonSkipLyrics.Invoke(update);
+        }
+
+        public void EnableComponents(bool forAlbumYear)
+        {
+            Action update = () => this.Window.AcceptButton = this.buttonTryAgain;
+            this.Window.Invoke(update);
+            if (forAlbumYear)
+            {
+                update = () => this.textBoxAlbum.ReadOnly = false;
+                this.textBoxAlbum.Invoke(update);
+                update = () => this.buttonSkipYear.Enabled = true;
+                this.buttonSkipYear.Invoke(update);
+            }
+            else
+            {
+                update = () => this.buttonSkipLyrics.Enabled = true;
+                this.buttonSkipLyrics.Invoke(update);
+            }
+            update = () => this.textBoxArtist.ReadOnly = false;
+            this.textBoxArtist.Invoke(update);
+            update = () => this.textBoxTitle.ReadOnly = false;
+            this.textBoxTitle.Invoke(update);
+            update = () => this.buttonTryAgain.Enabled = true;
+            this.buttonTryAgain.Invoke(update);
+        }
+
+        private void FinishedAllFiles()
+        {
+            Action update = () => this.textBoxArtist.Visible = false;
+            this.textBoxArtist.Invoke(update);
+            update = () => this.textBoxTitle.Visible = false;
+            this.textBoxTitle.Invoke(update);
+            update = () => this.textBoxYear.Visible = false;
+            this.textBoxYear.Invoke(update);
+            update = () => this.textBoxAlbum.Visible = false;
+            this.textBoxAlbum.Invoke(update);
+            update = () => this.labelArtist.Visible = false;
+            this.labelArtist.Invoke(update);
+            update = () => this.labelAlbum.Visible = false;
+            this.labelAlbum.Invoke(update);
+            update = () => this.labelTitle.Visible = false;
+            this.labelTitle.Invoke(update);
+            update = () => this.labelYear.Visible = false;
+            this.labelYear.Invoke(update);
+            update = () => this.labelUrlBeingChecked.Visible = false;
+            this.labelUrlBeingChecked.Invoke(update);
+            update = () => this.buttonSkipYear.Visible = false;
+            this.buttonSkipYear.Invoke(update);
+            update = () => this.buttonSkipLyrics.Visible = false;
+            this.buttonSkipLyrics.Invoke(update);
+            update = () => this.buttonTryAgain.Visible = false;
+            this.buttonTryAgain.Invoke(update);
+            update = () => this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed. All Done!";
+            this.labelFilesProcessed.Invoke(update);
+        }
+
+        private void WorkerDone(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (this.NumberFilesProcessed == this.NewFiles.Count)
+            {
+                this.SemAllFiles.Release();
+            }
+        }
+
+        private void ChangeUI(object sender, ProgressChangedEventArgs e)
+        {
+            this.MutexWorkers.WaitOne();
+            Action update;
+            List<string> auxList;
+            int[] auxArray;
+            switch (e.ProgressPercentage)
+            {
+                case 0:
+                    auxList = e.UserState as List<string>;
+                    int workerIndex = Int32.Parse((e.UserState as List<string>)[3]);
+                    this.AddToOutput(auxList[0], auxList[1], auxList[2], workerIndex);
+                    this.WorkersDoneReport[workerIndex] = true;
+                    break;
+                case 1:
+                    auxArray = e.UserState as int[];
+                    this.ChangeTextColor(false, auxArray[1]);
+                    this.WorkersDoneReport[auxArray[0]] = true;
+                    break;
+                case 2:
+                    auxArray = e.UserState as int[];
+                    this.ChangeTextColor(true, auxArray[1]);
+                    this.WorkersDoneReport[auxArray[0]] = true;
+                    break;
+                case 3:
+                    this.DisableComponents();
+                    break;
+                case 4:
+                    this.EnableComponents(true);
+                    auxList = e.UserState as List<string>;
+                    update = () => this.textBoxArtist.Text = auxList[0];
+                    this.textBoxArtist.Invoke(update);
+                    update = () => this.textBoxAlbum.Text = auxList[1];
+                    this.textBoxAlbum.Invoke(update);
+                    update = () => this.textBoxTitle.Text = auxList[2];
+                    this.textBoxTitle.Invoke(update);
+                    update = () => this.textBoxYear.Text = auxList[3];
+                    this.textBoxYear.Invoke(update);
+                    this.labelFilesProcessed.Invoke(update);
+                    break;
+                case 5:
+                    this.EnableComponents(false);
+                    auxList = e.UserState as List<string>;
+                    update = () => this.textBoxArtist.Text = auxList[0];
+                    this.textBoxArtist.Invoke(update);
+                    update = () => this.textBoxAlbum.Text = auxList[1];
+                    this.textBoxAlbum.Invoke(update);
+                    update = () => this.textBoxTitle.Text = auxList[2];
+                    this.textBoxTitle.Invoke(update);
+                    break;
+                case 6:
+                    update = () => this.labelUrlBeingChecked.Text = e.UserState.ToString();
+                    this.labelUrlBeingChecked.Invoke(update);
+                    break;
+                case 7:
+                    auxArray = e.UserState as int[];
+                    int lineIndex = auxArray[0];
+                    int filesProcessed = auxArray[1];
+                    int totalFiles = auxArray[2];
+                    update = () => this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
+                    this.labelFilesProcessed.Invoke(update);
+                    update = () =>
+                    {
+                        this.textBoxThreadStatus.Select(this.textBoxThreadStatus.GetFirstCharIndexFromLine(lineIndex), this.textBoxThreadStatus.Lines[lineIndex].Length);
+                        this.textBoxThreadStatus.SelectedText = "Thread " + lineIndex + ": " + filesProcessed + "/" + totalFiles + " Files Processed";
+                    };
+                    this.textBoxThreadStatus.Invoke(update);
+                    this.WorkersDoneReport[lineIndex] = true;
+                    break;
+                default:
+                    break;
+            }
+            this.MutexWorkers.ReleaseMutex();
+        }
+
+        private void AddToOutput(string artist, string album, string title, int workerIndex)
+        {
+            int line = 0;
+            Action update = () => line = Math.Max(this.richTextBoxArtist.Lines.Length - 1, 0);
+            this.richTextBoxArtist.Invoke(update);
+            //Console.WriteLine(workerIndex + " " + line);
+            this.WorkersLineIndex[workerIndex] = line;
+            update = () =>
+            {
+                this.richTextBoxArtist.AppendText(artist + Environment.NewLine);
+                this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(line), this.richTextBoxArtist.Lines[line].Length);
+                this.richTextBoxArtist.SelectionColor = Color.Yellow;
+                this.richTextBoxArtist.ScrollToCaret();
+            };
+            this.richTextBoxArtist.Invoke(update);
+            update = () =>
+            {
+                this.richTextBoxAlbum.AppendText(album + Environment.NewLine);
+                this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(line), this.richTextBoxAlbum.Lines[line].Length);
+                this.richTextBoxAlbum.SelectionColor = Color.Yellow;
+                this.richTextBoxAlbum.ScrollToCaret();
+            };
+            this.richTextBoxAlbum.Invoke(update);
+            update = () =>
+            {
+                this.richTextBoxTitle.AppendText(title + Environment.NewLine);
+                this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(line), this.richTextBoxTitle.Lines[line].Length);
+                this.richTextBoxTitle.SelectionColor = Color.Yellow;
+                this.richTextBoxTitle.ScrollToCaret();
+            };
+            this.richTextBoxTitle.Invoke(update);
         }
 
         //private void ChangeOutput(int whichBox,bool gettingYear)
@@ -222,46 +455,51 @@ namespace Downloader
         //    this.ChangeTextColor(!gettingYear);
         //}
 
-        private void ChangeTextColor(bool fileProcessed)
+        private void ChangeTextColor(bool fileProcessed, int lineIndex)
         {
+            Action update;
             if (!fileProcessed)
             {
-                this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxAlbum.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxTitle.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxArtist.SelectionColor = Color.DarkGreen;
-                this.richTextBoxAlbum.SelectionColor = Color.DarkGreen;
-                this.richTextBoxTitle.SelectionColor = Color.DarkGreen;
+                update = () =>
+                {
+                    this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(lineIndex), this.richTextBoxArtist.Lines[lineIndex].Length);
+                    this.richTextBoxArtist.SelectionColor = Color.DarkGreen;
+                };
+                this.richTextBoxArtist.Invoke(update);
+                update = () =>
+                {
+                    this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(lineIndex), this.richTextBoxAlbum.Lines[lineIndex].Length);
+                    this.richTextBoxAlbum.SelectionColor = Color.DarkGreen;
+                };
+                this.richTextBoxAlbum.Invoke(update);
+                update = () =>
+                {
+                    this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(lineIndex), this.richTextBoxTitle.Lines[lineIndex].Length);
+                    this.richTextBoxTitle.SelectionColor = Color.DarkGreen;
+                };
+                this.richTextBoxTitle.Invoke(update);
             }
             else
             {
-                this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxArtist.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxAlbum.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(this.NumberFilesProcessed), this.richTextBoxTitle.Lines[this.NumberFilesProcessed].Length);
-                this.richTextBoxArtist.SelectionColor = Color.Lime;
-                this.richTextBoxAlbum.SelectionColor = Color.Lime;
-                this.richTextBoxTitle.SelectionColor = Color.Lime;
+                update = () =>
+                {
+                    this.richTextBoxArtist.Select(this.richTextBoxArtist.GetFirstCharIndexFromLine(lineIndex), this.richTextBoxArtist.Lines[lineIndex].Length);
+                    this.richTextBoxArtist.SelectionColor = Color.Lime;
+                };
+                this.richTextBoxArtist.Invoke(update);
+                update = () =>
+                {
+                    this.richTextBoxAlbum.Select(this.richTextBoxAlbum.GetFirstCharIndexFromLine(lineIndex), this.richTextBoxAlbum.Lines[lineIndex].Length);
+                    this.richTextBoxAlbum.SelectionColor = Color.Lime;
+                };
+                this.richTextBoxAlbum.Invoke(update);
+                update = () =>
+                {
+                    this.richTextBoxTitle.Select(this.richTextBoxTitle.GetFirstCharIndexFromLine(lineIndex), this.richTextBoxTitle.Lines[lineIndex].Length);
+                    this.richTextBoxTitle.SelectionColor = Color.Lime;
+                };
+                this.richTextBoxTitle.Invoke(update);
             }
-        }
-
-        private void DisableComponents()
-        {
-            this.Window.AcceptButton = null;
-            this.textBoxAlbum.ReadOnly = true;
-            this.textBoxArtist.ReadOnly = true;
-            this.textBoxTitle.ReadOnly = true;
-            this.buttonSkipSong.Enabled = false;
-            this.buttonTryAgain.Enabled = false;
-        }
-
-        private void EnableComponents(bool forAlbumYear)
-        {
-            this.Window.AcceptButton = this.buttonTryAgain;
-            if (forAlbumYear) { this.textBoxAlbum.ReadOnly = false; }
-            else { this.buttonSkipSong.Enabled = true; }
-            this.textBoxArtist.ReadOnly = false;
-            this.textBoxTitle.ReadOnly = false;
-            this.buttonTryAgain.Enabled = true;
         }
 
         private string NamingConventions(string namePar)
@@ -275,7 +513,7 @@ namespace Downloader
             {
                 name = name.Replace(key, this.Window.LAFContainer.UrlReplacements[key]);
             }
-            var auxList = name.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var auxList = name.Split(null as char[], StringSplitOptions.RemoveEmptyEntries);
             for (int index = 0; index < auxList.Length; index++)
             {
                 auxList[index] = auxList[index].Trim();
@@ -284,84 +522,66 @@ namespace Downloader
             return char.ToUpper(name[0]) + name.Substring(1).ToLower();
         }
 
-        private void ChangeArtistAlbumTitle(bool forAlbumYear)
+        private void ChangeArtistAlbumTitle(bool forAlbumYear, ref string artist, ref string album, ref string title, uint trackCount)
         {
-            if (forAlbumYear)
+            List<string> CurrentKey = new List<string>() { artist, album, title };
+            if (!forAlbumYear || trackCount < 5)
             {
                 foreach (List<string> key in this.Window.LAFContainer.ExceptionsReplacements.Keys)
                 {
-                    if (this.Key[0] == key[0] && this.Key[1] == key[1] && key[2] == "")
+                    if (CurrentKey[0] == key[0] && CurrentKey[1] == key[1] && key[2] == "")
                     {
-                        //this.textBoxArtist.Text = key[0];
-                        //this.textBoxAlbum.Text = key[1];
-                        //Console.WriteLine("HERE");
-                        this.CurrentArtist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
-                        this.CurrentAlbum = this.Window.LAFContainer.ExceptionsReplacements[key][1];
-                        this.worker.ReportProgress(2);
-                        while (!this.ProgressWorkerDone) { }
+                        artist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
+                        album = this.Window.LAFContainer.ExceptionsReplacements[key][1];
+                    }
+                    else if (CurrentKey[0] == key[0] && CurrentKey[1] == key[1] && CurrentKey[2] == key[2])
+                    {
+                        artist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
+                        album = this.Window.LAFContainer.ExceptionsReplacements[key][1];
+                        title = this.Window.LAFContainer.ExceptionsReplacements[key][2];
                         break;
                     }
                 }
             }
-            else if (!forAlbumYear || this.TrackCount < 5)
+            else
             {
                 foreach (List<string> key in this.Window.LAFContainer.ExceptionsReplacements.Keys)
                 {
-                    if (this.Key[0] == key[0] && this.Key[1] == key[1] && key[2] == "")
+                    if (CurrentKey[0] == key[0] && CurrentKey[1] == key[1] && key[2] == "")
                     {
-                        //this.textBoxArtist.Text = key[0];
-                        //this.textBoxAlbum.Text = key[1];
-                        this.CurrentArtist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
-                        this.CurrentAlbum = this.Window.LAFContainer.ExceptionsReplacements[key][1];
-                        this.worker.ReportProgress(4);
-                        //this.worker.ReportProgress(4);
-                        while (!this.ProgressWorkerDone) { }
-                    }
-                    else if (this.Key[0] == key[0] && this.Key[1] == key[1] && this.Key[2] == key[2])
-                    {
-                        //this.textBoxArtist.Text = key[0];
-                        //this.textBoxAlbum.Text = key[1];
-                        //this.textBoxTitle.Text = key[2];
-                        this.CurrentArtist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
-                        this.CurrentAlbum = this.Window.LAFContainer.ExceptionsReplacements[key][1];
-                        this.CurrentTitle = this.Window.LAFContainer.ExceptionsReplacements[key][2];
-                        this.worker.ReportProgress(3);
-                        //this.worker.ReportProgress(3);
-                        while (!this.ProgressWorkerDone) { }
+                        artist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
+                        album = this.Window.LAFContainer.ExceptionsReplacements[key][1];
                         break;
                     }
                 }
             }
         }
 
-        private object CheckIfWebpageExists(bool forAlbumYear)
+        private object CheckIfWebpageExists(bool forAlbumYear, string artist, string album, string title, ref string year)
         {
+            string url;
             if (forAlbumYear)
             {
-                string name = "https://www.genius.com/albums/" + this.NamingConventions(this.CurrentArtist) + "/" + this.NamingConventions(this.CurrentAlbum);
-                //this.labelUrlBeingChecked.Text = "https://www.genius.com/albums/" + name;
-                this.worker.ReportProgress(6, name);
-                while (!this.ProgressWorkerDone) { }
-                if (this.PagesVisited_Year.Keys.Contains(this.CurrentArtist + this.CurrentAlbum))
+                url = "https://www.genius.com/albums/" + this.NamingConventions(artist) + "/" + this.NamingConventions(album);
+                if (this.PagesVisited_Year.Keys.Contains(artist + album))
                 {
-                    //this.textBoxYear.Text = this.PagesVisited_Year[name].ToString();
-                    this.CurrentYear = this.PagesVisited_Year[this.CurrentArtist + this.CurrentAlbum].ToString();
-                    this.worker.ReportProgress(5, this.CurrentArtist + this.CurrentAlbum);
-                    while (!this.ProgressWorkerDone) { }
+                    year = this.PagesVisited_Year[artist + album].ToString();
                     return "Skip";
                 }
             }
             else
             {
-                string name = "https://genius.com/" + this.NamingConventions(this.CurrentArtist + " " + this.CurrentTitle) + "-lyrics";
-                //this.labelUrlBeingChecked.Text = "https://genius.com/" + name + "-lyrics";
-                this.worker.ReportProgress(6, name);
-                while (!this.ProgressWorkerDone) { }
+                url = "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics";
             }
             var htmlWeb = new HtmlWeb();
-            while (!this.labelUrlBeingChecked.Text.StartsWith("http")) { }
-            var htmlDoc = htmlWeb.Load(this.labelUrlBeingChecked.Text);
+            //while (!this.labelUrlBeingChecked.Text.StartsWith("http")) { }
+            var htmlDoc = htmlWeb.Load(url);
             var pageTitle = htmlDoc.DocumentNode.Descendants("title").ToList()[0];
+            if (this.PagesVisited_Year.Keys.Contains(artist + album) && forAlbumYear)
+            {
+                year = this.PagesVisited_Year[artist + album].ToString();
+                return "Skip";
+            }
             if (pageTitle.InnerText == "Burrr! | Genius")
             {
                 return null;
@@ -369,24 +589,33 @@ namespace Downloader
             return htmlDoc;
         }
 
-        private void SetYearInFile()
+        private void SetYearInFile(string filename, string year)
         {
-            this.ErrorHandled = true;
-            using (var mp3 = TagLib.File.Create(this.Filename))
+            if (year != "Skip")
             {
-                //var mp3 = TagLib.File.Create(this.Filename);
-                mp3.Tag.Year = Convert.ToUInt32(this.CurrentYear);
-                mp3.Save();
+                using (var mp3 = TagLib.File.Create(filename))
+                {
+                    mp3.Tag.Year = Convert.ToUInt32(year);
+                    mp3.Save();
+                }
             }
         }
-        private void GetYear()
+        private void GetYear(ref BackgroundWorker worker, int workerIndex, string filename, ref string artist, ref string album, ref string title, ref string year, uint trackCount)
         {
+            List<string> key = new List<string>(3);
+            List<string> value = new List<string>(3);
+            key.Add(artist); key.Add(album); key.Add(title);
             while (true)
             {
-                var htmlDoc = this.CheckIfWebpageExists(true);
+                var htmlDoc = this.CheckIfWebpageExists(true, artist, album, title, ref year);
                 if (htmlDoc != null && htmlDoc.ToString() == "Skip")
                 {
-                    this.SetYearInFile();
+                    if (this.ErrorOcurred && workerIndex == this.WorkerIndexError)
+                    {
+                        this.SemError.Release();
+                        this.ErrorOcurred = false;
+                    }
+                    this.SetYearInFile(filename, year);
                     return;
                 }
                 if (htmlDoc != null)
@@ -398,22 +627,37 @@ namespace Downloader
                         yearTemp += div.InnerText.Trim();
                         break;
                     }
-                    var year = yearTemp.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    this.CurrentYear = year.Last();
-                    this.worker.ReportProgress(7);
-                    while (!this.ProgressWorkerDone) { }
-                    if (!this.PagesVisited_Year.ContainsKey(this.CurrentArtist + this.CurrentAlbum))
+                    year = yearTemp.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Last();
+                    if (!this.PagesVisited_Year.ContainsKey(artist + album))
                     {
-                        this.PagesVisited_Year.Add(this.CurrentArtist + this.CurrentAlbum, Int32.Parse(this.CurrentYear));
+                        this.PagesVisited_Year.Add(artist + album, Int32.Parse(year));
                     }
-                    this.SetYearInFile();
+                    if (this.ErrorOcurred && workerIndex == this.WorkerIndexError)
+                    {
+                        if (key[2] == value[2])
+                        {
+                            key[2] = value[2] = "";
+                        }
+                        try
+                        {
+                            this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                        }
+                        catch (ArgumentException)
+                        {
+                            this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                        }
+                        this.ErrorOcurred = false;
+                        this.WorkerIndexError = -1;
+                        this.SemError.Release();
+                    }
+                    this.SetYearInFile(filename, year);
                     return;
                 }
                 else
                 {
-                    if (this.TrackCount < 5)
+                    if (trackCount < 5)
                     {
-                        htmlDoc = this.CheckIfWebpageExists(false);
+                        htmlDoc = this.CheckIfWebpageExists(false, artist, album, title, ref year);
                         if (htmlDoc != null)
                         {
                             var soup = (HtmlAgilityPack.HtmlDocument)htmlDoc;
@@ -425,15 +669,26 @@ namespace Downloader
                                     if (div.InnerText.Contains("Release Date"))
                                     {
                                         var aux = div.InnerText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                                        //foreach (var item in aux)
-                                        //{
-                                        //    Console.WriteLine(":" + item.Trim() + ":");
-                                        //}
-                                        this.CurrentYear = aux.Last().Trim();
-                                        this.worker.ReportProgress(7);
-                                        while (!this.ProgressWorkerDone) { }
-                                        //this.textBoxYear.Text = aux.Last();
-                                        this.SetYearInFile();
+                                        year = aux.Last().Trim();
+                                        if (this.ErrorOcurred && workerIndex == this.WorkerIndexError)
+                                        {
+                                            if (key[2] == value[2])
+                                            {
+                                                key[2] = value[2] = "";
+                                            }
+                                            try
+                                            {
+                                                this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                                            }
+                                            catch (ArgumentException)
+                                            {
+                                                this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                                            }
+                                            this.ErrorOcurred = false;
+                                            this.WorkerIndexError = -1;
+                                            this.SemError.Release();
+                                        }
+                                        this.SetYearInFile(filename, year);
                                         return;
                                     }
                                 }
@@ -446,139 +701,180 @@ namespace Downloader
                                     if (div.InnerText.Contains("Release Date"))
                                     {
                                         var aux = div.InnerText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                                        //foreach (var item in aux)
-                                        //{
-                                        //    Console.WriteLine(":" + item.Trim() + ":");
-                                        //}
-                                        this.CurrentYear = aux.Last().Trim();
-                                        this.worker.ReportProgress(7);
-                                        while (!this.ProgressWorkerDone) { }
-                                        //this.textBoxYear.Text = aux.Last();
-                                        this.SetYearInFile();
+                                        year = aux.Last().Trim();
+                                        if (this.ErrorOcurred && workerIndex == this.WorkerIndexError)
+                                        {
+                                            if (key[2] == value[2])
+                                            {
+                                                key[2] = value[2] = "";
+                                            }
+                                            try
+                                            {
+                                                this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                                            }
+                                            catch (ArgumentException)
+                                            {
+                                                this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                                            }
+                                            this.ErrorOcurred = false;
+                                            this.WorkerIndexError = -1;
+                                            this.SemError.Release();
+                                        }
+                                        this.SetYearInFile(filename, year);
                                         return;
                                     }
                                 }
                             }
                         }
                     }
+                    this.SemError.WaitOne();
+                    this.WorkerIndexError = workerIndex;
+                    this.ErrorOcurred = true;
+                    SystemSounds.Exclamation.Play();
+                    if (trackCount < 5)
+                    {
+                        worker.ReportProgress(6, "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics");
+                        Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + title.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
+                    }
                     else
                     {
-                        this.ExceptionRaised = true;
-                        SystemSounds.Exclamation.Play();
-                        if (this.TrackCount < 5)
-                        {
-                            Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentTitle.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
-                        }
-                        else
-                        {
-                            Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentAlbum.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
-                        }
-                        this.ErrorHandled = false;
-                        this.worker.ReportProgress(11);
-                        //this.EnableComponents(true);
-                        while (!this.ErrorHandled)
-                        {
-                            Task.Delay(1000);
-                        }
+                        worker.ReportProgress(6, "https://www.genius.com/albums/" + this.NamingConventions(artist) + "/" + this.NamingConventions(album));
+                        Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + album.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
+                    }
+                    var paramsList = new List<string>(key); paramsList.Add(year);
+                    worker.ReportProgress(4, paramsList);
+                    this.SemErrorHandled.WaitOne();
+                    worker.ReportProgress(3);
+                    if (year == "Skip")
+                    {
+                        this.Window.LAFContainer.SongsToSkipYear.Add(key.Take(2).ToList());
+                        break;
+                    }
+                    else
+                    {
+                        string aux = "";
+                        Action update = () => aux = this.textBoxArtist.Text;
+                        this.textBoxArtist.Invoke(update);
+                        artist = aux;
+                        update = () => aux = this.textBoxAlbum.Text;
+                        this.textBoxAlbum.Invoke(update);
+                        album = aux;
+                        update = () => aux = this.textBoxTitle.Text;
+                        this.textBoxTitle.Invoke(update);
+                        title = aux;
+                        value.Add(artist); value.Add(album); value.Add(title);
                     }
                 }
 
             }
         }
-        private void SetLyricsInFile()
+
+
+        private void SetLyricsInFile(string filename, string lyrics)
         {
-            this.ErrorHandled = true;
-            using (var mp3 = TagLib.File.Create(this.Filename))
+            using (var mp3 = TagLib.File.Create(filename))
             {
-                //var mp3 = TagLib.File.Create(this.Filename);
-                mp3.Tag.Lyrics = this.CurrentLyrics;
+                //var mp3 = TagLib.File.Create(Filename);
+                mp3.Tag.Lyrics = lyrics;
                 mp3.Save();
             }
         }
-        private void GetLyrics()
+
+
+        private void GetLyrics(ref BackgroundWorker worker, int workerIndex, string filename, ref string artist, ref string album, ref string title, ref string lyrics)
         {
+            var disposable = "";
+            List<string> key = new List<string>(3);
+            List<string> value = new List<string>(3);
+            key.Add(artist); key.Add(album); key.Add(title);
             while (true)
             {
-                var htmlDoc = this.CheckIfWebpageExists(false);
+                var htmlDoc = this.CheckIfWebpageExists(false, artist, album, title, ref disposable);
                 if (htmlDoc != null)
                 {
                     var soup = (HtmlAgilityPack.HtmlDocument)htmlDoc;
                     foreach (var div in soup.DocumentNode.Descendants("div").Where(element => element.GetAttributeValue("class", "nothing") == "lyrics").ToList())
                     {
-                        this.CurrentLyrics += div.InnerText.Trim();
+                        lyrics += WebUtility.HtmlDecode(div.InnerText.Trim());
                     }
-                    if (this.CurrentLyrics != "")
+                    if (lyrics != "")
                     {
-                        this.SetLyricsInFile();
+                        if (this.ErrorOcurred && workerIndex == this.WorkerIndexError)
+                        {
+                            this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                            this.ErrorOcurred = false;
+                            this.WorkerIndexError = -1;
+                            this.SemError.Release();
+                        }
+                        this.SetLyricsInFile(filename, lyrics);
                         return;
                     }
                 }
                 else
                 {
-                    this.ExceptionRaised = true;
+                    this.SemError.WaitOne();
+                    this.WorkerIndexError = workerIndex;
+                    this.ErrorOcurred = true;
                     SystemSounds.Exclamation.Play();
-                    Process.Start(string.Format("https://www.google.com.tr/search?q={0}", this.CurrentArtist.Replace(" &", "").Replace(" ", "+") + "+" + this.CurrentTitle.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
-                    //this.EnableComponents(false);
-                    this.ErrorHandled = false;
-                    this.worker.ReportProgress(12);
-                    while (!this.ErrorHandled)
+                    worker.ReportProgress(6, "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics");
+                    Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + title.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
+                    worker.ReportProgress(5, key);
+                    this.SemErrorHandled.WaitOne();
+                    worker.ReportProgress(3);
+                    if (lyrics == "None")
                     {
-                        Task.Delay(1000);
+                        this.Window.LAFContainer.SongsToSkipLyrics.Add(key);
+                        break;
+                    }
+                    else
+                    {
+                        string aux = "";
+                        Action update = () => aux = this.textBoxArtist.Text;
+                        this.textBoxArtist.Invoke(update);
+                        artist = aux;
+                        update = () => aux = this.textBoxAlbum.Text;
+                        this.textBoxAlbum.Invoke(update);
+                        album = aux;
+                        update = () => aux = this.textBoxTitle.Text;
+                        this.textBoxTitle.Invoke(update);
+                        title = aux;
+                        value.Add(artist); value.Add(album); value.Add(title);
                     }
                 }
             }
         }
-        private void GetLyricsAndYear(object sender, DoWorkEventArgs e)
+
+        public void GetLyricsAndYear(object sender, DoWorkEventArgs e)
         {
-            foreach (string filename in this.NewFiles)
+            string currentArtist, currentAlbum, currentTitle, currentYear, currentLyrics;
+            string fileArtist, fileAlbum, fileTitle;
+            BackgroundWorker worker = sender as BackgroundWorker;
+            List<string> list = (e.Argument as List<string>);
+            int workerIndex = (int)(this.NewFiles.IndexOf(list[0]) / (this.NewFiles.Count / this.NUMBER_OF_THREADS));
+            uint trackCount;
+            bool skipSong;
+            int filesProcessed = 0;
+            Console.WriteLine(this.NewFiles.IndexOf(list[0]) + " " + this.NewFiles.IndexOf(list.Last()));
+            foreach (string filename in list)
             {
-                this.Filename = filename;
-                this.ErrorHandled = false;
-                this.CurrentLyrics = "";
-                this.ErrorHandled = true;
-                using (var mp3 = TagLib.File.Create(this.Filename))
+                currentLyrics = "";
+                using (var mp3 = TagLib.File.Create(filename))
                 {
-                    //var mp3 = TagLib.File.Create(filename);
-                    this.CurrentArtist = mp3.Tag.AlbumArtists[0];
-                    this.CurrentAlbum = mp3.Tag.Album;
-                    this.CurrentTitle = this.Window.LAFContainer.RemoveWordsFromWord(new List<string>() { "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track", "Vocal Mix", "Explicit", "explicit", "Extended" }, mp3.Tag.Title);
-                    this.CurrentYear = mp3.Tag.Year.ToString();
-                    this.TrackCount = mp3.Tag.TrackCount;
+                    currentArtist = fileArtist = mp3.Tag.AlbumArtists[0];
+                    currentAlbum = fileAlbum = mp3.Tag.Album;
+                    currentTitle = fileTitle = this.Window.LAFContainer.RemoveWordsFromWord(new List<string>() { "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track", "Vocal Mix", "Explicit", "explicit", "Extended" }, mp3.Tag.Title);
+                    currentYear = mp3.Tag.Year.ToString();
+                    trackCount = mp3.Tag.TrackCount;
                     mp3.Save();
                 }
-                this.worker.ReportProgress(0);
-                while (!this.ProgressWorkerDone) { }
-                this.Key = new List<string>() { this.CurrentArtist, this.CurrentAlbum, this.CurrentTitle };
-                //this.AddToOutput();
-                this.worker.ReportProgress(1);
-                while (!this.ProgressWorkerDone) { }
-                this.ChangeArtistAlbumTitle(true);
-                this.GetYear();
-                this.ErrorHandled = false;
-                //this.ChangeTextColor(false);
-                this.worker.ReportProgress(13);
-                while (!this.ProgressWorkerDone) { }
-                if (this.ExceptionRaised)
+                this.ChangeArtistAlbumTitle(true, ref currentArtist, ref currentAlbum, ref currentTitle, trackCount);
+                worker.ReportProgress(0, new List<string>() { currentArtist, currentAlbum, currentTitle, workerIndex.ToString() });
+                while (!this.WorkersDoneReport[workerIndex]) ;
+                this.WorkersDoneReport[workerIndex] = false;
+                skipSong = false;
+                foreach (var item in this.Window.LAFContainer.SongsToSkipYear)
                 {
-                    if (this.Key[2] == this.Value[2])
-                    {
-                        this.Key[2] = this.Value[2] = "";
-                    }
-                    try
-                    {
-                        this.Window.LAFContainer.ExceptionsReplacements[this.Key] = this.Value;
-                    }
-                    catch (ArgumentException)
-                    {
-                        this.Window.LAFContainer.ExceptionsReplacements[this.Key] = this.Value;
-                    }
-                    this.ExceptionRaised = false;
-                }
-                this.ChangeArtistAlbumTitle(false);
-                var skipSong = false;
-                foreach (var item in this.Window.LAFContainer.SongsToSkip)
-                {
-                    if (item[0] == this.CurrentArtist && item[1] == this.CurrentAlbum && item[2] == this.CurrentTitle)
+                    if (item[0] == currentArtist && item[1] == currentAlbum)
                     {
                         skipSong = true;
                         break;
@@ -586,47 +882,51 @@ namespace Downloader
                 }
                 if (!skipSong)
                 {
-                    this.GetLyrics();
-                    if (this.ExceptionRaised)
+                    this.GetYear(ref worker, workerIndex, filename, ref currentArtist, ref currentAlbum, ref currentTitle, ref currentYear, trackCount);
+                }
+                worker.ReportProgress(1, new int[] { workerIndex, this.WorkersLineIndex[workerIndex] });
+                while (!this.WorkersDoneReport[workerIndex]) ;
+                this.WorkersDoneReport[workerIndex] = false;
+                currentArtist = fileArtist;
+                currentAlbum = fileAlbum;
+                currentTitle = fileTitle;
+                this.ChangeArtistAlbumTitle(false, ref currentArtist, ref currentAlbum, ref currentTitle, trackCount);
+                skipSong = false;
+                foreach (var item in this.Window.LAFContainer.SongsToSkipLyrics)
+                {
+                    if (item[0] == currentArtist && item[1] == currentAlbum && item[2] == currentTitle)
                     {
-                        if (this.CurrentLyrics != "None")
-                        {
-                            this.Window.LAFContainer.ExceptionsReplacements[this.Key] = this.Value;
-                        }
-                        this.ExceptionRaised = false;
+                        skipSong = true;
+                        break;
                     }
                 }
-                //this.ChangeTextColor(true);
-                this.worker.ReportProgress(14);
-                while (!this.ProgressWorkerDone) { }
-                var opStatus = this.Window.LAFContainer.iTunesLibrary.AddFile(this.Filename);
+                if (!skipSong)
+                {
+                    this.GetLyrics(ref worker, workerIndex, filename, ref currentArtist, ref currentAlbum, ref currentTitle, ref currentLyrics);
+                }
+                worker.ReportProgress(2, new int[] { workerIndex, this.WorkersLineIndex[workerIndex] });
+                while (!this.WorkersDoneReport[workerIndex]) ;
+                this.WorkersDoneReport[workerIndex] = false;
+                this.MutexWorkers.WaitOne();
+                var opStatus = this.Window.LAFContainer.iTunesLibrary.AddFile(filename);
                 while (opStatus.InProgress) { }
                 var addedTrack = opStatus.Tracks[1];
-                if (Int32.Parse(this.CurrentYear) < 1985)
+                if (currentYear != "Skip" && Int32.Parse(currentYear) < 1985)
                 {
                     addedTrack.VolumeAdjustment = 50;
                 }
-                this.worker.ReportProgress(16);
-                while (!this.ProgressWorkerDone) { }
                 this.NumberFilesProcessed++;
-                this.worker.ReportProgress(15);
-                while (!this.ProgressWorkerDone) { }
-                this.Window.LAFContainer.iTunesLibrary.AddFile(this.Filename);
-                if (this.AddFileToList)
-                {
-                    this.Window.LAFContainer.AddMusicFile(this.Filename);
-                }
+                this.MutexWorkers.ReleaseMutex();
+                filesProcessed++;
+                worker.ReportProgress(7, new int[] { workerIndex, filesProcessed, list.Count });
+                while (!this.WorkersDoneReport[workerIndex]) ;
+                this.WorkersDoneReport[workerIndex] = false;
+                this.MutexWorkers.WaitOne();
+                this.Window.LAFContainer.AddMusicFile(filename);
+                this.MutexWorkers.ReleaseMutex();
             }
-            Thread saveExceptions = new Thread(this.Window.LAFContainer.SaveExceptions);
-            Thread saveMFs = new Thread(this.Window.LAFContainer.SaveMusicFiles);
-            saveExceptions.Start();
-            saveMFs.Start();
-            saveExceptions.Join();
-            saveMFs.Join();
-            //this.Window.LAFContainer.SaveExceptions();
-            //this.Window.LAFContainer.SaveMusicFiles();
-            this.worker.ReportProgress(17);
         }
+
     }
 
 }

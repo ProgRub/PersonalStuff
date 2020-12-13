@@ -81,7 +81,6 @@
             this.Name = "DownloaderForm";
             this.Text = "Downloader";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DownloaderForm_FormClosed);
-            this.Load += new System.EventHandler(this.DownloaderForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

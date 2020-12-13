@@ -45,98 +45,127 @@ namespace Downloader
                     line[0].Visible = false;
                     line[1].Visible = false;
                 }
-                this.buttonSongToSkip.Visible = false;
+                this.buttonSongSkipLyrics.Visible = false;
                 this.buttonException.Visible = false;
                 this.buttonURLReplacement.Visible = false;
                 this.buttonGrimeArtistConfirm.Text = "Confirm";
                 this.Window.AcceptButton = this.buttonGrimeArtistConfirm;
+                return;
             }
-            else
+            this.Window.AcceptButton = null;
+            this.NeedsConfirm = !this.NeedsConfirm;
+            this.listBoxToDelete.Items.Clear();
+            switch (this.Mode)
             {
-                this.Window.AcceptButton = null;
-                this.NeedsConfirm = !this.NeedsConfirm;
-                this.listBoxToDelete.Items.Clear();
-                switch (this.Mode)
-                {
-                    case 0:
-                        string grimeArtist = this.textBox1.Text.Trim();
-                        if (grimeArtist != "" && !this.Window.LAFContainer.GrimeArtists.Contains(grimeArtist))
+                case 0:
+                    string grimeArtist = this.textBox1.Text.Trim();
+                    if (grimeArtist != "" && !this.Window.LAFContainer.GrimeArtists.Contains(grimeArtist))
+                    {
+                        this.Window.LAFContainer.GrimeArtists.Add(grimeArtist);
+                        this.listBoxToDelete.Items.Add(grimeArtist);
+                    }
+                    this.Window.LAFContainer.SaveGrimeArtists();
+                    break;
+                case 1:
+                    string artist = this.textBox1.Text.Trim();
+                    string album = this.textBox2.Text.Trim();
+                    string title = this.textBox3.Text.Trim();
+                    if (artist != "" && album != "" && title != "")
+                    {
+                        bool contains = false;
+                        foreach (var item in this.Window.LAFContainer.SongsToSkipLyrics)
                         {
-                            this.Window.LAFContainer.GrimeArtists.Add(grimeArtist);
-                            this.listBoxToDelete.Items.Add(grimeArtist);
-                        }
-                        this.Window.LAFContainer.SaveGrimeArtists();
-                        break;
-                    case 1:
-                        string artist = this.textBox1.Text.Trim();
-                        string album = this.textBox2.Text.Trim();
-                        string title = this.textBox3.Text.Trim();
-                        if (artist != "" && album != "" && title != "")
-                        {
-                            bool contains = false;
-                            foreach (var item in this.Window.LAFContainer.SongsToSkip)
+                            if (item[0] == artist && item[1] == album && item[2] == title)
                             {
-                                if (item[0] == artist && item[1] == album && item[2] == title)
-                                {
-                                    contains = true;
-                                    break;
-                                }
-                            }
-                            if (!contains)
-                            {
-                                var list = new List<string>() { artist, album, title };
-                                this.Window.LAFContainer.SongsToSkip.Add(list);
-                                this.listBoxToDelete.Items.Add(string.Join(" | ", list));
+                                contains = true;
+                                break;
                             }
                         }
-                        this.Window.LAFContainer.SaveExceptions();
-                        break;
-                    case 2:
-                        string oldArtist = this.textBox1.Text.Trim();
-                        string oldAlbum = this.textBox2.Text.Trim();
-                        string oldTitle = this.textBox3.Text.Trim();
-                        string newArtist = this.textBox4.Text.Trim();
-                        string newAlbum = this.textBox5.Text.Trim();
-                        string newTitle = this.textBox6.Text.Trim();
-                        if (oldArtist != "" && oldAlbum != "" && newArtist != "" && newAlbum != "")
+                        if (!contains)
                         {
-                            var oldList = new List<string>() { oldArtist, oldAlbum, oldTitle };
-                            var newList = new List<string>() { newArtist, newAlbum, newTitle };
-                            this.Window.LAFContainer.ExceptionsReplacements[oldList] = newList;
-                            this.listBoxToDelete.Items.Add(string.Join(" | ", oldList) + " ---> " + string.Join(" | ", newList));
+                            var list = new List<string>() { artist, album, title };
+                            this.Window.LAFContainer.SongsToSkipLyrics.Add(list);
+                            this.listBoxToDelete.Items.Add(string.Join(" | ", list));
                         }
-                        this.Window.LAFContainer.SaveExceptions();
-                        break;
-                    case 3:
-                        string auxToReplace = this.textBox1.Text.Trim();
-                        string auxReplacement = this.textBox2.Text.Trim();
-                        if (auxToReplace.StartsWith("\"") && auxToReplace.EndsWith("\"") && auxReplacement.StartsWith("\"") && auxReplacement.EndsWith("\""))
-                        {
-                            string toReplace = auxToReplace.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
-                            string replacement = auxReplacement.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
-                            this.Window.LAFContainer.UrlReplacements[toReplace] = replacement;
-                            this.listBoxToDelete.Items.Add("\"" + toReplace + "\" ---> \"" + replacement + "\"");
-                        }
-                        this.Window.LAFContainer.SaveExceptions();
-                        break;
-                    default:
-                        break;
-                }
-                foreach (var line in ComponentsByLine)
-                {
-                    line[0].Visible = true;
-                    line[0].Text = "Input";
-                    line[1].Visible = true;
-                    line[1].Text = "";
-                }
-                this.buttonSongToSkip.Visible = true;
-                this.buttonException.Visible = true;
-                this.buttonURLReplacement.Visible = true;
-                this.buttonGrimeArtistConfirm.Text = "Grime Artist";
+                    }
+                    this.Window.LAFContainer.SaveExceptions();
+                    break;
+                case 2:
+                    string oldArtist = this.textBox1.Text.Trim();
+                    string oldAlbum = this.textBox2.Text.Trim();
+                    string oldTitle = this.textBox3.Text.Trim();
+                    string newArtist = this.textBox4.Text.Trim();
+                    string newAlbum = this.textBox5.Text.Trim();
+                    string newTitle = this.textBox6.Text.Trim();
+                    if (oldArtist != "" && oldAlbum != "" && newArtist != "" && newAlbum != "")
+                    {
+                        var oldList = new List<string>() { oldArtist, oldAlbum, oldTitle };
+                        var newList = new List<string>() { newArtist, newAlbum, newTitle };
+                        this.Window.LAFContainer.ExceptionsReplacements[oldList] = newList;
+                        this.listBoxToDelete.Items.Add(string.Join(" | ", oldList) + " ---> " + string.Join(" | ", newList));
+                    }
+                    this.Window.LAFContainer.SaveExceptions();
+                    break;
+                case 3:
+                    string artistYear = this.textBox1.Text.Trim();
+                    string albumYear = this.textBox2.Text.Trim();
+                    if (artistYear != "" && albumYear != "")
+                    {
+                        var songToSkip = new List<string>() { artistYear, albumYear };
+                        this.Window.LAFContainer.SongsToSkipYear.Add(songToSkip);
+                        this.listBoxToDelete.Items.Add(string.Join(" | ", songToSkip));
+                    }
+                    this.Window.LAFContainer.SaveExceptions();
+                    break;
+                case 4:
+                    string auxToReplace = this.textBox1.Text.Trim();
+                    string auxReplacement = this.textBox2.Text.Trim();
+                    if (auxToReplace.StartsWith("\"") && auxToReplace.EndsWith("\"") && auxReplacement.StartsWith("\"") && auxReplacement.EndsWith("\""))
+                    {
+                        string toReplace = auxToReplace.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
+                        string replacement = auxReplacement.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
+                        this.Window.LAFContainer.UrlReplacements[toReplace] = replacement;
+                        this.listBoxToDelete.Items.Add("\"" + toReplace + "\" ---> \"" + replacement + "\"");
+                    }
+                    this.Window.LAFContainer.SaveExceptions();
+                    break;
+                default:
+                    break;
             }
+            foreach (var line in ComponentsByLine)
+            {
+                line[0].Visible = true;
+                line[0].Text = "Input";
+                line[1].Visible = true;
+                line[1].Text = "";
+            }
+            this.buttonSongSkipYear.Visible = true;
+            this.buttonSongSkipLyrics.Visible = true;
+            this.buttonException.Visible = true;
+            this.buttonURLReplacement.Visible = true;
+            this.buttonGrimeArtistConfirm.Text = "Grime Artist";
         }
 
-        private void buttonSongToSkip_Click(object sender, EventArgs e)
+        private void buttonSongSkipYear_Click(object sender, EventArgs e)
+        {
+            this.NeedsConfirm = !this.NeedsConfirm;
+            this.Mode = 3;
+            this.AddToListbox();
+            this.label1.Text = "Artist";
+            this.label2.Text = "Album";
+            foreach (var line in ComponentsByLine.Skip(2))
+            {
+                line[0].Visible = false;
+                line[1].Visible = false;
+            }
+            this.buttonSongSkipYear.Visible = false;
+            this.buttonSongSkipLyrics.Visible = false;
+            this.buttonException.Visible = false;
+            this.buttonURLReplacement.Visible = false;
+            this.buttonGrimeArtistConfirm.Text = "Confirm";
+        }
+
+        private void buttonSongToSkipLyrics_Click(object sender, EventArgs e)
         {
             this.NeedsConfirm = !this.NeedsConfirm;
             this.Mode = 1;
@@ -149,7 +178,8 @@ namespace Downloader
                 line[0].Visible = false;
                 line[1].Visible = false;
             }
-            this.buttonSongToSkip.Visible = false;
+            this.buttonSongSkipYear.Visible = false;
+            this.buttonSongSkipLyrics.Visible = false;
             this.buttonException.Visible = false;
             this.buttonURLReplacement.Visible = false;
             this.buttonGrimeArtistConfirm.Text = "Confirm";
@@ -166,7 +196,8 @@ namespace Downloader
             this.label4.Text = "New Artist";
             this.label5.Text = "New Album";
             this.label6.Text = "New Title";
-            this.buttonSongToSkip.Visible = false;
+            this.buttonSongSkipYear.Visible = false;
+            this.buttonSongSkipLyrics.Visible = false;
             this.buttonException.Visible = false;
             this.buttonURLReplacement.Visible = false;
             this.buttonGrimeArtistConfirm.Text = "Confirm";
@@ -175,7 +206,7 @@ namespace Downloader
         private void buttonURLReplacement_Click(object sender, EventArgs e)
         {
             this.NeedsConfirm = !this.NeedsConfirm;
-            this.Mode = 3;
+            this.Mode = 4;
             this.AddToListbox();
             this.label1.Text = "To Replace";
             this.label2.Text = "Replacement";
@@ -184,7 +215,8 @@ namespace Downloader
                 line[0].Visible = false;
                 line[1].Visible = false;
             }
-            this.buttonSongToSkip.Visible = false;
+            this.buttonSongSkipYear.Visible = false;
+            this.buttonSongSkipLyrics.Visible = false;
             this.buttonException.Visible = false;
             this.buttonURLReplacement.Visible = false;
             this.buttonGrimeArtistConfirm.Text = "Confirm";
@@ -217,11 +249,11 @@ namespace Downloader
                                 string artist = listItem[0];
                                 string album = listItem[1];
                                 string title = listItem[2];
-                                foreach (var song in this.Window.LAFContainer.SongsToSkip)
+                                foreach (var song in this.Window.LAFContainer.SongsToSkipLyrics)
                                 {
                                     if (song[0] == artist && song[1] == album && song[2] == title)
                                     {
-                                        this.Window.LAFContainer.SongsToSkip.Remove(song);
+                                        this.Window.LAFContainer.SongsToSkipLyrics.Remove(song);
                                     }
                                 }
                                 this.listBoxToDelete.Items.RemoveAt(index);
@@ -256,6 +288,26 @@ namespace Downloader
                         {
                             if (this.listBoxToDelete.GetSelected(index))
                             {
+                                List<string> song = this.listBoxToDelete.Items[index].ToString().Split(new string[] { " | " }, StringSplitOptions.None).ToList();
+                                foreach (var key in this.Window.LAFContainer.ExceptionsReplacements.Keys)
+                                {
+                                    if (key[0] == song[0] && key[1] == song[1])
+                                    {
+                                        this.Window.LAFContainer.SongsToSkipYear.Remove(key);
+                                        break;
+                                    }
+                                }
+                                this.listBoxToDelete.Items.RemoveAt(index);
+                                index--;
+                            }
+                        }
+                        this.Window.LAFContainer.SaveExceptions();
+                        break;
+                    case 4:
+                        for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
+                        {
+                            if (this.listBoxToDelete.GetSelected(index))
+                            {
                                 string[] auxList = this.listBoxToDelete.Items[index].ToString().Split(new string[] { " ---> " }, StringSplitOptions.None);
                                 string auxToReplace = auxList[0];
                                 string toReplace = auxToReplace.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
@@ -271,6 +323,12 @@ namespace Downloader
                 }
             }
         }
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
+            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
+            this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
+        }
         #endregion
         private void AddToListbox()
         {
@@ -280,7 +338,7 @@ namespace Downloader
                     this.listBoxToDelete.Items.AddRange(this.Window.LAFContainer.GrimeArtists.ToArray());
                     break;
                 case 1:
-                    foreach (var song in this.Window.LAFContainer.SongsToSkip)
+                    foreach (var song in this.Window.LAFContainer.SongsToSkipLyrics)
                     {
                         this.listBoxToDelete.Items.Add(string.Join(" | ", song));
                     }
@@ -292,6 +350,12 @@ namespace Downloader
                     }
                     break;
                 case 3:
+                    foreach (var song in this.Window.LAFContainer.SongsToSkipYear)
+                    {
+                        this.listBoxToDelete.Items.Add(string.Join(" | ", song));
+                    }
+                    break;
+                case 4:
                     foreach (var old in this.Window.LAFContainer.UrlReplacements.Keys)
                     {
                         this.listBoxToDelete.Items.Add("\"" + old + "\" ---> \"" + this.Window.LAFContainer.UrlReplacements[old] + "\"");
@@ -300,13 +364,6 @@ namespace Downloader
                 default:
                     break;
             }
-        }
-
-        private void buttonBack_Click(object sender, EventArgs e)
-        {
-            this.Dispose();
-            this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
-            this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
         }
     }
 }

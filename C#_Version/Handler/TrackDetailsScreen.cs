@@ -103,7 +103,6 @@ namespace Handler
             this.Window.ActiveControl = this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0];
             this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0].Visible = true;
             this.NUMBER_OF_THREADS = Math.Min(this.Tracks.Count, this.NUMBER_OF_THREADS);
-            int tracksPerThread = this.Tracks.Count / NUMBER_OF_THREADS;
             Thread[] threads = new Thread[NUMBER_OF_THREADS+1];
             for (int i = 0; i < threads.Length; i++)
             {

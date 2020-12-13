@@ -19,7 +19,7 @@ namespace Downloader
         public string CurrentDirectory { get; }
 
         public List<MusicFile> MusicFiles;
-        public List<List<string>> SongsToSkip;
+        public List<List<string>> SongsToSkipLyrics, SongsToSkipYear;
         public List<Album> Albums;
         public Dictionary<List<string>, List<string>> ExceptionsReplacements;
         public Dictionary<string, string> UrlReplacements;
@@ -29,9 +29,11 @@ namespace Downloader
         private readonly string DetailsFile, SongsFile, ExceptionsFile;
         private int NumberOfFilesFromFile;
         private double LastModifiedTimeFromFile;
-        public iTunesApp iTunes { get; }
-        public IITLibraryPlaylist iTunesLibrary { get; }
+        public iTunesApp iTunes;
+        public IITLibraryPlaylist iTunesLibrary;
 
+#warning TODO: Handle exceptions for missing files
+#warning TODO: Delete song exceptions for songs that no longer exist (? maybe, bigger database means less errors for other people)
         public ListsAndFiles()
         {
             this.CurrentDirectory = Directory.GetCurrentDirectory();
@@ -43,15 +45,14 @@ namespace Downloader
             this.MusicDestinyDirectory = null;
             this.ExceptionsReplacements = new Dictionary<List<string>, List<string>>();
             this.UrlReplacements = new Dictionary<string, string>();
-            this.SongsToSkip = new List<List<string>>();
+            this.SongsToSkipLyrics = new List<List<string>>();
+            this.SongsToSkipYear = new List<List<string>>();
             this.GrimeArtists = new List<string>();
             this.GenresColors = new Dictionary<string, string>();
             this.WorkoutDatabase = new Dictionary<string, List<int>>();
             this.MusicFiles = new List<MusicFile>();
             this.Albums = new List<Album>();
             this.GetAllFromFiles();
-            this.iTunes = new iTunesApp();
-            this.iTunesLibrary = this.iTunes.LibraryPlaylist;
         }
 
         public string RemoveWordsFromWord(List<string> setOfWords, string wordPar)
@@ -77,7 +78,7 @@ namespace Downloader
                             startParenthesisPosition = word.IndexOf("[");
                             endParenthesisPosition = word.IndexOf("]");
                         }
-                        if (startParenthesisPosition!=-1 && word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1).Contains(wordToRemove))
+                        if (startParenthesisPosition != -1 && word.Substring(startParenthesisPosition, endParenthesisPosition - startParenthesisPosition + 1).Contains(wordToRemove))
                         {
                             word = this.RemoveWordsFromWord(setOfWords, word.Remove(startParenthesisPosition - 1, endParenthesisPosition - startParenthesisPosition + 2));
                         }
@@ -102,6 +103,11 @@ namespace Downloader
             return word.Trim();
         }
 
+        public void openITunes()
+        {
+            this.iTunes = new iTunesApp();
+            this.iTunesLibrary = this.iTunes.LibraryPlaylist;
+        }
         public void TagChanges(string filename)
         {
             using (var mp3 = TagLib.File.Create(filename))
@@ -150,15 +156,15 @@ namespace Downloader
                 {
                     mp3.Tag.Genres = new string[] { "Grime" };
                 }
-                else if (mp3.Tag.Genres[0].Contains("Electro"))
+                else if (mp3.Tag.Genres.Contains("Electro"))
                 {
                     mp3.Tag.Genres = new string[] { "Electro" };
                 }
-                else if (mp3.Tag.Genres[0].Contains("Rock"))
+                else if (mp3.Tag.Genres.Contains("Rock"))
                 {
                     mp3.Tag.Genres = new string[] { "Rock" };
                 }
-                else if (mp3.Tag.Genres[0].Contains("Rap"))
+                else if (mp3.Tag.Genres.Contains("Rap"))
                 {
                     mp3.Tag.Genres = new string[] { "Hip Hop" };
                 }
@@ -176,7 +182,7 @@ namespace Downloader
             files = files.OrderBy(x => File.GetLastWriteTime(x).ToFileTime()).ToList();
             try
             {
-                return File.GetLastWriteTime(files[files.Count-1]).ToFileTime();
+                return File.GetLastWriteTime(files[files.Count - 1]).ToFileTime();
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -264,7 +270,7 @@ namespace Downloader
         {
             this.UrlReplacements.Clear();
             this.ExceptionsReplacements.Clear();
-            this.SongsToSkip.Clear();
+            this.SongsToSkipLyrics.Clear();
             XDocument xmlDocument = XDocument.Load(this.ExceptionsFile);
             var exceptions = xmlDocument.Root.Elements("Exception").ToList();
             foreach (XElement item in exceptions)
@@ -280,12 +286,18 @@ namespace Downloader
                     string newTitle = item.Element("NewTitle").Value;
                     this.ExceptionsReplacements[new List<string>() { oldArtist, oldAlbum, oldTitle }] = new List<string>() { newArtist, newAlbum, newTitle };
                 }
-                else
+                else if(typeOfException==1)
                 {
                     string artist = item.Element("Artist").Value;
                     string album = item.Element("Album").Value;
                     string title = item.Element("Title").Value;
-                    this.SongsToSkip.Add(new List<string>() { artist, album, title });
+                    this.SongsToSkipLyrics.Add(new List<string>() { artist, album, title });
+                }
+                else
+                {
+                    string artist = item.Element("Artist").Value;
+                    string album = item.Element("Album").Value;
+                    this.SongsToSkipYear.Add(new List<string>() { artist, album, "" });
                 }
             }
             var urlReplacementsPairs = xmlDocument.Root.Elements("Pair").ToList();
@@ -400,7 +412,7 @@ namespace Downloader
                 child.Add(newTitle);
                 xmlDocument.Root.Add(child);
             }
-            foreach (List<string> song in this.SongsToSkip)
+            foreach (List<string> song in this.SongsToSkipLyrics)
             {
                 XElement child = new XElement("Exception");
                 child.SetAttributeValue("type", 1.ToString());
@@ -410,6 +422,16 @@ namespace Downloader
                 child.Add(artist);
                 child.Add(album);
                 child.Add(title);
+                xmlDocument.Root.Add(child);
+            }
+            foreach (List<string> song in this.SongsToSkipYear)
+            {
+                XElement child = new XElement("Exception");
+                child.SetAttributeValue("type", 2.ToString());
+                XElement artist = new XElement("Artist", song[0]);
+                XElement album = new XElement("Album", song[1]);
+                child.Add(artist);
+                child.Add(album);
                 xmlDocument.Root.Add(child);
             }
             foreach (string old in this.UrlReplacements.Keys)
@@ -473,5 +495,20 @@ namespace Downloader
             }
         }
 
+        public IITTrack GetITunesTrack(string title, string album)
+        {
+            var tracks = this.iTunesLibrary.Search(title, ITPlaylistSearchField.ITPlaylistSearchFieldSongNames);
+            if (tracks != null)
+            {
+                for (int index = 1; index <= tracks.Count; index++)
+                {
+                    if (tracks[index].Album == album)
+                    {
+                        return tracks[index];
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

@@ -4,13 +4,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading;
-using System.Xml;
 using System.Xml.Linq;
 using iTunesLib;
-using Microsoft.VisualBasic.FileIO;
 
 namespace Handler
 {
@@ -24,8 +20,6 @@ namespace Handler
         public List<MusicFile> MusicFiles;
         public List<List<string>> SongsToSkip;
         public List<Album> Albums;
-        public Dictionary<List<string>, List<string>> ExceptionsReplacements;
-        public Dictionary<string, string> UrlReplacements;
         public List<string> GrimeArtists, Files;
         public Dictionary<string, Color> GenresColors;
         public Dictionary<string, List<int>> WorkoutDatabase;
@@ -37,6 +31,7 @@ namespace Handler
         private const int NUMBER_OF_THREADS = 15;
         public Thread backgroundWork;
 
+#warning TODO: Handle exceptions for missing files
         public ListsAndFiles()
         {
             this.CurrentDirectory = Directory.GetCurrentDirectory();
@@ -46,8 +41,6 @@ namespace Handler
             this.DownloadsDirectory = null;
             this.MusicOriginDirectory = null;
             this.MusicDestinyDirectory = null;
-            this.ExceptionsReplacements = new Dictionary<List<string>, List<string>>();
-            this.UrlReplacements = new Dictionary<string, string>();
             this.SongsToSkip = new List<List<string>>();
             this.GrimeArtists = new List<string>();
             this.GenresColors = new Dictionary<string, Color>();
@@ -206,7 +199,6 @@ namespace Handler
             this.GetGenreColors();
             this.GetWorkoutDatabase();
             this.GetGrimeArtists();
-            this.GetExceptions();
             this.GetMusicFiles();
         }
 
@@ -274,45 +266,6 @@ namespace Handler
             this.GrimeArtists = new List<string>(from artist in aux select artist.Value);
         }
 
-        private void GetExceptions()
-        {
-            this.UrlReplacements.Clear();
-            this.ExceptionsReplacements.Clear();
-            this.SongsToSkip.Clear();
-            XDocument xmlDocument = XDocument.Load(this.ExceptionsFile);
-            var exceptions = xmlDocument.Root.Elements("Exception").ToList();
-            foreach (XElement item in exceptions)
-            {
-                int typeOfException = Int32.Parse(item.Attribute("type").Value);
-                if (typeOfException == 0)
-                {
-                    string oldArtist = item.Element("OldArtist").Value;
-                    string oldAlbum = item.Element("OldAlbum").Value;
-                    string oldTitle = item.Element("OldTitle").Value;
-                    string newArtist = item.Element("NewArtist").Value;
-                    string newAlbum = item.Element("NewAlbum").Value;
-                    string newTitle = item.Element("NewTitle").Value;
-                    this.ExceptionsReplacements[new List<string>() { oldArtist, oldAlbum, oldTitle }] = new List<string>() { newArtist, newAlbum, newTitle };
-                }
-                else
-                {
-                    string artist = item.Element("Artist").Value;
-                    string album = item.Element("Album").Value;
-                    string title = item.Element("Title").Value;
-                    this.SongsToSkip.Add(new List<string>() { artist, album, title });
-                }
-            }
-            var urlReplacementsPairs = xmlDocument.Root.Elements("Pair").ToList();
-            foreach (XElement item in urlReplacementsPairs)
-            {
-                string auxOld = item.Element("Old").Value;
-                string old = auxOld.Substring(auxOld.IndexOf("\"") + 1, auxOld.LastIndexOf("\"") - auxOld.IndexOf("\"") - 1);
-                string auxNew = item.Element("New").Value;
-                string replacement = auxNew.Substring(auxNew.IndexOf("\"") + 1, auxNew.LastIndexOf("\"") - auxNew.IndexOf("\"") - 1);
-                this.UrlReplacements[old] = replacement;
-            }
-
-        }
 
         private void GetMusicFiles()
         {
@@ -469,7 +422,6 @@ namespace Handler
             //Console.WriteLine(this.LastModifiedTimeFromFile);
             //Console.WriteLine(this.GetLastModifiedTime());
             this.Files = this.Files.Where(x => File.GetLastWriteTime(x).ToFileTime() > this.LastModifiedTimeFromFile).ToList();
-            int filesPerThread = this.Files.Count / NUMBER_OF_THREADS;
             Thread[] threads = new Thread[NUMBER_OF_THREADS + 1];
             if (this.Files.Count > 0)
             {
@@ -483,7 +435,6 @@ namespace Handler
                     threads[i].Join();
                 }
             }
-            filesPerThread = this.MusicFiles.Count / NUMBER_OF_THREADS;
             threads = new Thread[NUMBER_OF_THREADS + 1];
             for (int i = 0; i < threads.Length; i++)
             {
@@ -574,7 +525,6 @@ namespace Handler
                 }
             }
         }
-
 
         private void UpdatePlayCounts(object arg)
         {

@@ -30,36 +30,38 @@ namespace Handler
             this.listBoxResults.Items.AddRange(this.Window.LAFContainer.MusicFiles.Select(x => x.Filename).ToArray());
         }
 
+#warning TODO: Fix this, when searching with two parameters, the second parameter doesn't care about the first one
+
         #region Event Handlers
 
         private void textBoxAlbumArtist_TextChanged(object sender, EventArgs e)
         {
-            this.UpdateResults(0);
+            this.UpdateResults();
         }
 
         private void textBoxContributingArtist_TextChanged(object sender, EventArgs e)
         {
-            this.UpdateResults(1);
+            this.UpdateResults();
         }
 
         private void textBoxAlbum_TextChanged(object sender, EventArgs e)
         {
-            this.UpdateResults(2);
+            this.UpdateResults();
         }
 
         private void textBoxTitle_TextChanged(object sender, EventArgs e)
         {
-            this.UpdateResults(3);
+            this.UpdateResults();
         }
 
         private void textBoxYear_TextChanged(object sender, EventArgs e)
         {
-            this.UpdateResults(4);
+            this.UpdateResults();
         }
 
         private void textBoxGenre_TextChanged(object sender, EventArgs e)
         {
-            this.UpdateResults(5);
+            this.UpdateResults();
         }
 
         private void listBoxResults_KeyDown(object sender, KeyEventArgs e)
@@ -102,117 +104,93 @@ namespace Handler
         }
         #endregion
 
-        private void UpdateResults(int whichOne)
+        private void UpdateResults()
         {
             List<MusicFile> results = new List<MusicFile>(this.Window.LAFContainer.MusicFiles);
             int lenResults = results.Count;
             int index = 0;
-            switch (whichOne)
+            bool removedItem = false;
+            bool over;
+            bool under;
+            while (index < lenResults)
             {
-                case 0: //Album Artist
-                    while (index < lenResults)
-                    {
-                        if (!results[index].AlbumArtist.ToLower().Contains(this.textBoxAlbumArtist.Text.ToLower()))
-                        {
-                            results.RemoveAt(index);
-                            index--;
-                            lenResults--;
-                        }
-                        index++;
-                    }
-                    break;
-                case 1: //Contributing Artist
-                    while (index < lenResults)
-                    {
-                        if (!results[index].ContributingArtists.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.ToLower()).Contains(this.textBoxContributingArtist.Text.ToLower()))
-                        {
-                            results.RemoveAt(index);
-                            index--;
-                            lenResults--;
-                        }
-                        index++;
-                    }
-                    break;
-                case 2: //Album
-                    while (index < lenResults)
-                    {
-                        if (!results[index].Album.ToLower().Contains(this.textBoxAlbum.Text.ToLower()))
-                        {
-                            results.RemoveAt(index);
-                            index--;
-                            lenResults--;
-                        }
-                        index++;
-                    }
-                    break;
-                case 3: //Title
-                    while (index < lenResults)
-                    {
-                        if (!results[index].Title.ToLower().Contains(this.textBoxTitle.Text.ToLower()))
-                        {
-                            results.RemoveAt(index);
-                            index--;
-                            lenResults--;
-                        }
-                        index++;
-                    }
-                    break;
-                case 4: //Year
-                    bool over = this.textBoxYear.Text.StartsWith(">");
-                    bool under = this.textBoxYear.Text.StartsWith("<");
+                removedItem = false;
+                if (this.textBoxAlbumArtist.Text != "" && !results[index].AlbumArtist.ToLower().Contains(this.textBoxAlbumArtist.Text.ToLower()))
+                {
+                    results.RemoveAt(index);
+                    index--;
+                    lenResults--;
+                    removedItem = true;
+                }
+                if (!removedItem && this.textBoxContributingArtist.Text != "" && !results[index].ContributingArtists.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.ToLower()).Contains(this.textBoxContributingArtist.Text.ToLower()))
+                {
+                    results.RemoveAt(index);
+                    index--;
+                    lenResults--;
+                    removedItem = true;
+                }
+                if (!removedItem && this.textBoxAlbum.Text != "" && !results[index].Album.ToLower().Contains(this.textBoxAlbum.Text.ToLower()))
+                {
+                    results.RemoveAt(index);
+                    index--;
+                    lenResults--;
+                    removedItem = true;
+                }
+                if (!removedItem && this.textBoxTitle.Text != "" && !results[index].Title.ToLower().Contains(this.textBoxTitle.Text.ToLower()))
+                {
+                    results.RemoveAt(index);
+                    index--;
+                    lenResults--;
+                    removedItem = true;
+                }
+                if (!removedItem && this.textBoxYear.Text != "")
+                {
+                    over = this.textBoxYear.Text.StartsWith(">");
+                    under = this.textBoxYear.Text.StartsWith("<");
                     try
                     {
                         int year = !over & !under ? Int32.Parse(this.textBoxYear.Text) : Int32.Parse(this.textBoxYear.Text.Substring(1));
-                        while (index < lenResults)
+                        if (over)
                         {
-                            if (over)
+                            if (results[index].Year <= year)
                             {
-                                if (results[index].Year <= year)
-                                {
-                                    results.RemoveAt(index);
-                                    index--;
-                                    lenResults--;
-                                }
+                                results.RemoveAt(index);
+                                index--;
+                                lenResults--;
+                                removedItem = true;
                             }
-                            else if (under)
+                        }
+                        else if (under)
+                        {
+                            if (results[index].Year >= year)
                             {
-                                if (results[index].Year >= year)
-                                {
-                                    results.RemoveAt(index);
-                                    index--;
-                                    lenResults--;
-                                }
+                                results.RemoveAt(index);
+                                index--;
+                                lenResults--;
+                                removedItem = true;
                             }
-                            else
+                        }
+                        else
+                        {
+                            if ( year != results[index].Year)
                             {
-                                if (year != results[index].Year)
-                                {
-                                    results.RemoveAt(index);
-                                    index--;
-                                    lenResults--;
-                                }
+                                results.RemoveAt(index);
+                                index--;
+                                lenResults--;
+                                removedItem = true;
                             }
-                            index++;
                         }
                     }
-                    catch (FormatException)
-                    {
-                    }
-                    break;
-                case 5: //Genre
-                    while (index < lenResults)
-                    {
-                        if (!results[index].Genre.ToLower().Contains(this.textBoxGenre.Text.ToLower()))
-                        {
-                            results.RemoveAt(index);
-                            index--;
-                            lenResults--;
-                        }
-                        index++;
-                    }
-                    break;
-                default:
-                    break;
+                    catch (FormatException) { }
+                }
+                if (!removedItem && this.textBoxGenre.Text != "" && !results[index].Genre.ToLower().Contains(this.textBoxGenre.Text.ToLower()))
+                {
+                    results.RemoveAt(index);
+                    index--;
+                    lenResults--;
+                    removedItem = true;
+                }
+                index++;
             }
             this.listBoxResults.Items.Clear();
             this.listBoxResults.Items.AddRange(results.Select(x => x.Filename).ToArray());

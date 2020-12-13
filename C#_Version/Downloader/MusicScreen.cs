@@ -26,6 +26,7 @@ namespace Downloader
         {
             InitializeComponent();
             this.Window = window;
+            this.Window.LAFContainer.openITunes();
             this.Window.AcceptButton = this.buttonEndCycleAdvance;
             this.NumberFilesFound = 0;
             this.FileBuffer = new List<string>();
@@ -75,6 +76,7 @@ namespace Downloader
                 {
                     string oldArtist = "";
                     string oldAlbum = "";
+                    string newTitle = "";
                     string newArtist = "";
                     string newAlbum = "";
                     using (var mp3ToSend = TagLib.File.Create(oldFilename))
@@ -87,11 +89,18 @@ namespace Downloader
                     {
                         newArtist = mp3ToCheck.Tag.AlbumArtists[0];
                         newAlbum = mp3ToCheck.Tag.Album;
+                        newTitle = mp3ToCheck.Tag.Title;
                         mp3ToCheck.Save();
                     }
-                    //var mp3ToSend = TagLib.File.Create(oldFilename);
-                    //var mp3ToCheck = TagLib.File.Create(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
-                    if (oldArtist == newArtist && oldAlbum == newAlbum)
+                    if (oldArtist == newArtist && oldAlbum != newAlbum)
+                    {
+                        FileSystem.DeleteFile(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename), UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        this.Window.LAFContainer.GetITunesTrack(newTitle, newAlbum).Delete();
+                        File.Move(oldFilename, Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
+                        this.TextBoxFilesMoved.AppendText(Path.GetFileName(oldFilename) + " REPLACED" + Environment.NewLine);
+                        this.NewFiles.Add(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, newFilename));
+                    }
+                    else if (oldArtist == newArtist && oldAlbum == newAlbum)
                     {
                         FileSystem.DeleteFile(oldFilename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         this.TextBoxFilesMoved.AppendText(Path.GetFileName(oldFilename) + " already exists, DELETED" + Environment.NewLine);
@@ -161,7 +170,7 @@ namespace Downloader
             else
             {
                 this.Hide();
-                YearLyricsScreen aux = new YearLyricsScreen(this.Window,this.NewFiles, true);
+                YearLyricsScreen aux = new YearLyricsScreen(this.Window,this.NewFiles);
                 aux.Dock = DockStyle.Fill;
                 this.Window.Controls.Add(aux);
                 this.Window.ActiveControl = aux;

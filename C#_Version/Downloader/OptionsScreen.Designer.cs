@@ -45,8 +45,9 @@
             this.buttonException = new System.Windows.Forms.Button();
             this.buttonURLReplacement = new System.Windows.Forms.Button();
             this.listBoxToDelete = new System.Windows.Forms.ListBox();
-            this.buttonSongToSkip = new System.Windows.Forms.Button();
+            this.buttonSongSkipLyrics = new System.Windows.Forms.Button();
             this.buttonBack = new System.Windows.Forms.Button();
+            this.buttonSongSkipYear = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // labelTitle
@@ -220,7 +221,7 @@
             this.buttonException.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
             this.buttonException.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonException.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
-            this.buttonException.Location = new System.Drawing.Point(200, 320);
+            this.buttonException.Location = new System.Drawing.Point(200, 330);
             this.buttonException.Name = "buttonException";
             this.buttonException.Size = new System.Drawing.Size(121, 23);
             this.buttonException.TabIndex = 14;
@@ -259,23 +260,23 @@
             this.listBoxToDelete.TabIndex = 16;
             this.listBoxToDelete.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listBoxToDelete_KeyDown);
             // 
-            // buttonSongToSkip
+            // buttonSongSkipLyrics
             // 
-            this.buttonSongToSkip.AutoSize = true;
-            this.buttonSongToSkip.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.buttonSongToSkip.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
-            this.buttonSongToSkip.FlatAppearance.BorderSize = 0;
-            this.buttonSongToSkip.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
-            this.buttonSongToSkip.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
-            this.buttonSongToSkip.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.buttonSongToSkip.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
-            this.buttonSongToSkip.Location = new System.Drawing.Point(200, 280);
-            this.buttonSongToSkip.Name = "buttonSongToSkip";
-            this.buttonSongToSkip.Size = new System.Drawing.Size(82, 23);
-            this.buttonSongToSkip.TabIndex = 17;
-            this.buttonSongToSkip.Text = "Song To Skip";
-            this.buttonSongToSkip.UseVisualStyleBackColor = true;
-            this.buttonSongToSkip.Click += new System.EventHandler(this.buttonSongToSkip_Click);
+            this.buttonSongSkipLyrics.AutoSize = true;
+            this.buttonSongSkipLyrics.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonSongSkipLyrics.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonSongSkipLyrics.FlatAppearance.BorderSize = 0;
+            this.buttonSongSkipLyrics.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonSongSkipLyrics.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonSongSkipLyrics.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonSongSkipLyrics.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonSongSkipLyrics.Location = new System.Drawing.Point(200, 300);
+            this.buttonSongSkipLyrics.Name = "buttonSongSkipLyrics";
+            this.buttonSongSkipLyrics.Size = new System.Drawing.Size(112, 23);
+            this.buttonSongSkipLyrics.TabIndex = 17;
+            this.buttonSongSkipLyrics.Text = "Song To Skip Lyrics";
+            this.buttonSongSkipLyrics.UseVisualStyleBackColor = true;
+            this.buttonSongSkipLyrics.Click += new System.EventHandler(this.buttonSongToSkipLyrics_Click);
             // 
             // buttonBack
             // 
@@ -295,14 +296,33 @@
             this.buttonBack.UseVisualStyleBackColor = true;
             this.buttonBack.Click += new System.EventHandler(this.buttonBack_Click);
             // 
+            // buttonSongSkipYear
+            // 
+            this.buttonSongSkipYear.AutoSize = true;
+            this.buttonSongSkipYear.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonSongSkipYear.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(3)))), ((int)(((byte)(31)))));
+            this.buttonSongSkipYear.FlatAppearance.BorderSize = 0;
+            this.buttonSongSkipYear.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonSongSkipYear.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonSongSkipYear.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonSongSkipYear.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonSongSkipYear.Location = new System.Drawing.Point(200, 270);
+            this.buttonSongSkipYear.Name = "buttonSongSkipYear";
+            this.buttonSongSkipYear.Size = new System.Drawing.Size(107, 23);
+            this.buttonSongSkipYear.TabIndex = 19;
+            this.buttonSongSkipYear.Text = "Song To Skip Year";
+            this.buttonSongSkipYear.UseVisualStyleBackColor = true;
+            this.buttonSongSkipYear.Click += new System.EventHandler(this.buttonSongSkipYear_Click);
+            // 
             // OptionsScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.buttonSongSkipYear);
             this.Controls.Add(this.buttonBack);
-            this.Controls.Add(this.buttonSongToSkip);
+            this.Controls.Add(this.buttonSongSkipLyrics);
             this.Controls.Add(this.listBoxToDelete);
             this.Controls.Add(this.buttonURLReplacement);
             this.Controls.Add(this.buttonException);
@@ -321,7 +341,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.labelTitle);
             this.Name = "OptionsScreen";
-            this.Size = new System.Drawing.Size(1426, 406);
+            this.Size = new System.Drawing.Size(1426, 403);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -346,7 +366,8 @@
         private System.Windows.Forms.Button buttonException;
         private System.Windows.Forms.Button buttonURLReplacement;
         private System.Windows.Forms.ListBox listBoxToDelete;
-        private System.Windows.Forms.Button buttonSongToSkip;
+        private System.Windows.Forms.Button buttonSongSkipLyrics;
         private System.Windows.Forms.Button buttonBack;
+        private System.Windows.Forms.Button buttonSongSkipYear;
     }
 }
