@@ -41,7 +41,6 @@
             this.textBoxTitle = new System.Windows.Forms.TextBox();
             this.buttonTryAgain = new System.Windows.Forms.Button();
             this.buttonSkipYear = new System.Windows.Forms.Button();
-            this.labelFilesProcessed = new System.Windows.Forms.Label();
             this.textBoxYear = new System.Windows.Forms.TextBox();
             this.labelYear = new System.Windows.Forms.Label();
             this.labelTBArtist = new System.Windows.Forms.Label();
@@ -51,6 +50,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.textBoxThreadStatus = new System.Windows.Forms.TextBox();
             this.labelThreadInformation = new System.Windows.Forms.Label();
+            this.labelClock = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -213,17 +213,6 @@
             this.buttonSkipYear.UseVisualStyleBackColor = true;
             this.buttonSkipYear.Click += new System.EventHandler(this.buttonSkipYear_Click);
             // 
-            // labelFilesProcessed
-            // 
-            this.labelFilesProcessed.AutoSize = true;
-            this.labelFilesProcessed.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelFilesProcessed.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelFilesProcessed.Location = new System.Drawing.Point(807, 16);
-            this.labelFilesProcessed.Name = "labelFilesProcessed";
-            this.labelFilesProcessed.Size = new System.Drawing.Size(185, 26);
-            this.labelFilesProcessed.TabIndex = 12;
-            this.labelFilesProcessed.Text = "0 Files Processed";
-            // 
             // textBoxYear
             // 
             this.textBoxYear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
@@ -312,7 +301,7 @@
             // textBoxThreadStatus
             // 
             this.textBoxThreadStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
-            this.textBoxThreadStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxThreadStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxThreadStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.textBoxThreadStatus.Location = new System.Drawing.Point(146, 742);
             this.textBoxThreadStatus.Multiline = true;
@@ -331,12 +320,24 @@
             this.labelThreadInformation.TabIndex = 21;
             this.labelThreadInformation.Text = "Threads Status";
             // 
+            // labelClock
+            // 
+            this.labelClock.AutoSize = true;
+            this.labelClock.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelClock.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
+            this.labelClock.Location = new System.Drawing.Point(854, 16);
+            this.labelClock.Name = "labelClock";
+            this.labelClock.Size = new System.Drawing.Size(96, 26);
+            this.labelClock.TabIndex = 22;
+            this.labelClock.Text = "00:00:00";
+            // 
             // YearLyricsScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.labelClock);
             this.Controls.Add(this.labelThreadInformation);
             this.Controls.Add(this.textBoxThreadStatus);
             this.Controls.Add(this.pictureBox1);
@@ -346,7 +347,6 @@
             this.Controls.Add(this.labelTBArtist);
             this.Controls.Add(this.textBoxYear);
             this.Controls.Add(this.labelYear);
-            this.Controls.Add(this.labelFilesProcessed);
             this.Controls.Add(this.buttonSkipYear);
             this.Controls.Add(this.buttonTryAgain);
             this.Controls.Add(this.textBoxTitle);
@@ -382,7 +382,6 @@
         private System.Windows.Forms.TextBox textBoxTitle;
         private System.Windows.Forms.Button buttonTryAgain;
         private System.Windows.Forms.Button buttonSkipYear;
-        private System.Windows.Forms.Label labelFilesProcessed;
         private System.Windows.Forms.TextBox textBoxYear;
         private System.Windows.Forms.Label labelYear;
         private System.Windows.Forms.Label labelTBArtist;
@@ -392,5 +391,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.TextBox textBoxThreadStatus;
         private System.Windows.Forms.Label labelThreadInformation;
+        private System.Windows.Forms.Label labelClock;
     }
 }

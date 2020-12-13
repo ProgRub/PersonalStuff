@@ -25,8 +25,10 @@ namespace Downloader
         private List<int> WorkersLineIndex;
         private List<bool> WorkersDoneReport;
         public Semaphore SemError, SemErrorHandled, SemAllFiles;
-        public Mutex MutexWorkers;
         private int WorkerIndexError;
+        private System.Windows.Forms.Timer Clock;
+        private static readonly object Mutex=new object();
+        private DateTime StartTime;
 
         public YearLyricsScreen(DownloaderForm window, List<string> newFiles)
         {
@@ -40,11 +42,14 @@ namespace Downloader
             this.SemAllFiles = new Semaphore(0, 1);
             this.SemError = new Semaphore(1, 1);
             this.SemErrorHandled = new Semaphore(0, 1);
-            this.MutexWorkers = new Mutex();
             this.WorkerIndexError = -1;
-            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
             this.Window.WindowState = FormWindowState.Maximized;
             this.NUMBER_OF_THREADS = Math.Min(this.NewFiles.Count, this.NUMBER_OF_THREADS);
+            this.StartTime = DateTime.Now;
+            this.Clock = new System.Windows.Forms.Timer();
+            this.Clock.Interval = 1000;
+            this.Clock.Tick+=new EventHandler(this.Clock_Tick);
+            this.Clock.Start();
             try
             {
                 Process.GetProcessesByName("python")[0].Kill();
@@ -54,103 +59,14 @@ namespace Downloader
                 Console.WriteLine("NONEXISTENT");
             }
         }
+#warning TODO: Try threads instead of BackgroundWorkers
 
-#warning TODO: Wicked Skeng Man 4 blocking it
-        //private void ChangeUI(object sender, ProgressChangedEventArgs e)
-        //{
-        //    this.ProgressWorkerDone = false;
-        //    switch (e.ProgressPercentage)
-        //    {
-        //        case 0:
-        //            this.textBoxArtist.Text = artist;
-        //            this.textBoxAlbum.Text = album;
-        //            this.textBoxTitle.Text = title;
-        //            this.textBoxYear.Text = year;
-        //            break;
-        //        case 1:
-        //            this.AddToOutput();
-        //            break;
-        //        case 2:
-        //            this.textBoxArtist.Text = artist;
-        //            this.textBoxAlbum.Text = album;
-        //            //this.ChangeOutput(0,true);
-        //            //this.ChangeOutput(1, true);
-        //            //self.changeOutput(0, True)
-        //            //self.changeOutput(1, True)
-        //            break;
-        //        case 3:
-        //            this.textBoxArtist.Text = artist;
-        //            this.textBoxAlbum.Text = album;
-        //            this.textBoxTitle.Text = title;
-        //            //this.ChangeOutput(0, false);
-        //            //this.ChangeOutput(2, false);
-        //            //self.changeOutput(0, True)
-        //            //self.changeOutput(2, True)
-        //            break;
-        //        case 4:
-        //            this.textBoxArtist.Text = artist;
-        //            this.textBoxAlbum.Text = album;
-        //            break;
-        //        case 5:
-        //            this.textBoxYear.Text = year;
-        //            break;
-        //        case 6:
-        //            this.labelUrlBeingChecked.Text = e.UserState.ToString();
-        //            break;
-        //        case 7:
-        //            this.textBoxYear.Text = year;
-        //            break;
-        //        case 8:
-        //            //this.ChangeOutput(0, true);
-        //            //this.ChangeOutput(1, true);
-        //            break;
-        //        case 9:
-        //            //this.ChangeOutput(0, false);
-        //            //this.ChangeOutput(2, false);
-        //            break;
-        //        case 10:
-        //            this.DisableComponents();
-        //            break;
-        //        case 11:
-        //            this.EnableComponents(true);
-        //            break;
-        //        case 12:
-        //            this.EnableComponents(false);
-        //            break;
-        //        case 13:
-        //            this.ChangeTextColor(false);
-        //            break;
-        //        case 14:
-        //            this.ChangeTextColor(true);
-        //            break;
-        //        case 15:
-        //            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
-        //            break;
-        //        case 16:
-        //            this.richTextBoxArtist.AppendText(Environment.NewLine);
-        //            this.richTextBoxAlbum.AppendText(Environment.NewLine);
-        //            this.richTextBoxTitle.AppendText(Environment.NewLine);
-        //            break;
-        //        case 17:
-        //            this.textBoxArtist.Visible = false;
-        //            this.textBoxTitle.Visible = false;
-        //            this.textBoxYear.Visible = false;
-        //            this.textBoxAlbum.Visible = false;
-        //            this.labelArtist.Visible = false;
-        //            this.labelAlbum.Visible = false;
-        //            this.labelTitle.Visible = false;
-        //            this.labelYear.Visible = false;
-        //            this.labelUrlBeingChecked.Visible = false;
-        //            this.buttonSkipYear.Visible = false;
-        //            this.buttonSkipLyrics.Visible = false;
-        //            this.buttonTryAgain.Visible = false;
-        //            this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed. All Done!";
-        //            break;
-        //        default:
-        //            break;
-        //    }
-        //    this.ProgressWorkerDone = true;
-        //}
+        private void Clock_Tick(object sender, EventArgs e)
+        {
+            TimeSpan elapsedTime = DateTime.Now - this.StartTime;
+            this.labelClock.Text = elapsedTime.ToString(@"hh\:mm\:ss");
+        }
+
         #region EventHandlers
         private void buttonTryAgain_Click(object sender, EventArgs e)
         {
@@ -182,6 +98,7 @@ namespace Downloader
             {
                 this.textBoxThreadStatus.AppendText("Thread " + index + Environment.NewLine);
             }
+            this.textBoxThreadStatus.AppendText(String.Format("All Files: {0}/{1} Files Processed"  + Environment.NewLine,this.NumberFilesProcessed,this.NewFiles.Count));
             Task.Delay(100).ContinueWith(t => this.StartThreads());
         }
         #endregion
@@ -303,8 +220,12 @@ namespace Downloader
             this.buttonSkipLyrics.Invoke(update);
             update = () => this.buttonTryAgain.Visible = false;
             this.buttonTryAgain.Invoke(update);
-            update = () => this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed. All Done!";
-            this.labelFilesProcessed.Invoke(update);
+            update = () =>
+            {
+                this.textBoxThreadStatus.Select(this.textBoxThreadStatus.GetFirstCharIndexFromLine(NUMBER_OF_THREADS), this.textBoxThreadStatus.Lines[NUMBER_OF_THREADS].Length);
+                this.textBoxThreadStatus.SelectedText = String.Format("All Files: {0}/{1} Files Processed. All Done!", this.NumberFilesProcessed, this.NewFiles.Count);
+            };
+            this.textBoxThreadStatus.Invoke(update);
         }
 
         private void WorkerDone(object sender, RunWorkerCompletedEventArgs e)
@@ -312,12 +233,13 @@ namespace Downloader
             if (this.NumberFilesProcessed == this.NewFiles.Count)
             {
                 this.SemAllFiles.Release();
+                this.Clock.Stop();
             }
         }
 
         private void ChangeUI(object sender, ProgressChangedEventArgs e)
         {
-            this.MutexWorkers.WaitOne();
+            lock (Mutex) {
             Action update;
             List<string> auxList;
             int[] auxArray;
@@ -325,9 +247,9 @@ namespace Downloader
             {
                 case 0:
                     auxList = e.UserState as List<string>;
-                    int workerIndex = Int32.Parse((e.UserState as List<string>)[3]);
-                    this.AddToOutput(auxList[0], auxList[1], auxList[2], workerIndex);
-                    this.WorkersDoneReport[workerIndex] = true;
+                    int workerIndex2 = Int32.Parse((e.UserState as List<string>)[3]);
+                    this.AddToOutput(auxList[0], auxList[1], auxList[2], workerIndex2);
+                    this.WorkersDoneReport[workerIndex2] = true;
                     break;
                 case 1:
                     auxArray = e.UserState as int[];
@@ -336,8 +258,19 @@ namespace Downloader
                     break;
                 case 2:
                     auxArray = e.UserState as int[];
-                    this.ChangeTextColor(true, auxArray[1]);
-                    this.WorkersDoneReport[auxArray[0]] = true;
+                    int workerIndex = auxArray[0];
+                    int filesProcessed = auxArray[1];
+                    int totalFiles = auxArray[2];
+                    this.ChangeTextColor(true, this.WorkersLineIndex[workerIndex]);
+                    update = () =>
+                    {
+                        this.textBoxThreadStatus.Select(this.textBoxThreadStatus.GetFirstCharIndexFromLine(workerIndex), this.textBoxThreadStatus.Lines[workerIndex].Length);
+                        this.textBoxThreadStatus.SelectedText = "Thread " + workerIndex + ": " + filesProcessed + "/" + totalFiles + " Files Processed";
+                        this.textBoxThreadStatus.Select(this.textBoxThreadStatus.GetFirstCharIndexFromLine(NUMBER_OF_THREADS), this.textBoxThreadStatus.Lines[NUMBER_OF_THREADS].Length);
+                        this.textBoxThreadStatus.SelectedText = String.Format("All Files: {0}/{1} Files Processed", this.NumberFilesProcessed, this.NewFiles.Count);
+                    };
+                    this.textBoxThreadStatus.Invoke(update);
+                    this.WorkersDoneReport[workerIndex] = true;
                     break;
                 case 3:
                     this.DisableComponents();
@@ -353,7 +286,6 @@ namespace Downloader
                     this.textBoxTitle.Invoke(update);
                     update = () => this.textBoxYear.Text = auxList[3];
                     this.textBoxYear.Invoke(update);
-                    this.labelFilesProcessed.Invoke(update);
                     break;
                 case 5:
                     this.EnableComponents(false);
@@ -369,25 +301,10 @@ namespace Downloader
                     update = () => this.labelUrlBeingChecked.Text = e.UserState.ToString();
                     this.labelUrlBeingChecked.Invoke(update);
                     break;
-                case 7:
-                    auxArray = e.UserState as int[];
-                    int lineIndex = auxArray[0];
-                    int filesProcessed = auxArray[1];
-                    int totalFiles = auxArray[2];
-                    update = () => this.labelFilesProcessed.Text = this.NumberFilesProcessed + "/" + this.NewFiles.Count + " Files Processed";
-                    this.labelFilesProcessed.Invoke(update);
-                    update = () =>
-                    {
-                        this.textBoxThreadStatus.Select(this.textBoxThreadStatus.GetFirstCharIndexFromLine(lineIndex), this.textBoxThreadStatus.Lines[lineIndex].Length);
-                        this.textBoxThreadStatus.SelectedText = "Thread " + lineIndex + ": " + filesProcessed + "/" + totalFiles + " Files Processed";
-                    };
-                    this.textBoxThreadStatus.Invoke(update);
-                    this.WorkersDoneReport[lineIndex] = true;
-                    break;
                 default:
                     break;
             }
-            this.MutexWorkers.ReleaseMutex();
+            }
         }
 
         private void AddToOutput(string artist, string album, string title, int workerIndex)
@@ -904,26 +821,23 @@ namespace Downloader
                 {
                     this.GetLyrics(ref worker, workerIndex, filename, ref currentArtist, ref currentAlbum, ref currentTitle, ref currentLyrics);
                 }
-                worker.ReportProgress(2, new int[] { workerIndex, this.WorkersLineIndex[workerIndex] });
-                while (!this.WorkersDoneReport[workerIndex]) ;
-                this.WorkersDoneReport[workerIndex] = false;
-                this.MutexWorkers.WaitOne();
-                var opStatus = this.Window.LAFContainer.iTunesLibrary.AddFile(filename);
-                while (opStatus.InProgress) { }
-                var addedTrack = opStatus.Tracks[1];
-                if (currentYear != "Skip" && Int32.Parse(currentYear) < 1985)
+
+                lock (Mutex)
                 {
-                    addedTrack.VolumeAdjustment = 50;
+                    var opStatus = this.Window.LAFContainer.iTunesLibrary.AddFile(filename);
+                    while (opStatus.InProgress) { }
+                    var addedTrack = opStatus.Tracks[1];
+                    if (currentYear != "Skip" && Int32.Parse(currentYear) < 1985)
+                    {
+                        addedTrack.VolumeAdjustment = 50;
+                    }
+                    this.NumberFilesProcessed++;
+                    this.Window.LAFContainer.AddMusicFile(filename);
                 }
-                this.NumberFilesProcessed++;
-                this.MutexWorkers.ReleaseMutex();
                 filesProcessed++;
-                worker.ReportProgress(7, new int[] { workerIndex, filesProcessed, list.Count });
+                worker.ReportProgress(2, new int[] { workerIndex, filesProcessed, list.Count });
                 while (!this.WorkersDoneReport[workerIndex]) ;
                 this.WorkersDoneReport[workerIndex] = false;
-                this.MutexWorkers.WaitOne();
-                this.Window.LAFContainer.AddMusicFile(filename);
-                this.MutexWorkers.ReleaseMutex();
             }
         }
 
