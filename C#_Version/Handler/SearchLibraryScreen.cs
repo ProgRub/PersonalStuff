@@ -9,12 +9,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.FileIO;
 using System.IO;
+using System.Threading;
 
 namespace Handler
 {
     public partial class SearchLibraryScreen : UserControl
     {
-        private HandlerForm Window;
+        private readonly HandlerForm Window;
         public SearchLibraryScreen(HandlerForm window)
         {
             InitializeComponent();
@@ -29,8 +30,6 @@ namespace Handler
             this.textBoxYear.AutoCompleteCustomSource.AddRange(this.Window.LAFContainer.MusicFiles.Select(track => track.Year.ToString()).ToArray());
             this.listBoxResults.Items.AddRange(this.Window.LAFContainer.MusicFiles.Select(x => x.Filename).ToArray());
         }
-
-#warning TODO: Fix this, when searching with two parameters, the second parameter doesn't care about the first one
 
         #region Event Handlers
 
@@ -85,7 +84,8 @@ namespace Handler
 
         private void buttonBack_Click(object sender, EventArgs e)
         {
-            this.Window.LAFContainer.SaveMusicFiles();
+            Thread saveFiles = new Thread(this.Window.LAFContainer.SaveMusicFiles);
+            saveFiles.Start();
             this.Dispose();
             this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
             this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
@@ -96,9 +96,11 @@ namespace Handler
             if (this.listBoxResults.SelectedItems.Count > 0)
             {
                 this.Hide();
-                TrackDetailsScreen aux = new TrackDetailsScreen(this.Window, this.Window.LAFContainer.MusicFiles.Where(x => this.listBoxResults.SelectedItems.Contains(x.Filename)).ToList());
-                aux.Dock = DockStyle.Fill;
-                this.Window.Controls.Add(aux);
+				TrackDetailsScreen aux = new TrackDetailsScreen(this.Window, this.Window.LAFContainer.MusicFiles.Where(x => this.listBoxResults.SelectedItems.Contains(x.Filename)).ToList())
+				{
+					Dock = DockStyle.Fill
+				};
+				this.Window.Controls.Add(aux);
                 this.Window.ActiveControl = aux;
             }
         }

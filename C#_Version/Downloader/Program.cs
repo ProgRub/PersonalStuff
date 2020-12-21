@@ -16,7 +16,17 @@ namespace Downloader
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new DownloaderForm());
+            DownloaderForm form = new DownloaderForm();
+            Application.Run(form);
+            try
+            {
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(form.LAFContainer.iTunes);
+                GC.Collect();
+            }
+            catch (NullReferenceException)
+            {
+                Console.WriteLine("iTunes not opened.");
+            }
         }
     }
 }

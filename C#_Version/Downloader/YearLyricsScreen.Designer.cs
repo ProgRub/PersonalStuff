@@ -327,9 +327,9 @@
             this.labelClock.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.labelClock.Location = new System.Drawing.Point(854, 16);
             this.labelClock.Name = "labelClock";
-            this.labelClock.Size = new System.Drawing.Size(96, 26);
+            this.labelClock.Size = new System.Drawing.Size(211, 26);
             this.labelClock.TabIndex = 22;
-            this.labelClock.Text = "00:00:00";
+            this.labelClock.Text = "Time Elapsed: 00:00";
             // 
             // YearLyricsScreen
             // 

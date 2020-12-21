@@ -67,18 +67,18 @@ namespace Downloader
                     try
                     {
                         File.Move(this.CurrentFile, Path.Combine(this.OneDrive, this.ChosenDirectory, this.textBoxFilename.Text));
-                        this.TextBoxFilesMoved.AppendText(Path.Combine(this.ChosenDirectory, this.textBoxFilename.Text) + Environment.NewLine);
+                        this.TextBoxFilesMoved.AppendText(Path.Combine(this.ChosenDirectory, this.textBoxFilename.Text) +" REPLACED"+ Environment.NewLine);
                         break;
                     }
                     catch (IOException)
                     {
-                        FileSystem.DeleteFile(this.CurrentFile, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        FileSystem.DeleteFile(Path.Combine(this.OneDrive, this.ChosenDirectory, this.textBoxFilename.Text), UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                     }
                 }
             }
             else
             {
-                this.TextBoxFilesMoved.AppendText(this.textBoxFilename.Text + " skipped" + Environment.NewLine);
+                this.TextBoxFilesMoved.AppendText(this.textBoxFilename.Text + " SKIPPED" + Environment.NewLine);
             }
             this.textBoxFilename.Text = "";
             this.TextBoxFilesFound.AppendText(Environment.NewLine);
@@ -106,10 +106,10 @@ namespace Downloader
                 if (!this.CheckedFiles.Contains(filename) && filename.EndsWith(".pdf"))
                 {
                     this.CurrentFile = filename;
+                    Console.WriteLine(this.CurrentFile);
                     this.TextBoxFilesFound.AppendText(Path.GetFileName(filename));
                     this.textBoxFilename.Text = Path.GetFileName(filename).Replace(" ", "_");
                     this.TimerCheckDownloads.Stop();
-                    break;
                 }
             }
         }

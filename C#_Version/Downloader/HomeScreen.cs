@@ -19,9 +19,11 @@ namespace Downloader
         public HomeScreen()
         {
             InitializeComponent();
-            this.folderDialog = new CommonOpenFileDialog();
-            this.folderDialog.IsFolderPicker = true;
-        }
+			this.folderDialog = new CommonOpenFileDialog
+			{
+				IsFolderPicker = true
+			};
+		}
 
         private void HomeScreen_Enter(object sender, EventArgs e)
         {
@@ -69,9 +71,11 @@ namespace Downloader
         {
             this.Window.LAFContainer.SaveDirectories();
             this.Hide();
-            MusicScreen aux = new MusicScreen(this.Window);
-            aux.Dock = DockStyle.Fill;
-            this.Window.Controls.Add(aux);
+			MusicScreen aux = new MusicScreen(this.Window)
+			{
+				Dock = DockStyle.Fill
+			};
+			this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
         }
 
@@ -80,9 +84,11 @@ namespace Downloader
             this.Window.LAFContainer.SaveDirectories();
             this.Hide();
             long lastModifiedTime = this.Window.LAFContainer.GetLastModifiedTime();
-            YearLyricsScreen aux = new YearLyricsScreen(this.Window,Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3") && File.GetLastWriteTime(x).ToFileTime() > (lastModifiedTime - 5 * 60)).ToList());
-            aux.Dock = DockStyle.Fill;
-            this.Window.Controls.Add(aux);
+			YearLyricsScreen aux = new YearLyricsScreen(this.Window, Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3") && File.GetLastWriteTime(x).ToFileTime() > (lastModifiedTime - 5 * 60)).ToList())
+			{
+				Dock = DockStyle.Fill
+			};
+			this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
         }
 
@@ -90,9 +96,11 @@ namespace Downloader
         {
             this.Window.LAFContainer.SaveDirectories();
             this.Hide();
-            YearLyricsScreen aux = new YearLyricsScreen(this.Window,Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3")).ToList());
-            aux.Dock = DockStyle.Fill;
-            this.Window.Controls.Add(aux);
+			YearLyricsScreen aux = new YearLyricsScreen(this.Window, Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3")).ToList())
+			{
+				Dock = DockStyle.Fill
+			};
+			this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
         }
 
@@ -100,9 +108,11 @@ namespace Downloader
         {
             this.Window.LAFContainer.SaveDirectories();
             this.Hide();
-            OptionsScreen aux = new OptionsScreen(this.Window);
-            aux.Dock = DockStyle.Fill;
-            this.Window.Controls.Add(aux);
+			OptionsScreen aux = new OptionsScreen(this.Window)
+			{
+				Dock = DockStyle.Fill
+			};
+			this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
         }
 
@@ -110,9 +120,11 @@ namespace Downloader
         {
             this.Window.LAFContainer.SaveDirectories();
             this.Hide();
-            SchoolScreen aux = new SchoolScreen(this.Window);
-            aux.Dock = DockStyle.Fill;
-            this.Window.Controls.Add(aux);
+			SchoolScreen aux = new SchoolScreen(this.Window)
+			{
+				Dock = DockStyle.Fill
+			};
+			this.Window.Controls.Add(aux);
             this.Window.ActiveControl = aux;
         }
     }

@@ -10,12 +10,5 @@ namespace Handler
             InitializeComponent();
             this.LAFContainer = new ListsAndFiles();
         }
-
-        private void HandlerForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            System.Runtime.InteropServices.Marshal.ReleaseComObject(this.LAFContainer.iTunes);
-            System.GC.Collect();
-            this.LAFContainer.backgroundWork.Join();
-        }
     }
 }

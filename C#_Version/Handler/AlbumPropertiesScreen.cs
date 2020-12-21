@@ -22,8 +22,8 @@ namespace Handler
             this.GenresCheckBoxes = new List<CheckBox>();
             this.radioButtonBoth.Checked = true;
             int index = 1;
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(this.Window.LAFContainer.GenerateAlbums);
+            //BackgroundWorker worker = new BackgroundWorker();
+            //worker.DoWork += new DoWorkEventHandler(this.Window.LAFContainer.GenerateAlbums);
             foreach (string genre in this.Window.LAFContainer.GenresColors.Keys)
             {
                 CheckBox checkBox = new CheckBox();
@@ -42,7 +42,7 @@ namespace Handler
                 this.Controls.Add(checkBox);
                 this.GenresCheckBoxes.Add(checkBox);
             }
-            worker.RunWorkerAsync();
+            //worker.RunWorkerAsync();
             this.dropdownWorkouts.Items.AddRange(this.Window.LAFContainer.WorkoutDatabase.Keys.ToArray());
             //this.Window.Controls.OfType<HomeScreen>().ToList()[0].Dispose();
         }
@@ -97,8 +97,8 @@ namespace Handler
             }
             else
             {
-                int leewayMinimum = Math.Abs(average - (times[0] / 60));
-                int leewayMaximum = Math.Abs(average - (times.Last() / 60));
+                int leewayMinimum = Math.Abs(average - (times.Min() / 60));
+                int leewayMaximum = Math.Abs(average - (times.Max() / 60));
                 this.textBoxLeewayAlbum.Text = Math.Max(leewayMinimum, leewayMaximum).ToString();
             }
             this.textBoxTimeAlbum.Text = average.ToString();

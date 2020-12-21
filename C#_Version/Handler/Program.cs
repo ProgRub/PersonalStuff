@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Handler
@@ -16,7 +13,11 @@ namespace Handler
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new HandlerForm());
+            HandlerForm form = new HandlerForm();
+            Application.Run(form);
+            form.LAFContainer.backgroundWork.Join();
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(form.LAFContainer.iTunes);
+            GC.Collect();
         }
     }
 }

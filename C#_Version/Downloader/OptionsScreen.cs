@@ -14,7 +14,7 @@ namespace Downloader
     public partial class OptionsScreen : UserControl
     {
         public DownloaderForm Window { get; set; }
-        private List<List<Control>> ComponentsByLine;
+        private readonly List<List<Control>> ComponentsByLine;
         private bool NeedsConfirm;
         private int Mode;
         public OptionsScreen(DownloaderForm window)
@@ -22,14 +22,16 @@ namespace Downloader
             InitializeComponent();
             this.Window = window;
             this.Window.CancelButton = this.buttonBack;
-            this.ComponentsByLine = new List<List<Control>>();
-            this.ComponentsByLine.Add(new List<Control>() { this.label1, this.textBox1 });
-            this.ComponentsByLine.Add(new List<Control>() { this.label2, this.textBox2 });
-            this.ComponentsByLine.Add(new List<Control>() { this.label3, this.textBox3 });
-            this.ComponentsByLine.Add(new List<Control>() { this.label4, this.textBox4 });
-            this.ComponentsByLine.Add(new List<Control>() { this.label5, this.textBox5 });
-            this.ComponentsByLine.Add(new List<Control>() { this.label6, this.textBox6 });
-            this.NeedsConfirm = false;
+			this.ComponentsByLine = new List<List<Control>>
+			{
+				new List<Control>() { this.label1, this.textBox1 },
+				new List<Control>() { this.label2, this.textBox2 },
+				new List<Control>() { this.label3, this.textBox3 },
+				new List<Control>() { this.label4, this.textBox4 },
+				new List<Control>() { this.label5, this.textBox5 },
+				new List<Control>() { this.label6, this.textBox6 }
+			};
+			this.NeedsConfirm = false;
         }
         #region Event Handlers
         private void buttonGrimeArtistConfirm_Click(object sender, EventArgs e)
@@ -62,7 +64,6 @@ namespace Downloader
                     if (grimeArtist != "" && !this.Window.LAFContainer.GrimeArtists.Contains(grimeArtist))
                     {
                         this.Window.LAFContainer.GrimeArtists.Add(grimeArtist);
-                        this.listBoxToDelete.Items.Add(grimeArtist);
                     }
                     this.Window.LAFContainer.SaveGrimeArtists();
                     break;
@@ -85,7 +86,6 @@ namespace Downloader
                         {
                             var list = new List<string>() { artist, album, title };
                             this.Window.LAFContainer.SongsToSkipLyrics.Add(list);
-                            this.listBoxToDelete.Items.Add(string.Join(" | ", list));
                         }
                     }
                     this.Window.LAFContainer.SaveExceptions();
@@ -102,7 +102,6 @@ namespace Downloader
                         var oldList = new List<string>() { oldArtist, oldAlbum, oldTitle };
                         var newList = new List<string>() { newArtist, newAlbum, newTitle };
                         this.Window.LAFContainer.ExceptionsReplacements[oldList] = newList;
-                        this.listBoxToDelete.Items.Add(string.Join(" | ", oldList) + " ---> " + string.Join(" | ", newList));
                     }
                     this.Window.LAFContainer.SaveExceptions();
                     break;
@@ -113,7 +112,6 @@ namespace Downloader
                     {
                         var songToSkip = new List<string>() { artistYear, albumYear };
                         this.Window.LAFContainer.SongsToSkipYear.Add(songToSkip);
-                        this.listBoxToDelete.Items.Add(string.Join(" | ", songToSkip));
                     }
                     this.Window.LAFContainer.SaveExceptions();
                     break;
@@ -125,7 +123,6 @@ namespace Downloader
                         string toReplace = auxToReplace.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
                         string replacement = auxReplacement.Substring(1, auxToReplace.LastIndexOf('\"') - 1);
                         this.Window.LAFContainer.UrlReplacements[toReplace] = replacement;
-                        this.listBoxToDelete.Items.Add("\"" + toReplace + "\" ---> \"" + replacement + "\"");
                     }
                     this.Window.LAFContainer.SaveExceptions();
                     break;

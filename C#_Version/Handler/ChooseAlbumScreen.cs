@@ -23,7 +23,7 @@ namespace Handler
 
         public ChooseAlbumScreen(HandlerForm window,int albumTime, int albumLeeway, List<string> genresPicked, int leewayMode)
         {
-            InitializeComponent();
+            InitializeComponent(); 
             this.Window = window;
             this.AlbumTime = albumTime;
             this.AlbumLeeway = albumLeeway;
