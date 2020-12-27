@@ -34,8 +34,8 @@ namespace Downloader
 			this.NewFiles = new List<string>();
 			this.labelFilesFound.Text = "0 Files Found";
 			Process deemix = new Process();
-			deemix.StartInfo.WorkingDirectory = Path.Combine(this.Window.LAFContainer.CurrentDirectory, "auxFiles", "deemix");
-			deemix.StartInfo.FileName = "start.bat";
+			deemix.StartInfo.WorkingDirectory = Path.Combine(this.Window.LAFContainer.CurrentDirectory, "auxFiles", "deemix-pyweb-main");
+			deemix.StartInfo.FileName = "deemix-pyweb.py";
 			deemix.Start();
 			this.TimerCheckMusic = new Timer();
 			this.TimerCheckMusic.Tick += new EventHandler(CheckMusic);
