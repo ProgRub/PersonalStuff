@@ -39,7 +39,7 @@ namespace Downloader
 			this.StartTime = DateTime.Now;
 			this.Clock = new System.Windows.Forms.Timer
 			{
-				Interval =  1000*60
+				Interval = 1000 * 60
 			};
 			this.Clock.Tick += new EventHandler(this.Clock_Tick);
 			this.Minutes = 0;
@@ -70,7 +70,8 @@ namespace Downloader
 		{
 			Console.WriteLine("HERE");
 			this.Minutes++;
-			if (this.Minutes == 60) { 
+			if (this.Minutes == 60)
+			{
 				this.Hours++;
 			}
 			this.Minutes %= 60;
@@ -326,7 +327,7 @@ namespace Downloader
 			{
 				Action update;
 				int lineIndex = this.WorkersLineIndex[threadIndex];
-				if (mode==0)
+				if (mode == 0)
 				{
 					update = () =>
 					{
@@ -420,7 +421,7 @@ namespace Downloader
 			return char.ToUpper(name[0]) + name.Substring(1).ToLower();
 		}
 
-		private void ChangeArtistAlbumTitle(bool forAlbumYear, ref string artist, ref string album, ref string title, uint trackCount)
+		private bool ChangeArtistAlbumTitle(bool forAlbumYear, ref string artist, ref string album, ref string title, uint trackCount)
 		{
 			List<string> CurrentKey = new List<string>() { artist, album, title };
 			if (!forAlbumYear || trackCount < 5)
@@ -437,7 +438,7 @@ namespace Downloader
 						artist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
 						album = this.Window.LAFContainer.ExceptionsReplacements[key][1];
 						title = this.Window.LAFContainer.ExceptionsReplacements[key][2];
-						break;
+						return true;
 					}
 				}
 			}
@@ -449,10 +450,11 @@ namespace Downloader
 					{
 						artist = this.Window.LAFContainer.ExceptionsReplacements[key][0];
 						album = this.Window.LAFContainer.ExceptionsReplacements[key][1];
-						break;
+						return true;
 					}
 				}
 			}
+			return false;
 		}
 
 		private object CheckIfWebpageExists(bool forAlbumYear, string artist, string album, string title, ref string year)
@@ -630,42 +632,43 @@ namespace Downloader
 					this.SemError.WaitOne();
 					this.WorkerIndexError = threadIndex;
 					this.ErrorOcurred = true;
-					string url = "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics";
-					SystemSounds.Exclamation.Play();
-					if (trackCount < 5)
+					if (!this.ChangeArtistAlbumTitle(true, ref artist, ref album, ref title, trackCount))
 					{
-						//worker.ReportProgress(6, "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics");
-						Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + title.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
+						string url = "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics";
+						SystemSounds.Exclamation.Play();
+						if (trackCount < 5)
+						{
+							Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + title.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
+						}
+						else
+						{
+							url = "https://www.genius.com/albums/" + this.NamingConventions(artist) + "/" + this.NamingConventions(album);
+							Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + album.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
+						}
+						this.EnableComponents(true, artist, album, title, year, url);
+						this.SemErrorHandled.WaitOne();
+						if (this.SkipYear)
+						{
+							this.SkipYear = false;
+							this.Window.LAFContainer.SongsToSkipYear.Add(key.Take(2).ToList());
+							break;
+						}
+						else
+						{
+							string aux = "";
+							Action update = () => aux = this.textBoxArtist.Text;
+							this.textBoxArtist.Invoke(update);
+							artist = aux;
+							update = () => aux = this.textBoxAlbum.Text;
+							this.textBoxAlbum.Invoke(update);
+							album = aux;
+							update = () => aux = this.textBoxTitle.Text;
+							this.textBoxTitle.Invoke(update);
+							title = aux;
+							value.Add(artist); value.Add(album); value.Add(title);
+						}
+						this.DisableComponents();
 					}
-					else
-					{
-						url = "https://www.genius.com/albums/" + this.NamingConventions(artist) + "/" + this.NamingConventions(album);
-						//worker.ReportProgress(6, "https://www.genius.com/albums/" + this.NamingConventions(artist) + "/" + this.NamingConventions(album));
-						Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + album.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
-					}
-					this.EnableComponents(true, artist, album, title, year, url);
-					this.SemErrorHandled.WaitOne();
-					if (this.SkipYear)
-					{
-						this.SkipYear = false;
-						this.Window.LAFContainer.SongsToSkipYear.Add(key.Take(2).ToList());
-						break;
-					}
-					else
-					{
-						string aux = "";
-						Action update = () => aux = this.textBoxArtist.Text;
-						this.textBoxArtist.Invoke(update);
-						artist = aux;
-						update = () => aux = this.textBoxAlbum.Text;
-						this.textBoxAlbum.Invoke(update);
-						album = aux;
-						update = () => aux = this.textBoxTitle.Text;
-						this.textBoxTitle.Invoke(update);
-						title = aux;
-						value.Add(artist); value.Add(album); value.Add(title);
-					}
-					this.DisableComponents();
 				}
 
 			}
