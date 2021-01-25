@@ -629,7 +629,10 @@ namespace Downloader
 							}
 						}
 					}
-					this.SemError.WaitOne();
+					if (threadIndex != this.WorkerIndexError)
+					{
+						this.SemError.WaitOne();
+					}
 					this.WorkerIndexError = threadIndex;
 					this.ErrorOcurred = true;
 					if (!this.ChangeArtistAlbumTitle(true, ref artist, ref album, ref title, trackCount))
@@ -715,7 +718,10 @@ namespace Downloader
 				}
 				else
 				{
-					this.SemError.WaitOne();
+					if (threadIndex != this.WorkerIndexError)
+					{
+						this.SemError.WaitOne();
+					}
 					this.WorkerIndexError = threadIndex;
 					this.ErrorOcurred = true;
 					SystemSounds.Exclamation.Play();
@@ -763,8 +769,8 @@ namespace Downloader
 				using (var mp3 = TagLib.File.Create(filename))
 				{
 					currentArtist = fileArtist = mp3.Tag.AlbumArtists[0];
-					currentAlbum = fileAlbum = mp3.Tag.Album;
-					currentTitle = fileTitle = this.Window.LAFContainer.RemoveWordsFromWord(new List<string>() { "feat", "Feat", "bonus", "Bonus", "Conclusion", "Hidden Track", "Vocal Mix", "Explicit", "explicit", "Extended" }, mp3.Tag.Title);
+					currentAlbum = fileAlbum = this.Window.LAFContainer.RemoveWordsFromWord(new List<string>() {"Deluxe" }, mp3.Tag.Album);
+					currentTitle = fileTitle = this.Window.LAFContainer.RemoveWordsFromWord(new List<string>() { "feat", "Feat", "bonus", "Bonus", "Conclusion", "Vocal Mix",  "Extended" }, mp3.Tag.Title);
 					currentYear = mp3.Tag.Year.ToString();
 					trackCount = mp3.Tag.TrackCount;
 					mp3.Save();

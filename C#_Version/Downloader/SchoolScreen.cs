@@ -62,17 +62,19 @@ namespace Downloader
                     this.textBoxFilename.Text = this.textBoxFilename.Text.Split(Path.DirectorySeparatorChar)[1];
                     Directory.CreateDirectory(Path.Combine(this.OneDrive, this.ChosenDirectory));
                 }
+                bool replaced = false;
                 while (true)
                 {
                     try
                     {
                         File.Move(this.CurrentFile, Path.Combine(this.OneDrive, this.ChosenDirectory, this.textBoxFilename.Text));
-                        this.TextBoxFilesMoved.AppendText(Path.Combine(this.ChosenDirectory, this.textBoxFilename.Text) +" REPLACED"+ Environment.NewLine);
+                        this.TextBoxFilesMoved.AppendText(Path.Combine(this.ChosenDirectory, this.textBoxFilename.Text) +(replaced?" REPLACED":"")+ Environment.NewLine);
                         break;
                     }
                     catch (IOException)
                     {
                         FileSystem.DeleteFile(Path.Combine(this.OneDrive, this.ChosenDirectory, this.textBoxFilename.Text), UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                        replaced = true;
                     }
                 }
             }
@@ -110,6 +112,7 @@ namespace Downloader
                     this.TextBoxFilesFound.AppendText(Path.GetFileName(filename));
                     this.textBoxFilename.Text = Path.GetFileName(filename).Replace(" ", "_");
                     this.TimerCheckDownloads.Stop();
+                    break;
                 }
             }
         }

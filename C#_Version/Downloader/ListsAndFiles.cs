@@ -111,7 +111,7 @@ namespace Downloader
 		{
 			using (var mp3 = TagLib.File.Create(filename))
 			{
-				mp3.Tag.Album = this.RemoveWordsFromWord(new List<string>() { "Remaster", "Anniversary", "Deluxe", "Expanded" }, mp3.Tag.Album);
+				mp3.Tag.Album = this.RemoveWordsFromWord(new List<string>() { "Remaster", "Anniversary","Expanded" }, mp3.Tag.Album);
 				mp3.Tag.Title = this.RemoveWordsFromWord(new List<string>() { "Remaster", "Album Version", "Stereo", "Hidden Track", "Explicit",
 			"explicit" }, mp3.Tag.Title);
 				mp3.Tag.Title = mp3.Tag.Title.Replace("f*ck", "fuck").Replace(
