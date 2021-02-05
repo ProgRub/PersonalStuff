@@ -18,7 +18,7 @@ namespace Handler
         private List<MusicFile> Tracks;
         private List<string> PreviousValues;
         private List<string> NewValues;
-        private int NUMBER_OF_THREADS = 15;
+        private int NUMBER_OF_THREADS = (int)Math.Pow(2, (int)Math.Sqrt(Environment.ProcessorCount));
         public TrackDetailsScreen(HandlerForm window, List<MusicFile> tracks)
         {
             InitializeComponent();
@@ -103,15 +103,11 @@ namespace Handler
             this.Window.ActiveControl = this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0];
             this.Window.Controls.OfType<SearchLibraryScreen>().ToList()[0].Visible = true;
             this.NUMBER_OF_THREADS = Math.Min(this.Tracks.Count, this.NUMBER_OF_THREADS);
-            Thread[] threads = new Thread[NUMBER_OF_THREADS+1];
-            for (int i = 0; i < threads.Length; i++)
+            for (int i = 0; i < this.NUMBER_OF_THREADS+1; i++)
             {
-                threads[i] = new Thread(new ParameterizedThreadStart(UpdateFiles));
-                threads[i].Start(i);
-            }
-            for (int i = 0; i < threads.Length; ++i)
-            {
-                threads[i].Join();
+                var aux = new Thread(new ParameterizedThreadStart(UpdateFiles));
+                this.Window.LAFContainer.workingThreads.Add( aux);
+                aux.Start(i);
             }
         }
         #endregion

@@ -40,7 +40,19 @@ namespace Handler
 
         public void AddTrack(MusicFile track)
         {
-            this.TracksByDiscs[track.DiscNumber - 1].Add(track);
+            while (true)
+            {
+                try
+                {
+                    this.TracksByDiscs[track.DiscNumber - 1].Add(track);
+                    break;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    this.TracksByDiscs.Add(new List<MusicFile>());
+                }
+
+            }
             for (int index = this.TracksByDiscs[track.DiscNumber - 1].Count - 1; index > 0; index--)
             {
                 if (this.TracksByDiscs[track.DiscNumber - 1][index].TrackNumber < this.TracksByDiscs[track.DiscNumber - 1][index - 1].TrackNumber)

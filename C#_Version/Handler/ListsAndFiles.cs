@@ -28,8 +28,8 @@ namespace Handler
 		private long LastModifiedTimeFromFile;
 		public iTunesApp iTunes { get; }
 		public IITLibraryPlaylist iTunesLibrary { get; }
-		private const int NUMBER_OF_THREADS = 5;
-		public Thread backgroundWork;
+		private int NUMBER_OF_THREADS = (int)Math.Pow(2, (int)Math.Sqrt(Environment.ProcessorCount));
+		public List<Thread> workingThreads;
 
 		public ListsAndFiles()
 		{
@@ -50,8 +50,8 @@ namespace Handler
 			this.GenerateAlbums();
 			this.iTunes = new iTunesApp();
 			this.iTunesLibrary = this.iTunes.LibraryPlaylist;
-			this.backgroundWork = new Thread(CheckMusicFilesAndUpdatePlayCounts);
-			this.backgroundWork.Start();
+			this.workingThreads = new List<Thread>();
+			this.CheckMusicFilesAndUpdatePlayCounts();
 			//BackgroundWorker worker = new BackgroundWorker();
 			//worker.DoWork += new DoWorkEventHandler(this.CheckMusicFilesAndUpdatePlayCounts);
 			//worker.RunWorkerAsync();
@@ -364,30 +364,32 @@ namespace Handler
 				}
 				this.Files = Directory.EnumerateFiles(this.MusicDestinyDirectory).Where(file => file.EndsWith(".mp3")).ToList();
 				this.Files = this.Files.Where(x => File.GetLastWriteTime(x).ToFileTime() > this.LastModifiedTimeFromFile).ToList();
-				Thread[] threads = new Thread[NUMBER_OF_THREADS + 1];
+
 				if (this.Files.Count > 0)
 				{
-					for (int i = 0; i < threads.Length; i++)
+					for (int i = 0; i < NUMBER_OF_THREADS + 1; i++)
 					{
-						threads[i] = new Thread(new ParameterizedThreadStart(UpdateModifiedFiles));
-						threads[i].Start(i);
+						var aux = new Thread(new ParameterizedThreadStart(UpdateModifiedFiles));
+						this.workingThreads.Add(aux);
+						aux.Start(i);
 					}
-					for (int i = 0; i < threads.Length; ++i)
+					for (int i = 0; i < NUMBER_OF_THREADS + 1; ++i)
 					{
-						threads[i].Join();
+						this.workingThreads[i].Join();
 					}
 				}
-				threads = new Thread[NUMBER_OF_THREADS + 1];
-				for (int i = 0; i < threads.Length; i++)
+				this.workingThreads = new List<Thread>();
+				for (int i = 0; i < NUMBER_OF_THREADS + 1; i++)
 				{
-					threads[i] = new Thread(new ParameterizedThreadStart(UpdatePlayCounts));
-					threads[i].Start(i);
+					var aux = new Thread(new ParameterizedThreadStart(UpdatePlayCounts));
+					this.workingThreads.Add(aux);
+					aux.Start(i);
 				}
-				for (int i = 0; i < threads.Length; ++i)
-				{
-					threads[i].Join();
-				}
-				this.SaveMusicFiles();
+				//for (int i = 0; i < NUMBER_OF_THREADS + 1; ++i)
+				//{
+				//	this.workingThreads[i].Join();
+				//	this.workingThreads.RemoveAt(i);
+				//}
 			}
 		}
 

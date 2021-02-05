@@ -83,8 +83,7 @@ namespace Downloader
         {
             this.Window.LAFContainer.SaveDirectories();
             this.Hide();
-            long lastModifiedTime = this.Window.LAFContainer.GetLastModifiedTime();
-			YearLyricsScreen aux = new YearLyricsScreen(this.Window, Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3") && File.GetLastWriteTime(x).ToFileTime() > (lastModifiedTime - 5 * 60)).ToList())
+			YearLyricsScreen aux = new YearLyricsScreen(this.Window, Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3") && File.GetLastWriteTime(x) > DateTime.Now.Subtract(new TimeSpan(0,5,0))).ToList())
 			{
 				Dock = DockStyle.Fill
 			};

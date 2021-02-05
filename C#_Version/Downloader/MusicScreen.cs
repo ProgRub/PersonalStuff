@@ -36,8 +36,8 @@ namespace Downloader
 			Process deemix = new Process();
 			deemix.StartInfo.WorkingDirectory = Path.Combine(this.Window.LAFContainer.CurrentDirectory, "auxFiles", "deemix-pyweb-main");
 			deemix.StartInfo.FileName = "deemix-pyweb.py";
-			deemix.Start();
-			this.TimerCheckMusic = new Timer();
+            deemix.Start();
+            this.TimerCheckMusic = new Timer();
 			this.TimerCheckMusic.Tick += new EventHandler(CheckMusic);
 			this.TimerCheckMusic.Interval = 150;
 			this.TimerCheckMusic.Start();
@@ -50,15 +50,16 @@ namespace Downloader
 				if (filename.EndsWith(".mp3") && !this.FileBuffer.Contains(filename))
 				{
 					this.FileBuffer.Add(filename);
+					this.TextBoxFilesFound.AppendText((this.NumberFilesFound>0 ? Environment.NewLine:"")+ Path.GetFileName(filename) );
 					this.NumberFilesFound++;
 					this.labelFilesFound.Text = this.NumberFilesFound + " Files Found";
-					this.TextBoxFilesFound.AppendText(Path.GetFileName(filename) + Environment.NewLine);
 				}
 			}
 		}
 
 		private void MoveOutOfBuffer()
 		{
+			this.NumberFilesFound = 0;
 			foreach (string oldFilename in this.FileBuffer)
 			{
 				string newFilename = Path.GetFileName(oldFilename);
@@ -70,7 +71,8 @@ namespace Downloader
 				if (!File.Exists(newFilename) && File.Exists(oldFilename))
 				{
 					File.Move(oldFilename, newFilename);
-					this.TextBoxFilesMoved.AppendText(Path.GetFileName(newFilename) + Environment.NewLine);
+					this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(newFilename));
+					this.NumberFilesFound++;
 					this.NewFiles.Add(newFilename);
 				}
 				else
@@ -100,7 +102,8 @@ namespace Downloader
 							FileSystem.DeleteFile(newFilename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 							this.Window.LAFContainer.GetITunesTrack(newTitle, newAlbum).Delete();
 							File.Move(oldFilename, newFilename);
-							this.TextBoxFilesMoved.AppendText(Path.GetFileName(oldFilename) + " REPLACED" + Environment.NewLine);
+							this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(oldFilename) + " REPLACED");
+							this.NumberFilesFound++;
 							this.NewFiles.Add(newFilename);
 						}
 					}
@@ -109,7 +112,7 @@ namespace Downloader
 						if (File.Exists(oldFilename))
 						{
 							FileSystem.DeleteFile(oldFilename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-							this.TextBoxFilesMoved.AppendText(Path.GetFileName(oldFilename) + " already exists, DELETED" + Environment.NewLine);
+							this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(oldFilename) + " already exists, DELETED");
 						}
 					}
 					else
@@ -133,7 +136,8 @@ namespace Downloader
 						if (!File.Exists(newFilename) && File.Exists(oldFilename))
 						{
 							File.Move(oldFilename, newFilename);
-							this.TextBoxFilesMoved.AppendText(Path.GetFileName(newFilename) + Environment.NewLine);
+							this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(newFilename));
+							this.NumberFilesFound++;
 							this.NewFiles.Add(newFilename);
 						}
 						else
@@ -152,7 +156,7 @@ namespace Downloader
 									if (File.Exists(oldFilename))
 									{
 										FileSystem.DeleteFile(oldFilename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-										this.TextBoxFilesMoved.AppendText(Path.GetFileName(oldFilename) + " already exists, DELETED" + Environment.NewLine);
+										this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(oldFilename) + " already exists, DELETED");
 									}
 									break;
 								}
@@ -163,7 +167,8 @@ namespace Downloader
 									if (!File.Exists(newFilename) && File.Exists(oldFilename))
 									{
 										File.Move(oldFilename, newFilename);
-										this.TextBoxFilesMoved.AppendText(Path.GetFileName(newFilename) + Environment.NewLine);
+										this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(newFilename));
+										this.NumberFilesFound++;
 										this.NewFiles.Add(newFilename);
 										break;
 									}
@@ -173,7 +178,7 @@ namespace Downloader
 						}
 					}
 				}
-				this.labelFilesFound.Text = this.NumberFilesFound + " Files Found";
+				this.labelFilesFound.Text = this.NumberFilesFound + " Files Moved";
 			}
 			this.CanAdvance = true;
 			this.buttonEndCycleAdvance.Enabled = true;

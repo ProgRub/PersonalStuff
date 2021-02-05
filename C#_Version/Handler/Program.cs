@@ -15,7 +15,11 @@ namespace Handler
             Application.SetCompatibleTextRenderingDefault(false);
             HandlerForm form = new HandlerForm();
             Application.Run(form);
-            form.LAFContainer.backgroundWork.Join();
+            for (int index = 0; index < form.LAFContainer.workingThreads.Count; index++)
+            {
+                form.LAFContainer.workingThreads[index].Join();
+            }
+            form.LAFContainer.SaveMusicFiles();
             System.Runtime.InteropServices.Marshal.ReleaseComObject(form.LAFContainer.iTunes);
             GC.Collect();
         }

@@ -84,8 +84,6 @@ namespace Handler
 
         private void buttonBack_Click(object sender, EventArgs e)
         {
-            Thread saveFiles = new Thread(this.Window.LAFContainer.SaveMusicFiles);
-            saveFiles.Start();
             this.Dispose();
             this.Window.Controls.OfType<HomeScreen>().ToList()[0].Visible = true;
             this.Window.ActiveControl = this.Window.Controls.OfType<HomeScreen>().ToList()[0];
