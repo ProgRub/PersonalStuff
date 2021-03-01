@@ -402,7 +402,7 @@ namespace Downloader
             }
         }
 
-        private string NamingConventions(string namePar)
+        private string NamingConventions(string namePar,bool songTitle)
         {
             string name = namePar.ToLower();
             if (name.Contains("pt.") || name.Contains("part.") || name.Contains("pts.") || name.Contains("mr.") || name.Contains("vol."))
@@ -419,7 +419,13 @@ namespace Downloader
                 auxList[index] = auxList[index].Trim();
             }
             name = string.Join("-", auxList);
-            return char.ToUpper(name[0]) + name.Substring(1).ToLower();
+                if (!songTitle) {
+                return char.ToUpper(name[0]) + name.Substring(1).ToLower();
+                }
+                else
+                {
+                    return name.ToLower();
+                }
         }
 
         private bool ChangeArtistAlbumTitle(bool forAlbumYear, ref string artist, ref string album, ref string title, uint trackCount)
@@ -463,7 +469,7 @@ namespace Downloader
             string url;
             if (forAlbumYear)
             {
-                url = "https://www.genius.com/albums/" + this.NamingConventions(artist) + "/" + this.NamingConventions(album);
+                url = "https://www.genius.com/albums/" + this.NamingConventions(artist,false) + "/" + this.NamingConventions(album, false);
                 if (this.PagesVisited_Year.Keys.Contains(artist + album))
                 {
                     year = this.PagesVisited_Year[artist + album].ToString();
@@ -472,7 +478,7 @@ namespace Downloader
             }
             else
             {
-                url = "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics";
+                url = "https://genius.com/" + this.NamingConventions(artist, false) + "-" + this.NamingConventions(title, true) + "-lyrics";
             }
             var htmlWeb = new HtmlWeb();
             var htmlDoc = htmlWeb.Load(url);
@@ -691,7 +697,7 @@ namespace Downloader
                     this.ErrorOcurred = true;
                     if (!this.ChangeArtistAlbumTitle(true, ref artist, ref album, ref title, trackCount))
                     {
-                        string url = "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics";
+                        string url = "https://genius.com/" + this.NamingConventions(artist, false) + "-" + this.NamingConventions(title, true) + "-lyrics";
                         SystemSounds.Exclamation.Play();
                         if (trackCount < 5)
                         {
@@ -699,7 +705,7 @@ namespace Downloader
                         }
                         else
                         {
-                            url = "https://www.genius.com/albums/" + this.NamingConventions(artist) + "/" + this.NamingConventions(album);
+                            url = "https://www.genius.com/albums/" + this.NamingConventions(artist, false) + "/" + this.NamingConventions(album, false);
                             Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + album.Replace(" &", "").Replace(" ", "+") + "+site:Genius.com"));
                         }
                         this.EnableComponents(true, artist, album, title, year, url);
@@ -780,7 +786,7 @@ namespace Downloader
                     this.ErrorOcurred = true;
                     SystemSounds.Exclamation.Play();
                     Process.Start(string.Format("https://www.google.com.tr/search?q={0}", artist.Replace(" &", "").Replace(" ", "+") + "+" + title.Replace(" &", "").Replace(" ", "+") + "+lyrics+site:Genius.com"));
-                    this.EnableComponents(false, artist, album, title, "0000", "https://genius.com/" + this.NamingConventions(artist + " " + title) + "-lyrics");
+                    this.EnableComponents(false, artist, album, title, "0000", "https://genius.com/" + this.NamingConventions(artist, false) + "-" + this.NamingConventions(title, true) + "-lyrics");
                     this.SemErrorHandled.WaitOne();
                     if (this.SkipLyrics)
                     {

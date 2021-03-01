@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Permissions;
 using System.Windows.Forms;
 
 namespace Downloader
 {
     static class Program
     {
+        static DownloaderForm form = null;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -16,7 +15,7 @@ namespace Downloader
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            DownloaderForm form = new DownloaderForm();
+            Program.form = new DownloaderForm();
             Application.Run(form);
             try
             {
@@ -28,5 +27,6 @@ namespace Downloader
                 Console.WriteLine("iTunes not opened.");
             }
         }
+        
     }
 }

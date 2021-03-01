@@ -97,7 +97,7 @@ namespace Downloader
 					}
 					if (oldArtist == newArtist && oldAlbum != newAlbum)
 					{
-						if (!File.Exists(newFilename) && File.Exists(oldFilename))
+						if (File.Exists(newFilename) && File.Exists(oldFilename))
 						{
 							FileSystem.DeleteFile(newFilename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 							this.Window.LAFContainer.GetITunesTrack(newTitle, newAlbum).Delete();

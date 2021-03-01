@@ -45,6 +45,7 @@
             this.buttonYLModified = new System.Windows.Forms.Button();
             this.buttonYLAll = new System.Windows.Forms.Button();
             this.buttonOptions = new System.Windows.Forms.Button();
+            this.buttonYLNoLyrics = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // helpLabelFileDialog1
@@ -265,7 +266,7 @@
             this.buttonOptions.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
             this.buttonOptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonOptions.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
-            this.buttonOptions.Location = new System.Drawing.Point(268, 266);
+            this.buttonOptions.Location = new System.Drawing.Point(268, 295);
             this.buttonOptions.Name = "buttonOptions";
             this.buttonOptions.Size = new System.Drawing.Size(53, 23);
             this.buttonOptions.TabIndex = 18;
@@ -273,12 +274,30 @@
             this.buttonOptions.UseVisualStyleBackColor = true;
             this.buttonOptions.Click += new System.EventHandler(this.buttonOptions_Click);
             // 
+            // buttonYLNoLyrics
+            // 
+            this.buttonYLNoLyrics.AutoSize = true;
+            this.buttonYLNoLyrics.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.buttonYLNoLyrics.FlatAppearance.BorderSize = 0;
+            this.buttonYLNoLyrics.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Transparent;
+            this.buttonYLNoLyrics.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
+            this.buttonYLNoLyrics.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.buttonYLNoLyrics.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
+            this.buttonYLNoLyrics.Location = new System.Drawing.Point(268, 266);
+            this.buttonYLNoLyrics.Name = "buttonYLNoLyrics";
+            this.buttonYLNoLyrics.Size = new System.Drawing.Size(165, 23);
+            this.buttonYLNoLyrics.TabIndex = 19;
+            this.buttonYLNoLyrics.Text = "Year/Lyrics Files Without Lyrics";
+            this.buttonYLNoLyrics.UseVisualStyleBackColor = true;
+            this.buttonYLNoLyrics.Click += new System.EventHandler(this.buttonYLNoLyrics_Click);
+            // 
             // HomeScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.buttonYLNoLyrics);
             this.Controls.Add(this.buttonOptions);
             this.Controls.Add(this.buttonYLAll);
             this.Controls.Add(this.buttonYLModified);
@@ -298,7 +317,7 @@
             this.Controls.Add(this.helpLabelFileDialog1);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
             this.Name = "HomeScreen";
-            this.Size = new System.Drawing.Size(640, 292);
+            this.Size = new System.Drawing.Size(640, 316);
             this.Enter += new System.EventHandler(this.HomeScreen_Enter);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -323,5 +342,6 @@
         private System.Windows.Forms.Button buttonYLModified;
         private System.Windows.Forms.Button buttonYLAll;
         private System.Windows.Forms.Button buttonOptions;
+        private System.Windows.Forms.Button buttonYLNoLyrics;
     }
 }

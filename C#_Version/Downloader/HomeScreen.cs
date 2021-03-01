@@ -103,6 +103,18 @@ namespace Downloader
             this.Window.ActiveControl = aux;
         }
 
+        private void buttonYLNoLyrics_Click(object sender, EventArgs e)
+        {
+            this.Window.LAFContainer.SaveDirectories();
+            YearLyricsScreen aux = new YearLyricsScreen(this.Window, Directory.EnumerateFiles(this.Window.LAFContainer.MusicDestinyDirectory).Where(x => x.EndsWith(".mp3") && TagLib.File.Create(x).Tag.Lyrics==null).ToList())
+            {
+                Dock = DockStyle.Fill
+            };
+            this.Hide();
+            this.Window.Controls.Add(aux);
+            this.Window.ActiveControl = aux;
+        }
+
         private void buttonOptions_Click(object sender, EventArgs e)
         {
             this.Window.LAFContainer.SaveDirectories();

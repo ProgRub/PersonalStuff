@@ -45,11 +45,11 @@ namespace Downloader
             this.TextBoxFilesMoved.Cursor = System.Windows.Forms.Cursors.Default;
             this.TextBoxFilesMoved.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.TextBoxFilesMoved.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.TextBoxFilesMoved.Location = new System.Drawing.Point(555, 37);
+            this.TextBoxFilesMoved.Location = new System.Drawing.Point(730, 37);
             this.TextBoxFilesMoved.Multiline = true;
             this.TextBoxFilesMoved.Name = "TextBoxFilesMoved";
             this.TextBoxFilesMoved.ReadOnly = true;
-            this.TextBoxFilesMoved.Size = new System.Drawing.Size(539, 454);
+            this.TextBoxFilesMoved.Size = new System.Drawing.Size(714, 568);
             this.TextBoxFilesMoved.TabIndex = 12;
             // 
             // TextBoxFilesFound
@@ -63,7 +63,7 @@ namespace Downloader
             this.TextBoxFilesFound.Multiline = true;
             this.TextBoxFilesFound.Name = "TextBoxFilesFound";
             this.TextBoxFilesFound.ReadOnly = true;
-            this.TextBoxFilesFound.Size = new System.Drawing.Size(539, 454);
+            this.TextBoxFilesFound.Size = new System.Drawing.Size(714, 568);
             this.TextBoxFilesFound.TabIndex = 11;
             // 
             // buttonMoveFile
@@ -76,7 +76,7 @@ namespace Downloader
             this.buttonMoveFile.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
             this.buttonMoveFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonMoveFile.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
-            this.buttonMoveFile.Location = new System.Drawing.Point(520, 550);
+            this.buttonMoveFile.Location = new System.Drawing.Point(696, 664);
             this.buttonMoveFile.Name = "buttonMoveFile";
             this.buttonMoveFile.Size = new System.Drawing.Size(63, 23);
             this.buttonMoveFile.TabIndex = 10;
@@ -89,7 +89,7 @@ namespace Downloader
             this.labelFilesFound.AutoSize = true;
             this.labelFilesFound.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelFilesFound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelFilesFound.Location = new System.Drawing.Point(477, 9);
+            this.labelFilesFound.Location = new System.Drawing.Point(654, 9);
             this.labelFilesFound.Name = "labelFilesFound";
             this.labelFilesFound.Size = new System.Drawing.Size(143, 25);
             this.labelFilesFound.TabIndex = 9;
@@ -102,7 +102,7 @@ namespace Downloader
             this.dropdownDirectories.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.dropdownDirectories.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
             this.dropdownDirectories.FormattingEnabled = true;
-            this.dropdownDirectories.Location = new System.Drawing.Point(367, 523);
+            this.dropdownDirectories.Location = new System.Drawing.Point(533, 637);
             this.dropdownDirectories.Name = "dropdownDirectories";
             this.dropdownDirectories.Size = new System.Drawing.Size(380, 21);
             this.dropdownDirectories.TabIndex = 13;
@@ -112,7 +112,7 @@ namespace Downloader
             this.textBoxFilename.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(4)))), ((int)(((byte)(4)))), ((int)(((byte)(64)))));
             this.textBoxFilename.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBoxFilename.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.textBoxFilename.Location = new System.Drawing.Point(367, 497);
+            this.textBoxFilename.Location = new System.Drawing.Point(533, 611);
             this.textBoxFilename.Name = "textBoxFilename";
             this.textBoxFilename.Size = new System.Drawing.Size(380, 20);
             this.textBoxFilename.TabIndex = 14;
@@ -130,7 +130,7 @@ namespace Downloader
             this.Controls.Add(this.buttonMoveFile);
             this.Controls.Add(this.labelFilesFound);
             this.Name = "SchoolScreen";
-            this.Size = new System.Drawing.Size(1106, 586);
+            this.Size = new System.Drawing.Size(1447, 690);
             this.ResumeLayout(false);
             this.PerformLayout();
 

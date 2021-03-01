@@ -221,12 +221,13 @@ namespace Downloader
 
         private void listBoxToDelete_KeyDown(object sender, KeyEventArgs e)
         {
+            int index = 0;
             if (Keys.Delete == e.KeyCode)
             {
                 switch (this.Mode)
                 {
                     case 0:
-                        for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
+                        while (index < this.listBoxToDelete.Items.Count)
                         {
                             if (this.listBoxToDelete.GetSelected(index))
                             {
@@ -234,11 +235,12 @@ namespace Downloader
                                 this.listBoxToDelete.Items.RemoveAt(index);
                                 index--;
                             }
+                            index ++;
                         }
                         this.Window.LAFContainer.SaveGrimeArtists();
                         break;
                     case 1:
-                        for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
+                        while (index < this.listBoxToDelete.Items.Count)
                         {
                             if (this.listBoxToDelete.GetSelected(index))
                             {
@@ -251,16 +253,18 @@ namespace Downloader
                                     if (song[0] == artist && song[1] == album && song[2] == title)
                                     {
                                         this.Window.LAFContainer.SongsToSkipLyrics.Remove(song);
+                                        break;
                                     }
                                 }
                                 this.listBoxToDelete.Items.RemoveAt(index);
                                 index--;
                             }
+                            index++;
                         }
                         this.Window.LAFContainer.SaveExceptions();
                         break;
                     case 2:
-                        for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
+                        while (index < this.listBoxToDelete.Items.Count)
                         {
                             if (this.listBoxToDelete.GetSelected(index))
                             {
@@ -277,11 +281,13 @@ namespace Downloader
                                 this.listBoxToDelete.Items.RemoveAt(index);
                                 index--;
                             }
+                            index++;
                         }
+                        
                         this.Window.LAFContainer.SaveExceptions();
                         break;
                     case 3:
-                        for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
+                        while (index < this.listBoxToDelete.Items.Count)
                         {
                             if (this.listBoxToDelete.GetSelected(index))
                             {
@@ -297,11 +303,12 @@ namespace Downloader
                                 this.listBoxToDelete.Items.RemoveAt(index);
                                 index--;
                             }
+                            index++;
                         }
                         this.Window.LAFContainer.SaveExceptions();
                         break;
                     case 4:
-                        for (int index = 0; index < this.listBoxToDelete.Items.Count; index++)
+                        while (index < this.listBoxToDelete.Items.Count)
                         {
                             if (this.listBoxToDelete.GetSelected(index))
                             {
@@ -312,6 +319,7 @@ namespace Downloader
                                 this.listBoxToDelete.Items.RemoveAt(index);
                                 index--;
                             }
+                            index++;
                         }
                         this.Window.LAFContainer.SaveExceptions();
                         break;

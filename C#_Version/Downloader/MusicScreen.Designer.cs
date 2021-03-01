@@ -41,7 +41,7 @@ namespace Downloader
             this.labelFilesFound.AutoSize = true;
             this.labelFilesFound.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelFilesFound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.labelFilesFound.Location = new System.Drawing.Point(482, 6);
+            this.labelFilesFound.Location = new System.Drawing.Point(653, 6);
             this.labelFilesFound.Name = "labelFilesFound";
             this.labelFilesFound.Size = new System.Drawing.Size(143, 25);
             this.labelFilesFound.TabIndex = 5;
@@ -57,7 +57,7 @@ namespace Downloader
             this.buttonEndCycleAdvance.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Transparent;
             this.buttonEndCycleAdvance.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonEndCycleAdvance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(124)))), ((int)(((byte)(219)))));
-            this.buttonEndCycleAdvance.Location = new System.Drawing.Point(515, 494);
+            this.buttonEndCycleAdvance.Location = new System.Drawing.Point(689, 608);
             this.buttonEndCycleAdvance.Name = "buttonEndCycleAdvance";
             this.buttonEndCycleAdvance.Size = new System.Drawing.Size(68, 23);
             this.buttonEndCycleAdvance.TabIndex = 6;
@@ -76,7 +76,7 @@ namespace Downloader
             this.TextBoxFilesFound.Multiline = true;
             this.TextBoxFilesFound.Name = "TextBoxFilesFound";
             this.TextBoxFilesFound.ReadOnly = true;
-            this.TextBoxFilesFound.Size = new System.Drawing.Size(539, 454);
+            this.TextBoxFilesFound.Size = new System.Drawing.Size(714, 568);
             this.TextBoxFilesFound.TabIndex = 7;
             // 
             // TextBoxFilesMoved
@@ -86,11 +86,11 @@ namespace Downloader
             this.TextBoxFilesMoved.Cursor = System.Windows.Forms.Cursors.Default;
             this.TextBoxFilesMoved.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.TextBoxFilesMoved.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(151)))), ((int)(((byte)(151)))), ((int)(((byte)(161)))));
-            this.TextBoxFilesMoved.Location = new System.Drawing.Point(551, 34);
+            this.TextBoxFilesMoved.Location = new System.Drawing.Point(726, 34);
             this.TextBoxFilesMoved.Multiline = true;
             this.TextBoxFilesMoved.Name = "TextBoxFilesMoved";
             this.TextBoxFilesMoved.ReadOnly = true;
-            this.TextBoxFilesMoved.Size = new System.Drawing.Size(539, 454);
+            this.TextBoxFilesMoved.Size = new System.Drawing.Size(714, 568);
             this.TextBoxFilesMoved.TabIndex = 8;
             // 
             // MusicScreen
@@ -104,7 +104,7 @@ namespace Downloader
             this.Controls.Add(this.buttonEndCycleAdvance);
             this.Controls.Add(this.labelFilesFound);
             this.Name = "MusicScreen";
-            this.Size = new System.Drawing.Size(1103, 525);
+            this.Size = new System.Drawing.Size(1443, 664);
             this.ResumeLayout(false);
             this.PerformLayout();
 
