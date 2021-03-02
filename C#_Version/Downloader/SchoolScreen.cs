@@ -24,7 +24,7 @@ namespace Downloader
             InitializeComponent();
             this.Window = window;
             this.Window.AcceptButton = this.buttonMoveFile;
-            this.OneDrive = Path.Combine(new string[] { "C:", Path.DirectorySeparatorChar.ToString(), "Users", "ruben", "Onedrive - Universidade da Madeira", "Ano_3", "Semestre_1" });
+            this.OneDrive = Path.Combine(new string[] { "C:", Path.DirectorySeparatorChar.ToString(), "Users", "ruben", "Onedrive - Universidade da Madeira", "Ano_3", "Semestre_2" });
             this.PossibleDirectories = new List<string>();
             this.CheckedFiles = new List<string>();
             foreach (string directory in Directory.EnumerateDirectories(this.OneDrive))

@@ -99,12 +99,25 @@ namespace Downloader
 					{
 						if (File.Exists(newFilename) && File.Exists(oldFilename))
 						{
+							if(TagLib.File.Create(oldFilename).Tag.TrackCount == 1) { 
 							FileSystem.DeleteFile(newFilename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
 							this.Window.LAFContainer.GetITunesTrack(newTitle, newAlbum).Delete();
 							File.Move(oldFilename, newFilename);
 							this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(oldFilename) + " REPLACED");
 							this.NumberFilesFound++;
 							this.NewFiles.Add(newFilename);
+							}
+							else
+							{
+								string toAdd = " (";
+								toAdd += TagLib.File.Create(oldFilename).Tag.Album;
+								toAdd += ").mp3";
+								newFilename = newFilename.Substring(0, newFilename.LastIndexOf('.')) + toAdd;
+								File.Move(oldFilename, newFilename);
+								this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(newFilename));
+								this.NumberFilesFound++;
+								this.NewFiles.Add(newFilename);
+							}
 						}
 					}
 					else if (oldArtist == newArtist && oldAlbum == newAlbum)
