@@ -72,8 +72,15 @@ namespace Handler
                     if (this.listBoxResults.GetSelected(index))
                     {
                         int musicFileIndex = this.Window.LAFContainer.IndexOfMusicFile(this.listBoxResults.Items[index].ToString());
+                        var track=this.Window.LAFContainer.GetITunesTrack(this.Window.LAFContainer.MusicFiles[musicFileIndex].Title, this.Window.LAFContainer.MusicFiles[musicFileIndex].Album);
+                        try
+                        {
+                            track.Delete();
+                        }
+                        catch (Exception)
+                        {
+                        }
                         FileSystem.DeleteFile(Path.Combine(this.Window.LAFContainer.MusicDestinyDirectory, this.Window.LAFContainer.MusicFiles[musicFileIndex].Filename), UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                        this.Window.LAFContainer.GetITunesTrack(this.Window.LAFContainer.MusicFiles[musicFileIndex].Title, this.Window.LAFContainer.MusicFiles[musicFileIndex].Album).Delete();
                         this.Window.LAFContainer.MusicFiles.RemoveAt(musicFileIndex);
                         this.listBoxResults.Items.RemoveAt(index);
                         index--;

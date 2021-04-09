@@ -79,6 +79,7 @@ namespace Downloader
 				{
 					string oldArtist = "";
 					string oldAlbum = "";
+					string oldTitle = "";
 					string newTitle = "";
 					string newArtist = "";
 					string newAlbum = "";
@@ -86,6 +87,7 @@ namespace Downloader
 					{
 						oldArtist = mp3ToSend.Tag.AlbumArtists[0];
 						oldAlbum = mp3ToSend.Tag.Album;
+						oldTitle = mp3ToSend.Tag.Title;
 						mp3ToSend.Save();
 					}
 					using (var mp3ToCheck = TagLib.File.Create(newFilename))
@@ -99,9 +101,9 @@ namespace Downloader
 					{
 						if (File.Exists(newFilename) && File.Exists(oldFilename))
 						{
-							if(TagLib.File.Create(oldFilename).Tag.TrackCount == 1) { 
+							if(TagLib.File.Create(newFilename).Tag.TrackCount == 1) { 
 							FileSystem.DeleteFile(newFilename, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-							this.Window.LAFContainer.GetITunesTrack(newTitle, newAlbum).Delete();
+							this.Window.LAFContainer.GetITunesTrack(oldTitle, oldAlbum).Delete();
 							File.Move(oldFilename, newFilename);
 							this.TextBoxFilesMoved.AppendText((this.NumberFilesFound > 0 ? Environment.NewLine : "") + Path.GetFileName(oldFilename) + " REPLACED");
 							this.NumberFilesFound++;

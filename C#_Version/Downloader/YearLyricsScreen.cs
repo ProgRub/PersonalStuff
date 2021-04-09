@@ -117,7 +117,7 @@ namespace Downloader
             Action update;
             for (int index = 0; index < NUMBER_OF_THREADS; index++)
             {
-                update = () => this.textBoxThreadStatus.AppendText("Thread " + (index+1) + Environment.NewLine);
+                update = () => this.textBoxThreadStatus.AppendText("Thread " + (index + 1) + Environment.NewLine);
                 this.textBoxThreadStatus.Invoke(update);
             }
             update = () => this.textBoxThreadStatus.AppendText(string.Format("All Files: {0}/{1} Files Processed" + Environment.NewLine, this.NumberFilesProcessed, this.NewFiles.Count));
@@ -402,7 +402,7 @@ namespace Downloader
             }
         }
 
-        private string NamingConventions(string namePar,bool songTitle)
+        private string NamingConventions(string namePar, bool songTitle)
         {
             string name = namePar.ToLower();
             if (name.Contains("pt.") || name.Contains("part.") || name.Contains("pts.") || name.Contains("mr.") || name.Contains("vol."))
@@ -419,13 +419,14 @@ namespace Downloader
                 auxList[index] = auxList[index].Trim();
             }
             name = string.Join("-", auxList);
-                if (!songTitle) {
+            if (!songTitle)
+            {
                 return char.ToUpper(name[0]) + name.Substring(1).ToLower();
-                }
-                else
-                {
-                    return name.ToLower();
-                }
+            }
+            else
+            {
+                return name.ToLower();
+            }
         }
 
         private bool ChangeArtistAlbumTitle(bool forAlbumYear, ref string artist, ref string album, ref string title, uint trackCount)
@@ -469,7 +470,7 @@ namespace Downloader
             string url;
             if (forAlbumYear)
             {
-                url = "https://www.genius.com/albums/" + this.NamingConventions(artist,false) + "/" + this.NamingConventions(album, false);
+                url = "https://www.genius.com/albums/" + this.NamingConventions(artist, false) + "/" + this.NamingConventions(album, false);
                 if (this.PagesVisited_Year.Keys.Contains(artist + album))
                 {
                     year = this.PagesVisited_Year[artist + album].ToString();
@@ -510,11 +511,12 @@ namespace Downloader
             bool releaseSems = false, semWait = false;
             string initialAlbumTitle = album;
             int indexSem = -1;
+            bool singleTrackOrYearNotFound = false;
             while (true)
             {
                 lock (Mutex)
                 {
-                    if (!this.PagesVisited_Year.ContainsKey(artist + album) && this.WorkerIndexError!=threadIndex)
+                    if (!this.PagesVisited_Year.ContainsKey(artist + album) && this.WorkerIndexError != threadIndex)
                     {
                         if (this.AlbumsBeingChecked.ContainsKey(initialAlbumTitle))
                         {
@@ -545,9 +547,8 @@ namespace Downloader
                     this.SetYearInFile(filename, year);
                     return;
                 }
-                if (htmlDoc != null)
+                if (htmlDoc != null && !singleTrackOrYearNotFound)
                 {
-                    ////Console.WriteLine(threadIndex + " GetYear");
                     string yearTemp = "";
                     var soup = (HtmlAgilityPack.HtmlDocument)htmlDoc;
                     foreach (var div in soup.DocumentNode.Descendants("div").Where(element => element.GetAttributeValue("class", "nothing") == "metadata_unit").ToList())
@@ -555,45 +556,52 @@ namespace Downloader
                         yearTemp += div.InnerText.Trim();
                         break;
                     }
-                    year = yearTemp.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Last();
-                    if (!this.PagesVisited_Year.ContainsKey(artist + album))
+                    try
                     {
-                        this.PagesVisited_Year.Add(artist + album, int.Parse(year));
-                    }
-                    if (this.ErrorOcurred && threadIndex == this.WorkerIndexError)
-                    {
-                        if (key[2] == value[2])
+                        year = yearTemp.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Last();
+                        if (!this.PagesVisited_Year.ContainsKey(artist + album))
                         {
-                            key[2] = value[2] = "";
+                            this.PagesVisited_Year.Add(artist + album, int.Parse(year));
                         }
-                        try
+                        if (this.ErrorOcurred && threadIndex == this.WorkerIndexError)
                         {
-                            this.Window.LAFContainer.ExceptionsReplacements[key] = value;
-                        }
-                        catch (ArgumentException)
-                        {
-                            this.Window.LAFContainer.ExceptionsReplacements[key] = value;
-                        }
-                        this.ErrorOcurred = false;
-                        this.WorkerIndexError = -1;
-                        this.SemError.Release();
-                    }
-                    this.SetYearInFile(filename, year);
-                    lock (Mutex)
-                    {
-                        if (releaseSems)
-                        {
-
-                            foreach (var semaphore in this.AlbumsBeingChecked[initialAlbumTitle])
+                            if (key[2] == value[2])
                             {
-                                semaphore.Release();
+                                key[2] = value[2] = "";
                             }
-                            this.AlbumsBeingChecked.Remove(initialAlbumTitle);
+                            try
+                            {
+                                this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                            }
+                            catch (ArgumentException)
+                            {
+                                this.Window.LAFContainer.ExceptionsReplacements[key] = value;
+                            }
+                            this.ErrorOcurred = false;
+                            this.WorkerIndexError = -1;
+                            this.SemError.Release();
                         }
+                        this.SetYearInFile(filename, year);
+                        lock (Mutex)
+                        {
+                            if (releaseSems)
+                            {
+
+                                foreach (var semaphore in this.AlbumsBeingChecked[initialAlbumTitle])
+                                {
+                                    semaphore.Release();
+                                }
+                                this.AlbumsBeingChecked.Remove(initialAlbumTitle);
+                            }
+                        }
+                        return;
                     }
-                    return;
+                    catch (InvalidOperationException)
+                    {
+                        singleTrackOrYearNotFound = true;
+                    }
                 }
-                else
+                if (singleTrackOrYearNotFound || htmlDoc == null)
                 {
                     if (trackCount < 5)
                     {

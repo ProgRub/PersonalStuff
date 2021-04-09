@@ -487,9 +487,10 @@ namespace Downloader
         }
         #endregion
 
-        public void AddMusicFile(string filename)
+        public void AddMusicFile(string path)
         {
             int index;
+            string filename = Path.GetFileName(path);
             for (index = 0; index < this.MusicFiles.Count; index++)
             {
                 if (this.MusicFiles[index].Filename == filename)
@@ -497,15 +498,15 @@ namespace Downloader
                     break;
                 }
             }
-            using (var mp3 = TagLib.File.Create(filename))
+            using (var mp3 = TagLib.File.Create(path))
             {
                 if (index < this.MusicFiles.Count)
                 {
-                    this.MusicFiles[index] = new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0);
+                    this.MusicFiles[index] = new MusicFile(filename, mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0);
                 }
                 else
                 {
-                    this.MusicFiles.Add(new MusicFile(Path.GetFileName(filename), mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
+                    this.MusicFiles.Add(new MusicFile(filename, mp3.Tag.Title, mp3.Tag.Performers[0], mp3.Tag.AlbumArtists[0], mp3.Tag.Album, (int)mp3.Tag.Track, (int)mp3.Tag.TrackCount, (int)mp3.Tag.Disc, (int)mp3.Tag.DiscCount, mp3.Tag.Genres[0], (int)mp3.Tag.Year, Convert.ToInt32(mp3.Properties.Duration.TotalSeconds), 0));
                 }
                 while (true)
                 {

@@ -49,6 +49,10 @@ namespace Handler
 			this.GetAllFromFiles();
 			this.GenerateAlbums();
 			this.iTunes = new iTunesApp();
+            for (int i = 1; i <= this.iTunes.Sources.Count; i++)
+            {
+				Console.WriteLine(this.iTunes.Sources[i].Kind);
+            }
 			this.iTunesLibrary = this.iTunes.LibraryPlaylist;
 			this.workingThreads = new List<Thread>();
 			this.CheckMusicFilesAndUpdatePlayCounts();
@@ -445,10 +449,16 @@ namespace Handler
 			{
 				for (int index = 1; index <= tracks.Count; index++)
 				{
-					if (tracks[index].Album == album)
+                    try
 					{
-						return tracks[index];
+						if (tracks[index].Album == album)
+						{
+							return tracks[index];
+						}
 					}
+                    catch (Exception)
+                    {
+                    }
 				}
 			}
 			return null;
@@ -488,7 +498,13 @@ namespace Handler
 					var track = this.GetITunesTrack(this.MusicFiles[index].Title, this.MusicFiles[index].Album);
 					if (track != null)
 					{
-						this.MusicFiles[index].PlayCount = track.PlayedCount;
+                        try
+						{
+							this.MusicFiles[index].PlayCount = track.PlayedCount;
+						}
+                        catch (Exception)
+                        {
+                        }
 					}
 				}
 				catch (IOException)
